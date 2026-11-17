@@ -106,6 +106,12 @@ let activeReportWriterTab = "preview"; // "preview" hoặc "editor"
 let currentGeneratedReportMarkdown = "";
 let isReportGenerating = false;
 
+// Trạng thái Bước 4: WHAT-IF SIMULATION & EXECUTIVE DECISION SUPPORT
+let whatIfDiscountReductionPct = 3.0; // Mặc định giảm 3% chiết khấu
+let whatIfReturnRateReductionPct = 2.0; // Mặc định giảm 2% tỷ lệ hoàn đơn COD
+let whatIfOrderGrowthPct = 10.0; // Mặc định tăng trưởng 10% đơn hàng
+let isWhatIfAppliedToReport = false;
+
 // ================= CẬP NHẬT HEADER & STATUS =================
 
 function updateTopSystemInfo(manifest) {
@@ -2441,6 +2447,28 @@ function renderStage3_Analysis() {
 
       </div>
 
+      <!-- BRIDGE CARD: GỢI Ý ĐỀ XUẤT QUẢN TRỊ SANG BƯỚC 4 -->
+      <div class="p-4 rounded-2xl bg-[#F5EFE6] border border-[#D4B07B]/60 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-[#0D2B22] text-[#D4B07B] flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
+            💡
+          </div>
+          <div>
+            <div class="text-xs font-bold text-[#0D2B22] flex items-center gap-2">
+              <span>Gợi ý Chẩn đoán AI dành cho Nhà Quản trị:</span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">What-If Simulation Ready</span>
+            </div>
+            <div class="text-[11px] text-[#4A635A] mt-0.5 leading-relaxed">
+              Phát hiện 2 điểm nghẽn dòng tiền (Chiết khấu hao hụt 51.1M & Tỷ lệ hoàn COD 5.5%) cùng cơ hội bứt phá biên LN tại Kênh Website (36.4%). Chuyển sang Bước 4 để trải nghiệm <strong>Mô phỏng Kịch bản Tăng trưởng (What-If)</strong>.
+            </div>
+          </div>
+        </div>
+        <button onclick="confirmAnalysisAndAdvance()" class="px-4 py-2 rounded-xl bg-[#0D2B22] hover:bg-[#164335] text-white text-xs font-bold shrink-0 transition flex items-center gap-1.5 shadow-md">
+          <span>Khám phá Kịch bản Bước 4</span>
+          <svg class="w-3.5 h-3.5 text-[#D4B07B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </button>
+      </div>
+
       <!-- PRIMARY ACTION CTA -->
       <div class="glass-card p-4 flex items-center justify-between">
         <span class="text-xs text-[#4A635A] font-mono">Giai đoạn 03/04 hoàn tất khi tổng hợp báo cáo</span>
@@ -2946,6 +2974,120 @@ function startNewSession() {
   }
 }
 
+// ================= WHAT-IF SIMULATION & EXECUTIVE DECISION SUPPORT ENGINE =================
+
+function calculateWhatIfMetrics() {
+  const m = currentReportingManifest || {};
+  const dash = currentDashboardFilteredData || m.dashboard || {};
+  const kpis = dash.summary_kpis || {};
+  
+  const baseRev = kpis.net_revenue || 542252418;
+  const baseProfit = kpis.gross_profit || 179530418;
+  const baseOrders = kpis.total_orders || 600;
+  const baseDiscount = 51149233; // Thất thoát chiết khấu hiện tại (~9.43% doanh thu)
+
+  // 1. Tiết kiệm từ giảm chiết khấu (0 - 6%)
+  const discountSaved = Math.round(baseDiscount * (whatIfDiscountReductionPct / 9.43));
+
+  // 2. Tiết kiệm từ giảm tỷ lệ hoàn đơn COD (0 - 4%)
+  const returnOrdersSaved = Math.round(baseOrders * (whatIfReturnRateReductionPct / 100));
+  const returnSaved = returnOrdersSaved * 450000; // Chi phí logistics ngược & xử lý bao bì ~450k/đơn hoàn
+
+  // 3. Tăng trưởng từ mở rộng đơn hàng (0 - 30%)
+  const newOrders = Math.round(baseOrders * (whatIfOrderGrowthPct / 100));
+  const newRevenueFromOrders = baseRev * (whatIfOrderGrowthPct / 100);
+  const newProfitFromOrders = Math.round(newRevenueFromOrders * 0.3311);
+
+  // Tổng hợp
+  const totalNetAddedProfit = discountSaved + returnSaved + newProfitFromOrders;
+  const projectedGrossProfit = baseProfit + totalNetAddedProfit;
+  const projectedNetRevenue = Math.round(baseRev + newRevenueFromOrders + discountSaved);
+  const projectedMarginPct = ((projectedGrossProfit / projectedNetRevenue) * 100).toFixed(2);
+  const profitGrowthPct = ((totalNetAddedProfit / baseProfit) * 100).toFixed(1);
+
+  return {
+    baseRev,
+    baseProfit,
+    baseOrders,
+    discountSaved,
+    returnOrdersSaved,
+    returnSaved,
+    newOrders,
+    newRevenueFromOrders,
+    newProfitFromOrders,
+    totalNetAddedProfit,
+    projectedGrossProfit,
+    projectedNetRevenue,
+    projectedMarginPct,
+    profitGrowthPct
+  };
+}
+
+function updateWhatIfSimulationUI() {
+  const sliderDisc = document.getElementById('slider-discount');
+  const sliderRet = document.getElementById('slider-return');
+  const sliderGrowth = document.getElementById('slider-growth');
+
+  if (sliderDisc) whatIfDiscountReductionPct = parseFloat(sliderDisc.value) || 0;
+  if (sliderRet) whatIfReturnRateReductionPct = parseFloat(sliderRet.value) || 0;
+  if (sliderGrowth) whatIfOrderGrowthPct = parseFloat(sliderGrowth.value) || 0;
+
+  const m = calculateWhatIfMetrics();
+
+  // Update slider labels
+  const lblDisc = document.getElementById('label-val-discount');
+  if (lblDisc) lblDisc.textContent = `-${whatIfDiscountReductionPct.toFixed(1)}% (Tiết kiệm +${m.discountSaved.toLocaleString()} đ)`;
+
+  const lblRet = document.getElementById('label-val-return');
+  if (lblRet) lblRet.textContent = `-${whatIfReturnRateReductionPct.toFixed(1)}% (Tiết kiệm +${m.returnSaved.toLocaleString()} đ)`;
+
+  const lblGrowth = document.getElementById('label-val-growth');
+  if (lblGrowth) lblGrowth.textContent = `+${whatIfOrderGrowthPct.toFixed(0)}% (+${m.newOrders} đơn / +${m.newProfitFromOrders.toLocaleString()} đ)`;
+
+  // Update scorecards
+  const cardProfit = document.getElementById('card-proj-profit');
+  if (cardProfit) cardProfit.textContent = m.projectedGrossProfit.toLocaleString();
+
+  const cardDelta = document.getElementById('card-delta-profit');
+  if (cardDelta) cardDelta.textContent = `+${m.totalNetAddedProfit.toLocaleString()} đ (+${m.profitGrowthPct}%)`;
+
+  const cardRev = document.getElementById('card-proj-revenue');
+  if (cardRev) cardRev.textContent = `${m.projectedNetRevenue.toLocaleString()} đ`;
+
+  const cardMargin = document.getElementById('card-proj-margin');
+  if (cardMargin) cardMargin.textContent = `${m.projectedMarginPct}%`;
+}
+
+function applyWhatIfToReport() {
+  isWhatIfAppliedToReport = true;
+  currentGeneratedReportMarkdown = buildReportMarkdownClientSide(selectedReportType);
+  const prevEl = document.getElementById('report-live-preview-box');
+  if (prevEl) prevEl.innerHTML = renderMarkdownToHtml(currentGeneratedReportMarkdown);
+  const editorEl = document.getElementById('report-markdown-editor');
+  if (editorEl) editorEl.value = currentGeneratedReportMarkdown;
+
+  const card = document.getElementById('professional-report-writer-card');
+  if (card) card.scrollIntoView({ behavior: 'smooth' });
+
+  alert(`✓ Đã áp dụng kịch bản mô phỏng (+${calculateWhatIfMetrics().totalNetAddedProfit.toLocaleString()} VNĐ Lợi nhuận gộp dự phóng) vào Báo cáo Chiến lược!`);
+}
+
+function resetWhatIfSimulation() {
+  whatIfDiscountReductionPct = 3.0;
+  whatIfReturnRateReductionPct = 2.0;
+  whatIfOrderGrowthPct = 10.0;
+  isWhatIfAppliedToReport = false;
+  
+  const sliderDisc = document.getElementById('slider-discount');
+  const sliderRet = document.getElementById('slider-return');
+  const sliderGrowth = document.getElementById('slider-growth');
+  if (sliderDisc) sliderDisc.value = 3.0;
+  if (sliderRet) sliderRet.value = 2.0;
+  if (sliderGrowth) sliderGrowth.value = 10.0;
+
+  updateWhatIfSimulationUI();
+}
+
 // ================= PROFESSIONAL REPORT WRITER SKILL (CLIENT-SIDE ENGINE) =================
 
 function changeReportType(newType) {
@@ -3205,17 +3347,30 @@ Toàn bộ chỉ số dưới đây được trích xuất trực tiếp từ k�
 
 ---
 
-## IV. LỘ TRÌNH HÀNH ĐỘNG ƯU TIÊN (PRIORITIZED ACTION PLAN)
+## IV. LỘ TRÌNH HÀNH ĐỘNG ƯU TIÊN & DỰ PHÓNG KỊCH BẢN TĂNG TRƯỞNG (WHAT-IF SIMULATION)
 
-1. **Hành động Ngay lập tức (Quick Wins - 30 Ngày tới)**:
-   - Siết chặt ngân sách khuyến mại chiết khấu tràn lan, chuyển đổi voucher giảm giá tiền mặt sang voucher tích điểm thành viên (Loyalty Points) để tiết kiệm 15% chi phí khuyến mại.
-   - Kích hoạt chính sách chăm sóc đặc quyền cho nhóm khách hàng thân thiết mua sắm định kỳ.
-2. **Hành động Trung hạn (Strategic Shifts - Quý tới)**:
-   - Tái đàm phán hợp đồng SLA vận chuyển với các đối tác logistics, bổ sung điều khoản cam kết thời gian giao hàng và bồi hoàn nếu giao trễ quá 48 giờ.
-   - Đẩy mạnh bán chéo (Cross-selling) phụ kiện tại các kênh có biên lợi nhuận cao (Website và Cửa hàng).
-3. **Bộ Chỉ số Giám sát Quản trị (Governance Metrics)**:
-   - *Chỉ số dẫn dắt (Leading)*: Tỷ lệ khách hàng thanh toán trước, Tỷ lệ đơn xuất kho trong 12h.
-   - *Chỉ số kết quả (Lagging)*: Tỷ lệ đơn hoàn trả < 3.5%, Tăng trưởng Lợi nhuận gộp quý tiếp theo > 10%.`;
+### 1. Bảng Dự phóng Kịch bản Chính sách Kinh doanh (Prescriptive Policy Simulation)
+> Dựa trên mô hình mô phỏng định lượng tương tác từ Trung tâm Hỗ trợ Ra Quyết định (Executive Decision Support System):
+
+| Tham số Chính sách Điều chỉnh | Mức độ Điều chỉnh | Tác động Tài chính Dự phóng (VNĐ) |
+| :--- | :--- | :--- |
+| **Tối ưu Tỷ lệ Chiết khấu** | Giảm **${whatIfDiscountReductionPct.toFixed(1)}%** chiết khấu | Bảo toàn thêm **+${calculateWhatIfMetrics().discountSaved.toLocaleString()} VNĐ** dòng tiền |
+| **Kiểm soát Tỷ lệ Hoàn COD** | Giảm **${whatIfReturnRateReductionPct.toFixed(1)}%** hoàn hàng | Tiết kiệm chi phí logistics ngược **+${calculateWhatIfMetrics().returnSaved.toLocaleString()} VNĐ** |
+| **Mục tiêu Tăng trưởng Đơn hàng** | Mở rộng **+${whatIfOrderGrowthPct.toFixed(0)}%** đơn mới (+${calculateWhatIfMetrics().newOrders} đơn) | Đóng góp thêm **+${calculateWhatIfMetrics().newProfitFromOrders.toLocaleString()} VNĐ** lợi nhuận gộp |
+| **TỔNG LỢI NHUẬN GỘP DỰ PHÓNG** | **${calculateWhatIfMetrics().projectedGrossProfit.toLocaleString()} VNĐ** | **Tăng trưởng +${calculateWhatIfMetrics().profitGrowthPct}% so với kỳ hiện tại** |
+| **DOANH THU THUẦN DỰ PHÓNG** | **${calculateWhatIfMetrics().projectedNetRevenue.toLocaleString()} VNĐ** | **Biên Lợi nhuận gộp đạt ${calculateWhatIfMetrics().projectedMarginPct}%** |
+
+### 2. Ma trận Kế hoạch Hành động Phân cấp (Action Priority Matrix)
+
+1. **Hành động Ngay lập tức (Quick Wins - 30 Ngày tới - Tác động Cao, Dễ làm)**:
+   - Siết chặt ngân sách khuyến mại chiết khấu tràn lan, chuyển đổi voucher giảm giá tiền mặt sang voucher tích điểm thành viên (Loyalty Cashback 5%) để bảo toàn hơn ${calculateWhatIfMetrics().discountSaved.toLocaleString()} đ chi phí.
+   - Đóng gói combo *Gia dụng + Phụ kiện* tại Website và Cửa hàng (kênh có biên LN đạt 36.4% - 38.1%) để tăng AOV từ 903k lên 1.1 triệu đ.
+2. **Hành động Trung hạn (Strategic Shifts - Quý tới - Tác động Bền vững)**:
+   - Tái đàm phán hợp đồng SLA vận chuyển với các đối tác logistics, bổ sung điều khoản cam kết thời gian giao hàng và bồi hoàn nếu giao trễ quá 48 giờ để giảm tỷ lệ hoàn đơn COD từ 5.5% xuống dưới 3.0%.
+   - Dồn ngân sách marketing chuyển dịch dần từ Kênh Mạng xã hội sang Kênh Website (mục tiêu đạt 35% tỷ trọng) để làm chủ dữ liệu khách hàng (First-Party Data).
+3. **Bộ Chỉ số Giám sát Quản trị & Kiểm soát Rủi ro (Governance & Risk Metrics)**:
+   - *Chỉ số dẫn dắt (Leading)*: Tỷ lệ khách hàng thanh toán trước qua cổng điện tử, Tỷ lệ đơn xuất kho trong 12h.
+   - *Chỉ số kết quả (Lagging)*: Tỷ lệ đơn hoàn trả COD < 3.5%, Tăng trưởng Lợi nhuận gộp quý tiếp theo đạt **+${calculateWhatIfMetrics().profitGrowthPct}%**.`;
 }
 
 async function generateProfessionalReport(showNotice = true) {
@@ -3364,12 +3519,13 @@ function renderStage4_Reporting() {
   const kpis = dash.summary_kpis || {};
   const charts = dash.charts || {};
 
-  // Khởi tạo và tính toán dữ liệu Báo cáo Quản trị Học thuật
+  // Khởi tạo và tính toán dữ liệu Báo cáo Quản trị Học thuật & What-If Simulation
   if (!currentGeneratedReportMarkdown) {
     currentGeneratedReportMarkdown = buildReportMarkdownClientSide(selectedReportType);
   }
   const outlineData = getReportOutlineData(selectedReportType);
   const reportRenderedHtml = renderMarkdownToHtml(currentGeneratedReportMarkdown);
+  const whatIfMetrics = calculateWhatIfMetrics();
   const channels = charts.channels || [
     { channel: "Mạng xã hội", net_revenue: 166692012, orders: 168, share_pct: 30.74, margin_pct: 31.2 },
     { channel: "Sàn thương mại điện tử", net_revenue: 132112130, orders: 150, share_pct: 24.36, margin_pct: 28.5 },
@@ -4076,6 +4232,231 @@ function renderStage4_Reporting() {
             <span><strong>Giá trị đơn hàng trung bình (AOV)</strong> đạt 903,754 VNĐ/đơn với chỉ số UPT 2.19 sản phẩm/đơn phản ánh sức mua vững chắc của khách hàng.</span>
           </li>
         </ul>
+      </div>
+
+      <!-- ================= 3.3. TRUNG TÂM HỖ TRỢ RA QUYẾT ĐỊNH & MÔ PHỎNG KỊCH BẢN KINH DOANH (EXECUTIVE DECISION SUPPORT & WHAT-IF SIMULATOR) ================= -->
+      <div class="bg-white rounded-3xl p-6 border border-[#ECE4D8] shadow-sm space-y-6" id="executive-decision-support-card">
+        
+        <!-- Header & Badges -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#ECE4D8] pb-4">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-full bg-[#0A261D] text-[#D4B07B] text-[10px] font-black uppercase tracking-wider">Executive Decision Support (DSS)</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/60 text-[10px] font-bold">What-If Dynamic Simulation</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200/60 text-[10px] font-bold">Action Priority Matrix</span>
+            </div>
+            <h2 class="text-xl font-black text-[#0A261D] tracking-tight mt-2">Trung tâm Hỗ trợ Ra Quyết định &amp; Mô phỏng Kịch bản Tăng trưởng</h2>
+            <p class="text-xs text-[#4A635A] mt-0.5">
+              Công cụ lượng hóa tác động chính sách kinh doanh giúp các nhà quản trị thử nghiệm các kịch bản tối ưu chiết khấu, giảm hoàn đơn và mở rộng thị trường trước khi ra quyết định chính thức.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="resetWhatIfSimulation()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-[#F5EFE4] text-[#4A635A] border border-[#ECE4D8] text-xs font-bold transition shadow-xs flex items-center gap-1.5" title="Đặt lại các thanh trượt về giá trị chuẩn">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              <span>Đặt lại</span>
+            </button>
+            <button onclick="applyWhatIfToReport()" class="px-4 py-2 rounded-xl bg-[#0D7A5F] hover:bg-[#0A634D] text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md" title="Đưa kịch bản này vào Báo cáo Chiến lược">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <span>Áp dụng vào Báo cáo Chiến lược</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ROW 1: WHAT-IF SIMULATION ENGINE (2 COLS) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          
+          <!-- LEFT 7 COLS: 3 INTERACTIVE POLICY SLIDERS -->
+          <div class="lg:col-span-7 bg-[#FAF8F5] p-5 rounded-2xl border border-[#ECE4D8] space-y-5">
+            <div class="flex items-center justify-between border-b border-[#ECE4D8] pb-2.5">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#0D7A5F] animate-pulse"></span>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-[#0A261D]">Điều khiển Biến số Chính sách (Policy Sliders)</h3>
+              </div>
+              <span class="text-[10px] text-[#7A8F87] font-mono">Tương tác thời gian thực</span>
+            </div>
+
+            <!-- SLIDER 1: DISCOUNT OPTIMIZATION -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-bold text-[#0A261D]">1. Tối ưu Tỷ lệ Chiết khấu Khuyến mại</span>
+                  <div class="text-[10px] text-[#7A8F87]">Cắt giảm chiết khấu trực tiếp (hiện tại làm hao hụt 51.1M VNĐ)</div>
+                </div>
+                <span id="label-val-discount" class="text-xs font-mono font-black text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200/60">
+                  -${whatIfDiscountReductionPct.toFixed(1)}% (Tiết kiệm +${whatIfMetrics.discountSaved.toLocaleString()} đ)
+                </span>
+              </div>
+              <input type="range" id="slider-discount" min="0" max="6" step="0.5" value="${whatIfDiscountReductionPct}" oninput="updateWhatIfSimulationUI()" class="w-full h-2 bg-[#E8E2D8] rounded-lg appearance-none cursor-pointer accent-[#0D7A5F]">
+              <div class="flex justify-between text-[10px] text-[#7A8F87] font-mono">
+                <span>0% (Giữ nguyên)</span>
+                <span>3% (Khuyến nghị)</span>
+                <span>6% (Tối đa)</span>
+              </div>
+            </div>
+
+            <!-- SLIDER 2: COD RETURN RATE REDUCTION -->
+            <div class="space-y-2 pt-1 border-t border-[#ECE4D8]/60">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-bold text-[#0A261D]">2. Kiểm soát Tỷ lệ Hoàn đơn COD</span>
+                  <div class="text-[10px] text-[#7A8F87]">Giảm tỷ lệ hoàn đơn từ 5.5% hiện tại xuống mức tối ưu</div>
+                </div>
+                <span id="label-val-return" class="text-xs font-mono font-black text-blue-800 bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200/60">
+                  -${whatIfReturnRateReductionPct.toFixed(1)}% (Tiết kiệm +${whatIfMetrics.returnSaved.toLocaleString()} đ)
+                </span>
+              </div>
+              <input type="range" id="slider-return" min="0" max="4" step="0.5" value="${whatIfReturnRateReductionPct}" oninput="updateWhatIfSimulationUI()" class="w-full h-2 bg-[#E8E2D8] rounded-lg appearance-none cursor-pointer accent-[#0D7A5F]">
+              <div class="flex justify-between text-[10px] text-[#7A8F87] font-mono">
+                <span>0% (5.5% hiện tại)</span>
+                <span>2% (Khuyến nghị 3.5%)</span>
+                <span>4% (Xuất sắc 1.5%)</span>
+              </div>
+            </div>
+
+            <!-- SLIDER 3: ORDER VOLUME GROWTH -->
+            <div class="space-y-2 pt-1 border-t border-[#ECE4D8]/60">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-bold text-[#0A261D]">3. Mục tiêu Tăng trưởng Đơn hàng Kỳ tới</span>
+                  <div class="text-[10px] text-[#7A8F87]">Kích cầu qua Kênh Website và Re-marketing tệp khách thân thiết</div>
+                </div>
+                <span id="label-val-growth" class="text-xs font-mono font-black text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200/60">
+                  +${whatIfOrderGrowthPct.toFixed(0)}% (+${whatIfMetrics.newOrders} đơn / +${whatIfMetrics.newProfitFromOrders.toLocaleString()} đ)
+                </span>
+              </div>
+              <input type="range" id="slider-growth" min="0" max="30" step="1" value="${whatIfOrderGrowthPct}" oninput="updateWhatIfSimulationUI()" class="w-full h-2 bg-[#E8E2D8] rounded-lg appearance-none cursor-pointer accent-[#0D7A5F]">
+              <div class="flex justify-between text-[10px] text-[#7A8F87] font-mono">
+                <span>+0%</span>
+                <span>+10% (Cơ sở)</span>
+                <span>+20% (Kỳ vọng)</span>
+                <span>+30% (Đột phá)</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT 5 COLS: PROJECTED IMPACT SCORECARD -->
+          <div class="lg:col-span-5 bg-[#0A261D] text-white rounded-2xl p-5 border border-[#D4B07B]/40 shadow-xl flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <div class="text-xs font-black uppercase tracking-wider text-[#D4B07B]">Dự Phóng Tác Động Tài Chính</div>
+                <span id="card-status-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                  Kịch bản Khả thi
+                </span>
+              </div>
+
+              <!-- Key Output 1: Projected Gross Profit -->
+              <div class="mt-4 bg-white/5 rounded-xl p-3.5 border border-white/10">
+                <div class="text-[10px] text-[#D8CEBE] font-bold uppercase">Lợi nhuận gộp Dự phóng (Gross Profit)</div>
+                <div class="text-2xl font-black text-[#D4B07B] mt-1 font-mono flex items-baseline gap-1.5">
+                  <span id="card-proj-profit">${whatIfMetrics.projectedGrossProfit.toLocaleString()}</span>
+                  <span class="text-xs font-bold text-white/80">VNĐ</span>
+                </div>
+                <div class="mt-2 flex items-center justify-between text-[11px]">
+                  <span class="text-[#D8CEBE]">Tăng thêm so với hiện tại:</span>
+                  <span id="card-delta-profit" class="font-bold font-mono text-emerald-400">+${whatIfMetrics.totalNetAddedProfit.toLocaleString()} đ (+${whatIfMetrics.profitGrowthPct}%)</span>
+                </div>
+              </div>
+
+              <!-- Key Output 2: Projected Net Revenue & Margin -->
+              <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                  <div class="text-[10px] text-[#D8CEBE]">Doanh thu thuần dự phóng</div>
+                  <div id="card-proj-revenue" class="font-black text-white text-xs font-mono mt-0.5 truncate">${whatIfMetrics.projectedNetRevenue.toLocaleString()} đ</div>
+                </div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                  <div class="text-[10px] text-[#D8CEBE]">Biên LN gộp dự phóng</div>
+                  <div id="card-proj-margin" class="font-black text-emerald-300 text-xs font-mono mt-0.5">${whatIfMetrics.projectedMarginPct}%</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-[#D8CEBE]">
+              <span>Mô hình định lượng:</span>
+              <span class="font-mono text-[#D4B07B] font-bold">MECE Decision Engine</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ROW 2: STRATEGIC ACTION PRIORITY MATRIX (3 CARDS) -->
+        <div>
+          <div class="flex items-center justify-between mb-3.5">
+            <div>
+              <h3 class="text-sm font-black text-[#0A261D] tracking-tight">Ma trận Đề xuất Hành động Chiến lược (Action Priority Matrix)</h3>
+              <p class="text-xs text-[#4A635A]">Phân loại giải pháp thực thi theo mức độ tác động và tính khả thi dành cho Ban Điều Hành:</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <!-- CARD 1: QUICK WINS -->
+            <div class="bg-[#FAF8F5] rounded-2xl p-4 border border-emerald-200/80 shadow-xs space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-black text-xs">⚡</span>
+                  <h4 class="font-black text-xs text-[#0A261D] uppercase">Quick Wins (30 Ngày)</h4>
+                </div>
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Tác động cao · Dễ làm</span>
+              </div>
+              <ul class="text-xs text-[#0A261D] space-y-2.5">
+                <li class="flex items-start gap-1.5">
+                  <span class="text-emerald-700 font-bold mt-0.5">✓</span>
+                  <span><strong>Chuyển đổi Khuyến mại:</strong> Dừng ngay giảm giá tiền mặt trực tiếp; chuyển sang voucher hoàn tiền tích điểm (Loyalty Cashback 5%) để giữ lại hơn 51 triệu đ chiết khấu.</span>
+                </li>
+                <li class="flex items-start gap-1.5">
+                  <span class="text-emerald-700 font-bold mt-0.5">✓</span>
+                  <span><strong>Bán chéo Combo:</strong> Đóng gói combo *Gia dụng + Phụ kiện* trên Website và Cửa hàng (kênh có biên LN đạt 36.4% - 38.1%) để tăng AOV từ 903k lên 1.1M đ.</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- CARD 2: STRATEGIC MOVES -->
+            <div class="bg-[#FAF8F5] rounded-2xl p-4 border border-blue-200/80 shadow-xs space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-black text-xs">🎯</span>
+                  <h4 class="font-black text-xs text-[#0A261D] uppercase">Strategic Moves (90 Ngày)</h4>
+                </div>
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">Tác động bền vững</span>
+              </div>
+              <ul class="text-xs text-[#0A261D] space-y-2.5">
+                <li class="flex items-start gap-1.5">
+                  <span class="text-blue-700 font-bold mt-0.5">✓</span>
+                  <span><strong>Tái cấu trúc Kênh:</strong> Giảm tỷ trọng Kênh Mạng xã hội từ 30.7% xuống 25% do chi phí quảng cáo leo thang; dồn ngân sách phát triển Website lên 35% để làm chủ dữ liệu khách hàng.</span>
+                </li>
+                <li class="flex items-start gap-1.5">
+                  <span class="text-blue-700 font-bold mt-0.5">✓</span>
+                  <span><strong>Tự động hóa Xác nhận COD:</strong> Triển khai Voice Bot gọi xác nhận tự động các đơn hàng COD > 800k trên Mạng xã hội để giảm tỷ lệ hoàn hủy từ 5.5% xuống dưới 3.0%.</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- CARD 3: RISK GOVERNANCE -->
+            <div class="bg-[#FAF8F5] rounded-2xl p-4 border border-amber-200/80 shadow-xs space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-black text-xs">🛡️</span>
+                  <h4 class="font-black text-xs text-[#0A261D] uppercase">Kiểm Soát Rủi Ro</h4>
+                </div>
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Quản trị an toàn</span>
+              </div>
+              <ul class="text-xs text-[#0A261D] space-y-2.5">
+                <li class="flex items-start gap-1.5">
+                  <span class="text-amber-700 font-bold mt-0.5">✓</span>
+                  <span><strong>Rủi ro Tập trung Ngành hàng:</strong> Ngành Gia dụng chiếm 48.8% tổng doanh thu; cần mở rộng thêm danh mục Thiết bị văn phòng để phòng ngừa đứt gãy nguồn cung.</span>
+                </li>
+                <li class="flex items-start gap-1.5">
+                  <span class="text-amber-700 font-bold mt-0.5">✓</span>
+                  <span><strong>Cảnh báo Khách rời bỏ (RFM):</strong> 18% khách hàng nhóm "At Risk" cần được kích hoạt chiến dịch re-marketing chăm sóc qua Zalo/Email trước khi mất hoàn toàn.</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
       </div>
 
       <!-- ================= 3.5. CHUYÊN VIÊN SOẠN THẢO BÁO CÁO HỌC THUẬT (PROFESSIONAL REPORT WRITER SKILL) ================= -->
