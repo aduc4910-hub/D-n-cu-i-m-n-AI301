@@ -222,14 +222,30 @@ class BIPlatformHTTPHandler(BaseHTTPRequestHandler):
             return
 
         # 4. Exported Data Files Download
-        if path.startswith("/data/export/"):
+        if path.startswith("/data/export/") or path.startswith("/ui/data/export/"):
             fname = os.path.basename(path)
             export_file = os.path.join(WORKSPACE_ROOT, "data", "export", fname)
-            if not os.path.exists(export_file):
+            ui_export_file = os.path.join(WORKSPACE_ROOT, "ui", "data", "export", fname)
+
+            target_file = None
+            if os.path.exists(export_file):
+                target_file = export_file
+            elif os.path.exists(ui_export_file):
+                target_file = ui_export_file
+            else:
+                try:
+                    stage = ReportingStage()
+                    stage.generate_export_files()
+                    if os.path.exists(export_file):
+                        target_file = export_file
+                except Exception as e:
+                    print(f"[Export:AutoGenerate:Error] {e}")
+
+            if not target_file or not os.path.exists(target_file):
                 self.send_error(404, f"Export file not found: {fname}")
                 return
 
-            mime_type, _ = mimetypes.guess_type(export_file)
+            mime_type, _ = mimetypes.guess_type(target_file)
             if not mime_type:
                 if fname.endswith(".xlsx"):
                     mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -240,12 +256,13 @@ class BIPlatformHTTPHandler(BaseHTTPRequestHandler):
                 else:
                     mime_type = "application/octet-stream"
 
-            with open(export_file, "rb") as f:
+            with open(target_file, "rb") as f:
                 content = f.read()
 
             self.send_response(200)
             self.send_header('Content-Type', mime_type)
             self.send_header('Content-Length', str(len(content)))
+            self.send_header('Access-Control-Allow-Origin', '*')
             if not fname.endswith(".html"):
                 self.send_header('Content-Disposition', f'attachment; filename="{fname}"')
             self.send_header('Cache-Control', 'no-cache')

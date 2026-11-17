@@ -24,4 +24,7 @@ data/uploads/*
 !data/uploads/DuLieu_GiaoDich_Sach_Cleaned.csv
 data/clean/*
 !data/clean/sales_transactions_cleaned.csv
-data/export/*
+# Export files tracked for Vercel deployment
+!data/export/*.csv
+!data/export/*.xlsx
+!data/export/*.html
