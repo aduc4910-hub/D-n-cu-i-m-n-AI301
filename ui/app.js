@@ -2143,6 +2143,67 @@ function renderStage2_Cleaning() {
 // ================= CHI TIẾT BƯỚC 3: BENTO GRID ANALYTICS (FROSTED GLASS) =================
 
 // ================= CLIENT-SIDE DYNAMIC ANALYTICS ENGINE =================
+
+// Chuẩn hóa tên cột thông minh: không phân biệt hoa thường, bỏ ký tự đặc biệt, bỏ hậu tố tiền tệ/đơn vị (_VND, vnd, dong, usd...)
+function normalizeKeyForMatch(k) {
+  if (!k) return "";
+  return String(k)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d").replace(/Đ/g, "D")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .replace(/(vnd|dong|usd|vietnamdong)$/, "");
+}
+
+// Chuẩn hóa tên kênh bán hàng tiếng Việt: giải quyết triệt để sự phân mảnh kênh (website/Website/WEBSITE, Cửa hàng/CỬA HÀNG...)
+function normalizeChannelName(rawName) {
+  if (!rawName) return "Khác";
+  const s = String(rawName).trim();
+  if (!s || s.toLowerCase() === "null" || s.toLowerCase() === "undefined" || s.toLowerCase() === "nan") return "Khác";
+  
+  const unacc = s.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d").replace(/Đ/g, "D")
+    .toLowerCase()
+    .trim();
+
+  if (unacc.includes("shopee")) return "Shopee";
+  if (unacc.includes("lazada")) return "Lazada";
+  if (unacc.includes("tiktok")) return "TikTok Shop";
+  if (unacc.includes("web")) return "Website";
+  if (unacc.includes("cua hang") || unacc.includes("store") || unacc.includes("showroom") || unacc.includes("truc tiep")) return "Cửa hàng trực tiếp";
+  if (unacc.includes("san") || unacc.includes("thuong mai") || unacc.includes("tmdt") || unacc.includes("marketplace") || unacc.includes("ecommerce")) return "Sàn thương mại điện tử";
+  if (unacc.includes("dien thoai") || unacc.includes("tu van") || unacc.includes("telesale") || unacc.includes("hotline") || unacc.includes("call") || unacc.includes("phone")) return "Tư vấn điện thoại";
+  if (unacc.includes("dai ly") || unacc.includes("b2b") || unacc.includes("si")) return "Đại lý & B2B";
+  if (unacc.includes("mang xa hoi") || unacc.includes("facebook") || unacc.includes("zalo") || unacc.includes("social")) return "Mạng xã hội";
+  
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// Bóc tách ngày tháng, năm và quý một cách động từ chuỗi ngày (hỗ trợ YYYY-MM-DD, DD/MM/YYYY, v.v.)
+function parseRowDateInfo(dateStr) {
+  if (!dateStr) return null;
+  const s = String(dateStr).trim();
+  let match = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (match) {
+    const year = parseInt(match[1]);
+    const month = parseInt(match[2]);
+    const qNum = Math.min(4, Math.max(1, Math.floor((month - 1) / 3) + 1));
+    const ym = `${year}-${String(month).padStart(2, '0')}`;
+    return { year, month, quarter: `Q${qNum}`, ym };
+  }
+  match = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+  if (match) {
+    const year = parseInt(match[3]);
+    const month = parseInt(match[2]);
+    const qNum = Math.min(4, Math.max(1, Math.floor((month - 1) / 3) + 1));
+    const ym = `${year}-${String(month).padStart(2, '0')}`;
+    return { year, month, quarter: `Q${qNum}`, ym };
+  }
+  return null;
+}
+
 function computeAnalysisManifestFromRows(rows, businessContext) {
   if (!rows || !Array.isArray(rows) || rows.length === 0) {
     return null;
@@ -2158,36 +2219,56 @@ function computeAnalysisManifestFromRows(rows, businessContext) {
         "Nhóm khách hàng nào có giá trị mua hàng cao nhất (RFM Champions)?"
       ];
 
-  const parseNumVal = (r, candidateKeys, defaultVal = 0) => {
-    for (const key of candidateKeys) {
-      if (r[key] !== undefined && r[key] !== null && r[key] !== "") {
-        const s = String(r[key]).replace(/,/g, '').replace(/\$/g, '').replace(/[đ₫%]/g, '').trim();
-        const n = parseFloat(s);
-        if (!isNaN(n)) return n;
+  // Helper tìm trường an toàn đa tầng: chính xác -> không phân biệt hoa thường -> chuẩn hóa không ký tự đặc biệt & hậu tố
+  const getRowVal = (r, candidateKeys) => {
+    // 1. Kiểm tra chính xác tên trường
+    for (const ck of candidateKeys) {
+      if (r[ck] !== undefined && r[ck] !== null && String(r[ck]).trim() !== "") {
+        return r[ck];
       }
-      const lowerKey = key.toLowerCase();
-      for (const rk of Object.keys(r)) {
-        if (rk.toLowerCase() === lowerKey && r[rk] !== undefined && r[rk] !== null && r[rk] !== "") {
-          const s = String(r[rk]).replace(/,/g, '').replace(/\$/g, '').replace(/[đ₫%]/g, '').trim();
-          const n = parseFloat(s);
-          if (!isNaN(n)) return n;
+    }
+    // 2. Kiểm tra không phân biệt hoa thường
+    const rKeys = Object.keys(r);
+    for (const ck of candidateKeys) {
+      const lowerCk = ck.toLowerCase();
+      for (const rk of rKeys) {
+        if (rk.toLowerCase() === lowerCk && r[rk] !== undefined && r[rk] !== null && String(r[rk]).trim() !== "") {
+          return r[rk];
         }
       }
+    }
+    // 3. Chuẩn hóa sâu (loại bỏ _, -, khoảng trắng, ngoặc, và hậu tố VND, USD, DONG)
+    const normCandidates = candidateKeys.map(normalizeKeyForMatch);
+    for (let i = 0; i < normCandidates.length; i++) {
+      const nc = normCandidates[i];
+      if (!nc) continue;
+      for (const rk of rKeys) {
+        const nrk = normalizeKeyForMatch(rk);
+        if (nrk === nc || (nc.length >= 4 && nrk.startsWith(nc)) || (nrk.length >= 4 && nc.startsWith(nrk))) {
+          if (r[rk] !== undefined && r[rk] !== null && String(r[rk]).trim() !== "") {
+            return r[rk];
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  const parseNumVal = (r, candidateKeys, defaultVal = 0) => {
+    const raw = getRowVal(r, candidateKeys);
+    if (raw !== null && raw !== undefined) {
+      const s = String(raw).replace(/,/g, '').replace(/\$/g, '').replace(/[đ₫%]/g, '').trim();
+      const n = parseFloat(s);
+      if (!isNaN(n)) return n;
     }
     return defaultVal;
   };
 
   const parseStrVal = (r, candidateKeys, defaultVal = "") => {
-    for (const key of candidateKeys) {
-      if (r[key] !== undefined && r[key] !== null && String(r[key]).trim() !== "") {
-        return String(r[key]).trim();
-      }
-      const lowerKey = key.toLowerCase();
-      for (const rk of Object.keys(r)) {
-        if (rk.toLowerCase() === lowerKey && r[rk] !== undefined && r[rk] !== null && String(r[rk]).trim() !== "") {
-          return String(r[rk]).trim();
-        }
-      }
+    const raw = getRowVal(r, candidateKeys);
+    if (raw !== null && raw !== undefined) {
+      const s = String(raw).trim();
+      if (s !== "" && s.toLowerCase() !== "null" && s.toLowerCase() !== "undefined") return s;
     }
     return defaultVal;
   };
@@ -2203,32 +2284,78 @@ function computeAnalysisManifestFromRows(rows, businessContext) {
   const prodMap = {};
   const catMap = {};
   const monthMap = {};
+  const quarterMap = {
+    Q1: { quarter: "Q1", revenue: 0, profit: 0, orders: 0 },
+    Q2: { quarter: "Q2", revenue: 0, profit: 0, orders: 0 },
+    Q3: { quarter: "Q3", revenue: 0, profit: 0, orders: 0 },
+    Q4: { quarter: "Q4", revenue: 0, profit: 0, orders: 0 }
+  };
+  const yearCounts = {};
   const statusCounts = {};
 
   rows.forEach((r, idx) => {
-    const orderId = parseStrVal(r, ["OrderID", "Order_ID", "TransactionID", "MaDonHang", "MaGiaoDich"], `ORD-${idx + 1}`);
+    const orderId = parseStrVal(r, [
+      "Order_ID", "OrderID", "TransactionID", "Transaction_ID", "MaDonHang", "Ma_Don_Hang", "MaGiaoDich", "ID"
+    ], `ORD-${idx + 1}`);
     uniqueOrdersSet.add(orderId);
 
-    const qty = parseNumVal(r, ["Quantity", "QUANTITY", "SoLuong", "Units"], 1);
+    const qty = parseNumVal(r, ["Quantity", "Qty", "SoLuong", "So_Luong", "Units", "SL", "Volume"], 1);
     totalUnits += qty;
 
-    const unitPrice = parseNumVal(r, ["UnitPrice", "UNIT_PRICE", "DonGia", "Price"], 0);
-    let gross = parseNumVal(r, ["GrossSales", "GROSSSALES", "GrossRevenue", "DoanhThuGop", "TongTien"], 0);
+    const unitPrice = parseNumVal(r, ["Unit_Price_VND", "Unit_Price", "UnitPrice", "UNIT_PRICE", "DonGia", "Don_Gia", "GiaBan", "Price", "SellingPrice"], 0);
+    const unitCost = parseNumVal(r, ["Unit_Cost_VND", "Unit_Cost", "UnitCost", "UNIT_COST", "CostPrice", "Cost_Price", "DonGiaVon", "GiaVonDonVi"], 0);
+
+    let gross = parseNumVal(r, [
+      "Gross_Sales_VND", "Gross_Sales", "GrossSales", "GROSSSALES", "GrossRevenue", "Gross_Revenue", "DoanhThuGop", "Doanh_Thu_Gop", "TongTien", "TotalAmount", "Amount"
+    ], 0);
     if (gross === 0 && unitPrice > 0) gross = unitPrice * qty;
 
-    const discount = parseNumVal(r, ["DiscountAmount", "DISCOUNT_AMOUNT", "ChietKhau", "GiamGia", "Discounts"], 0);
+    let discount = parseNumVal(r, [
+      "Discount_Amount_VND", "Discount_Amount", "DiscountAmount", "DISCOUNT_AMOUNT", "ChietKhau", "TienChietKhau", "GiamGia", "Discounts", "Discount"
+    ], 0);
+    const discountRate = parseNumVal(r, [
+      "Discount_Rate", "DiscountRate", "Discount_Pct", "DiscountPct", "TyLeChietKhau", "ChietKhauPct", "PhanTramGiamGia"
+    ], 0);
+    if (discount === 0 && discountRate > 0) {
+      const rate = discountRate > 1 ? discountRate / 100 : discountRate;
+      discount = gross > 0 ? (gross * rate) : 0;
+    }
     
-    let net = parseNumVal(r, ["NetRevenue", "NetSales", "NETSALES", "DoanhThuThuan", "Revenue_VND", "Revenue"], 0);
-    if (net === 0 && gross > 0) net = Math.max(0, gross - discount);
-
-    let cogs = parseNumVal(r, ["CostOfGoodsSold", "TotalCOGS", "TOTALCOGS", "COGS", "Cost_VND", "GiaVon"], 0);
-    if (cogs === 0) {
-      const unitCost = parseNumVal(r, ["CostPrice", "COST_PRICE", "UnitCost", "GiaVonDonVi"], 0);
-      if (unitCost > 0) cogs = unitCost * qty;
+    let net = parseNumVal(r, [
+      "Net_Sales_VND", "Net_Sales", "NetSales", "NETSALES", "NetRevenue", "Net_Revenue", "DoanhThuThuan", "Doanh_Thu_Thuan", "Revenue_VND", "Revenue", "ThucThu", "DoanhThu"
+    ], 0);
+    if (net === 0 && gross > 0) {
+      net = Math.max(0, gross - discount);
     }
 
-    let profit = parseNumVal(r, ["GrossProfit", "GROSSPROFIT", "LoiNhuanGop", "Profit_VND"], 0);
-    if (profit === 0 && net > 0) profit = net - cogs;
+    let cogs = parseNumVal(r, [
+      "Total_Cost_VND", "Total_Cost", "TotalCost", "CostOfGoodsSold", "TotalCOGS", "TOTALCOGS", "Total_COGS", "COGS", "GiaVon", "TongGiaVon", "Cost_VND", "Cost", "ChiPhi"
+    ], 0);
+    if (cogs === 0 && unitCost > 0) {
+      cogs = unitCost * qty;
+    }
+
+    let profit = parseNumVal(r, [
+      "Profit_VND", "Profit", "GrossProfit", "GROSSPROFIT", "Gross_Profit", "LoiNhuanGop", "Loi_Nhuan_Gop", "LoiNhuan", "Margin"
+    ], 0);
+    if (profit === 0 && net > 0 && cogs > 0) {
+      profit = net - cogs;
+    }
+
+    // Các phép suy diễn toán học phòng thủ (Reconciliation Fallbacks)
+    if (net === 0) {
+      if (profit > 0 && cogs > 0) net = profit + cogs;
+      else if (profit > 0) net = profit;
+    }
+    if (gross === 0 && net > 0) {
+      gross = net + discount;
+    }
+    if (cogs === 0 && net > 0 && profit > 0 && net >= profit) {
+      cogs = net - profit;
+    }
+    if (discount === 0 && gross > net && net > 0) {
+      discount = gross - net;
+    }
 
     totalGross += gross;
     totalDiscounts += discount;
@@ -2236,18 +2363,23 @@ function computeAnalysisManifestFromRows(rows, businessContext) {
     totalCogs += cogs;
     totalProfit += profit;
 
-    // Channel
-    const ch = parseStrVal(r, ["SalesChannel", "Sales_Channel", "Channel", "KenhBan", "Kenh"], "Khác");
-    if (!channelMap[ch]) channelMap[ch] = { name: ch, revenue: 0, profit: 0, orders: 0, discounts: 0 };
-    channelMap[ch].revenue += net;
-    channelMap[ch].profit += profit;
-    channelMap[ch].orders += 1;
-    channelMap[ch].discounts += discount;
+    // Channel (áp dụng chuẩn hóa tên kênh toàn diện)
+    const rawCh = parseStrVal(r, [
+      "Sales_Channel", "SalesChannel", "Channel", "KenhBan", "Kenh_Ban", "KenhBanHang", "Kenh", "DistributionChannel"
+    ], "Khác");
+    const normCh = normalizeChannelName(rawCh);
+    if (!channelMap[normCh]) {
+      channelMap[normCh] = { name: normCh, revenue: 0, profit: 0, orders: 0, discounts: 0 };
+    }
+    channelMap[normCh].revenue += net;
+    channelMap[normCh].profit += profit;
+    channelMap[normCh].orders += 1;
+    channelMap[normCh].discounts += discount;
 
     // Product
-    const pName = parseStrVal(r, ["ProductName", "Product_Name", "TenSanPham", "ProductLine", "ProductID"], "Sản phẩm khác");
-    const pId = parseStrVal(r, ["ProductID", "Product_ID", "MaSanPham"], `PRD-${idx + 1}`);
-    const pCat = parseStrVal(r, ["ProductCategory", "Product_Category", "Category", "DanhMuc", "NganhHang"], "Chung");
+    const pName = parseStrVal(r, ["Product_Name", "ProductName", "TenSanPham", "Ten_San_Pham", "ProductLine", "SanPham", "ItemName", "ProductID"], "Sản phẩm khác");
+    const pId = parseStrVal(r, ["Product_ID", "ProductID", "MaSanPham", "Ma_San_Pham", "ItemID", "SKU"], `PRD-${idx + 1}`);
+    const pCat = parseStrVal(r, ["Product_Category", "ProductCategory", "Category", "DanhMuc", "Danh_Muc", "NhomHang", "NganhHang"], "Chung");
     if (!prodMap[pName]) prodMap[pName] = { id: pId, name: pName, category: pCat, revenue: 0, profit: 0, units: 0, orders: 0 };
     prodMap[pName].revenue += net;
     prodMap[pName].profit += profit;
@@ -2260,21 +2392,40 @@ function computeAnalysisManifestFromRows(rows, businessContext) {
     catMap[pCat].gross_profit += profit;
     catMap[pCat].orders += 1;
 
-    // Date / Month
-    let dateStr = parseStrVal(r, ["OrderDate", "Order_Date", "Date", "NgayDat", "NgayGiao"], "");
+    // Date / Quarter / Month
+    const dateStr = parseStrVal(r, [
+      "Order_Date", "OrderDate", "Date", "NgayDat", "Ngay_Dat", "NgayGiaoDich", "Ngay", "CreatedAt"
+    ], "");
+    const dateInfo = parseRowDateInfo(dateStr);
     let ym = "2025-01";
-    if (dateStr && dateStr.length >= 7) {
-      ym = dateStr.slice(0, 7);
+    let quarterKey = "Q1";
+    if (dateInfo) {
+      ym = dateInfo.ym;
+      quarterKey = dateInfo.quarter;
+      yearCounts[dateInfo.year] = (yearCounts[dateInfo.year] || 0) + 1;
     } else {
       ym = parseStrVal(r, ["YearMonth"], "2025-01");
+      quarterKey = parseStrVal(r, ["Quarter"], "Q1");
+      if (quarterKey.includes("-")) quarterKey = quarterKey.split("-")[0];
     }
+    if (!["Q1", "Q2", "Q3", "Q4"].includes(quarterKey)) {
+      quarterKey = "Q1";
+    }
+
+    if (!quarterMap[quarterKey]) {
+      quarterMap[quarterKey] = { quarter: quarterKey, revenue: 0, profit: 0, orders: 0 };
+    }
+    quarterMap[quarterKey].revenue += net;
+    quarterMap[quarterKey].profit += profit;
+    quarterMap[quarterKey].orders += 1;
+
     if (!monthMap[ym]) monthMap[ym] = { month: ym, net_revenue: 0, gross_profit: 0, orders: 0 };
     monthMap[ym].net_revenue += net;
     monthMap[ym].gross_profit += profit;
     monthMap[ym].orders += 1;
 
     // Order status
-    const st = parseStrVal(r, ["OrderStatus", "Order_Status", "TrangThai"], "Hoàn thành");
+    const st = parseStrVal(r, ["Order_Status", "OrderStatus", "TrangThai", "Trang_Thai", "Status"], "Hoàn thành");
     statusCounts[st] = (statusCounts[st] || 0) + 1;
   });
 
@@ -2283,7 +2434,25 @@ function computeAnalysisManifestFromRows(rows, businessContext) {
   const aov = uniqueOrders > 0 ? Math.round(totalNet / uniqueOrders) : 0;
   const discountRatio = totalGross > 0 ? (totalDiscounts / totalGross) : 0;
 
-  // Channels list
+  // Năm thống trị xuất hiện nhiều nhất trong tập dữ liệu
+  const yearEntries = Object.entries(yearCounts).sort((a, b) => b[1] - a[1]);
+  const dominantYear = yearEntries.length > 0 ? parseInt(yearEntries[0][0]) : 2025;
+
+  // Danh sách 4 Quý tính toán trực tiếp từ dữ liệu thực tế
+  const quarterly = ["Q1", "Q2", "Q3", "Q4"].map(q => {
+    const qData = quarterMap[q] || { revenue: 0, profit: 0, orders: 0 };
+    return {
+      quarter: q,
+      revenue: qData.revenue,
+      net_revenue: qData.revenue,
+      profit: qData.profit,
+      gross_profit: qData.profit,
+      orders: qData.orders,
+      share_pct: totalNet > 0 ? parseFloat((qData.revenue / totalNet * 100).toFixed(1)) : 0
+    };
+  });
+
+  // Channels list (đã chuẩn hóa, sắp xếp theo doanh thu giảm dần, tỷ trọng xấp xỉ 100%)
   const channels = Object.values(channelMap).sort((a, b) => b.revenue - a.revenue).map(c => ({
     name: c.name,
     channel: c.name,
@@ -2385,6 +2554,8 @@ function computeAnalysisManifestFromRows(rows, businessContext) {
     channels: channels,
     categories: categories,
     monthly: monthly,
+    quarterly: quarterly,
+    dominant_year: dominantYear,
     top_products: topProducts,
     lowest_product: lowestProduct,
     lowest_channel: lowestChannel,
@@ -2401,7 +2572,8 @@ function computeAnalysisManifestFromRows(rows, businessContext) {
         top_products: topProducts
       },
       trend: {
-        monthly: monthly
+        monthly: monthly,
+        quarterly: quarterly
       }
     }
   };
@@ -2419,13 +2591,33 @@ function masterQueryBIEngine(qText, idx = 0, manifestOverride = null) {
   const qLower = qClean.toLowerCase();
 
   // Trích xuất số liệu thực tế động từ phiên làm việc nếu có
-  const activeOrders = m?.kpis?.TotalOrders || currentCleaningManifest?.cleaned_rows || window.CURRENT_CLEANED_ROWS?.length || 1200;
-  const activeNetRev = m?.kpis?.NetRevenue || 23248348000;
-  const activeGrossProfit = m?.kpis?.GrossProfit || 6837458000;
-  const activeCOGS = m?.kpis?.TotalCOGS || (activeNetRev - activeGrossProfit);
-  const activeMargin = m?.kpis?.GrossMargin ? (m.kpis.GrossMargin * 100).toFixed(2) : ((activeGrossProfit / Math.max(activeNetRev, 1)) * 100).toFixed(2);
-  const activeAOV = m?.kpis?.AverageOrderValue || (activeOrders > 0 ? Math.round(activeNetRev / activeOrders) : 19373623);
-  const activeDiscount = m?.kpis?.TotalDiscount || 1023150000;
+  const activeOrders = (m?.kpis?.TotalOrders !== undefined && m?.kpis?.TotalOrders !== null && m.kpis.TotalOrders > 0)
+    ? m.kpis.TotalOrders
+    : (currentCleaningManifest?.cleaned_rows || window.CURRENT_CLEANED_ROWS?.length || 1200);
+
+  const activeNetRev = (m?.kpis?.NetRevenue !== undefined && m?.kpis?.NetRevenue !== null && m.kpis.NetRevenue > 0)
+    ? m.kpis.NetRevenue
+    : 23248348000;
+
+  const activeGrossProfit = (m?.kpis?.GrossProfit !== undefined && m?.kpis?.GrossProfit !== null && m.kpis.GrossProfit > 0)
+    ? m.kpis.GrossProfit
+    : 6837458000;
+
+  const activeCOGS = (m?.kpis?.TotalCOGS !== undefined && m?.kpis?.TotalCOGS !== null && m.kpis.TotalCOGS > 0)
+    ? m.kpis.TotalCOGS
+    : Math.max(0, activeNetRev - activeGrossProfit);
+
+  const activeMargin = m?.kpis?.GrossMargin
+    ? (m.kpis.GrossMargin * 100).toFixed(2)
+    : ((activeGrossProfit / Math.max(activeNetRev, 1)) * 100).toFixed(2);
+
+  const activeAOV = (m?.kpis?.AverageOrderValue !== undefined && m?.kpis?.AverageOrderValue !== null && m.kpis.AverageOrderValue > 0)
+    ? m.kpis.AverageOrderValue
+    : (activeOrders > 0 ? Math.round(activeNetRev / activeOrders) : 19373623);
+
+  const activeDiscount = (m?.kpis?.TotalDiscount !== undefined && m?.kpis?.TotalDiscount !== null && m.kpis.TotalDiscount > 0)
+    ? m.kpis.TotalDiscount
+    : 1023150000;
 
   const channelsList = m?.channels || [];
   const topCh = channelsList[0] || { name: "Shopee", channel: "Shopee", revenue: 7245600000, pct: 31.1, share_pct: 31.1, margin_pct: 29.4, orders: 373 };
@@ -2439,8 +2631,8 @@ function masterQueryBIEngine(qText, idx = 0, manifestOverride = null) {
   const topProdName = topProd?.product_name || topProd?.name || "Sản phẩm chủ lực";
   const lowProdName = lowProd?.product_name || lowProd?.name || "Sản phẩm đóng góp thấp nhất";
 
-  const isLowest = qLower.includes("thấp nhất") || qLower.includes("kém nhất") || qLower.includes("ít nhất") || qLower.includes("tệ nhất") || qLower.includes("đáy") || qLower.includes("yếu nhất") || qLower.includes("nhỏ nhất") || qLower.includes("giảm nhất");
-  const isHighest = qLower.includes("cao nhất") || qLower.includes("nhiều nhất") || qLower.includes("lớn nhất") || qLower.includes("tốt nhất") || qLower.includes("đỉnh") || qLower.includes("mạnh nhất") || qLower.includes("dẫn đầu") || qLower.includes("top 1") || qLower.includes("số 1") || qLower.includes("nhiều đơn");
+  const isLowest = qLower.includes("thấp nhất") || qLower.includes("thap nhat") || qLower.includes("nhấp nhất") || qLower.includes("kém nhất") || qLower.includes("kem nhat") || qLower.includes("ít nhất") || qLower.includes("it nhat") || qLower.includes("tệ nhất") || qLower.includes("đáy") || qLower.includes("yếu nhất") || qLower.includes("nhỏ nhất") || qLower.includes("giảm nhất");
+  const isHighest = qLower.includes("cao nhất") || qLower.includes("cao nhat") || qLower.includes("nhiều nhất") || qLower.includes("nhieu nhat") || qLower.includes("lớn nhất") || qLower.includes("lon nhat") || qLower.includes("tốt nhất") || qLower.includes("tot nhat") || qLower.includes("đỉnh") || qLower.includes("mạnh nhất") || qLower.includes("dẫn đầu") || qLower.includes("top 1") || qLower.includes("số 1") || qLower.includes("nhiều đơn");
 
   // Kiểm tra xem câu hỏi có chứa từ khóa nghiệp vụ / số liệu kinh doanh không
   const hasDataKeywords = qLower.includes("đơn") || qLower.includes("doanh thu") || qLower.includes("doanh số") || 
@@ -2842,16 +3034,28 @@ function masterQueryBIEngine(qText, idx = 0, manifestOverride = null) {
 
   // ================= 12. XU HƯỚNG QUÝ / THÁNG / MÙA VỤ (TRENDS) =================
   if (qLower.includes("quý") || qLower.includes("tháng") || qLower.includes("mùa vụ") || qLower.includes("xu hướng") || qLower.includes("trend") || qLower.includes("tăng trưởng") || qLower.includes("thời điểm") || qLower.includes("q1") || qLower.includes("q2") || qLower.includes("q3") || qLower.includes("q4")) {
+    const qList = (m?.quarterly && m.quarterly.length > 0) ? m.quarterly : [
+      { quarter: "Quý 1", revenue: 5120000000, share_pct: 22.0 },
+      { quarter: "Quý 2", revenue: 5780000000, share_pct: 24.9 },
+      { quarter: "Quý 3", revenue: 6210000000, share_pct: 26.7 },
+      { quarter: "Quý 4", revenue: 6140000000, share_pct: 26.4 }
+    ];
+    const sortedQ = [...qList].sort((a, b) => (b.revenue || 0) - (a.revenue || 0));
+    const topQ = sortedQ[0] || { quarter: "Quý 3", revenue: 6210000000, share_pct: 26.7 };
+    const lowQ = sortedQ[sortedQ.length - 1] || { quarter: "Quý 1", revenue: 5120000000, share_pct: 22.0 };
+    const topQRevStr = topQ.revenue >= 1000000000 ? `${(topQ.revenue / 1000000000).toFixed(2)} tỷ đ` : (topQ.revenue >= 1000000 ? `${(topQ.revenue / 1000000).toFixed(1)} Tr đ` : `${(topQ.revenue || 0).toLocaleString()} đ`);
+    const lowQRevStr = lowQ.revenue >= 1000000000 ? `${(lowQ.revenue / 1000000000).toFixed(2)} tỷ đ` : (lowQ.revenue >= 1000000 ? `${(lowQ.revenue / 1000000).toFixed(1)} Tr đ` : `${(lowQ.revenue || 0).toLocaleString()} đ`);
+
     if (isLowest) {
       return {
         question_index: idx + 1,
         question: qClean,
         status: "RESOLVED_100",
-        answer_summary: "Thời điểm có doanh thu thấp nhất trong năm là **Quý 1 (Q1)** chỉ đạt **5,120,000,000 đ** (chiếm **22.0%** doanh thu cả năm, 270 đơn hàng). Tháng có doanh thu thấp nhất là **Tháng 2** (1.54 tỷ đ) do trùng kỳ nghỉ Tết Nguyên đán khiến hoạt động giao vận và mua sắm chững lại.",
+        answer_summary: `Thời điểm có doanh thu thấp nhất trong năm là **${lowQ.quarter}** chỉ đạt **${lowQRevStr}** (chiếm **${lowQ.share_pct || 0}%** tổng doanh thu, ${lowQ.orders || 0} đơn hàng).`,
         evidence: [
-          "Quý thấp nhất: Quý 1 đạt 5.12 tỷ đ (22.0% cả năm).",
-          "Tháng đáy doanh thu: Tháng 2 đạt 1.54 tỷ đ (tháng thấp nhất năm).",
-          "Phục hồi: Doanh số bứt phá dần từ Quý 2 (+12.9%) và đạt đỉnh ở Quý 3 và Quý 4."
+          `Quý thấp nhất: ${lowQ.quarter} đạt ${lowQRevStr} (${lowQ.share_pct || 0}% tổng doanh thu).`,
+          `Số đơn hàng ghi nhận trong quý thấp nhất: ${lowQ.orders || 0} đơn hàng.`,
+          "Khuyến nghị: Rà soát các chương trình khuyến mãi đầu mùa vụ để kích cầu doanh số."
         ]
       };
     } else {
@@ -2859,11 +3063,11 @@ function masterQueryBIEngine(qText, idx = 0, manifestOverride = null) {
         question_index: idx + 1,
         question: qClean,
         status: "RESOLVED_100",
-        answer_summary: "Doanh thu tăng trưởng mạnh mẽ và bùng nổ vào **Quý 3** (**6.21 tỷ đ**, 26.7%) và **Quý 4** (**6.14 tỷ đ**, 26.4%). Tháng đạt đỉnh doanh thu là **Tháng 12** (2.35 tỷ đ) nhờ các chiến dịch Mega Sale Black Friday, 11/11 và mua sắm cuối năm.",
+        answer_summary: `Doanh thu đạt đỉnh cao nhất vào **${topQ.quarter}** với **${topQRevStr}** (chiếm **${topQ.share_pct || 0}%** tổng doanh số cả năm, ${topQ.orders || 0} đơn hàng).`,
         evidence: [
-          "Quý 1: 5.12 tỷ đ (22.0% cả năm, giai đoạn mở đầu).",
-          "Quý 2: 5.78 tỷ đ (24.9%, tăng trưởng +12.9% so với Q1).",
-          "Quý 3 & Q4: Đóng góp 53.1% tổng doanh thu cả năm (12.35 tỷ đ)."
+          `Quý cao nhất: ${topQ.quarter} đạt ${topQRevStr} (${topQ.share_pct || 0}% cả năm).`,
+          `Số đơn hàng quý cao nhất: ${topQ.orders || 0} đơn hàng.`,
+          "Đóng góp chủ lực vào hoàn thành chỉ tiêu doanh số năm tài chính."
         ]
       };
     }
@@ -3238,6 +3442,21 @@ function renderStage3_Analysis() {
     : (m.answers || []);
   const insights = m.insights || [];
 
+  const quarterly = (m.quarterly && m.quarterly.length > 0) ? m.quarterly : [
+    { quarter: "Q1", revenue: 5120000000 },
+    { quarter: "Q2", revenue: 5780000000 },
+    { quarter: "Q3", revenue: 6210000000 },
+    { quarter: "Q4", revenue: 6140000000 }
+  ];
+  const dominantYear = m.dominant_year || 2025;
+  const maxQRev = Math.max(...quarterly.map(q => q.revenue || 0), 1);
+  const formatQLabel = (val) => {
+    if (!val || val === 0) return "0đ";
+    if (val >= 1000000000) return (val / 1000000000).toFixed(2) + "B";
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + "M";
+    return val.toLocaleString() + "đ";
+  };
+
   return `
     <div class="space-y-5">
       
@@ -3258,13 +3477,13 @@ function renderStage3_Analysis() {
         <div class="glass-card p-5">
           <div class="text-[10px] font-bold uppercase font-mono text-[#4A635A]">Tổng đơn & AOV</div>
           <div class="text-xl md:text-2xl font-black text-[#0D2B22] mt-1">${(kpis.TotalOrders || 0).toLocaleString()} đơn</div>
-          <span class="inline-block mt-2 text-[10px] text-[#4A635A] font-semibold">AOV: ${Math.round((kpis.AverageOrderValue || 0) / 1000000).toFixed(1)}M đ/đơn</span>
+          <span class="inline-block mt-2 text-[10px] text-[#4A635A] font-semibold">AOV: ${kpis.AverageOrderValue >= 1000000 ? (kpis.AverageOrderValue / 1000000).toFixed(1) + 'M' : Math.round(kpis.AverageOrderValue || 0).toLocaleString()} đ/đơn</span>
         </div>
 
         <div class="glass-card p-5">
           <div class="text-[10px] font-bold uppercase font-mono text-[#4A635A]">Chiết khấu & Khuyến mãi</div>
           <div class="text-xl md:text-2xl font-black text-amber-600 mt-1">${(kpis.TotalDiscount || 0).toLocaleString()} đ</div>
-          <span class="inline-block mt-2 text-[10px] text-[#4A635A] font-semibold">4.2% Doanh thu thuần</span>
+          <span class="inline-block mt-2 text-[10px] text-[#4A635A] font-semibold">${kpis.NetRevenue > 0 ? ((kpis.TotalDiscount / kpis.NetRevenue) * 100).toFixed(1) : (kpis.DiscountRatio ? (kpis.DiscountRatio * 100).toFixed(1) : '0.0')}% Doanh thu thuần</span>
         </div>
       </div>
 
@@ -3276,23 +3495,26 @@ function renderStage3_Analysis() {
           <div class="flex items-center justify-between border-b border-[#D4B07B]/30 pb-2.5">
             <div>
               <h2 class="font-bold text-[#0D2B22] text-xs md:text-sm">Phân Bổ Doanh Thu Theo Kênh Bán Hàng</h2>
-              <p class="text-[10px] text-[#4A635A]">Đối chiếu tỷ trọng thực tế trên 5 kênh phân phối</p>
+              <p class="text-[10px] text-[#4A635A]">Đối chiếu tỷ trọng thực tế trên ${channels.length} kênh phân phối</p>
             </div>
             <span class="text-[10px] font-bold text-[#0D2B22] bg-[#F5EFE4] px-2.5 py-0.5 rounded-full border border-[#D4B07B]/40">Tỷ trọng %</span>
           </div>
 
           <div class="space-y-3 pt-1">
-            ${channels.map(ch => `
-              <div class="space-y-1">
-                <div class="flex items-center justify-between text-xs">
-                  <span class="font-semibold text-[#0D2B22]">${ch.name}</span>
-                  <span class="font-mono text-[#0D2B22] font-bold">${(ch.revenue / 1000000000).toFixed(2)} tỷ (${ch.pct}%)</span>
+            ${channels.map(ch => {
+              const chRevStr = ch.revenue >= 1000000000 ? `${(ch.revenue / 1000000000).toFixed(2)} tỷ` : (ch.revenue >= 1000000 ? `${(ch.revenue / 1000000).toFixed(1)} Tr` : `${(ch.revenue || 0).toLocaleString()} đ`);
+              return `
+                <div class="space-y-1">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="font-semibold text-[#0D2B22]">${ch.name}</span>
+                    <span class="font-mono text-[#0D2B22] font-bold">${chRevStr} (${ch.pct}%)</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden glass-input p-0.5">
+                    <div class="bg-gradient-to-r from-[#C6A15B] to-[#D8C6A5] h-1.5 rounded-full transition-all duration-500" style="width: ${ch.pct}%"></div>
+                  </div>
                 </div>
-                <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden glass-input p-0.5">
-                  <div class="bg-gradient-to-r from-[#C6A15B] to-[#D8C6A5] h-1.5 rounded-full transition-all duration-500" style="width: ${ch.pct}%"></div>
-                </div>
-              </div>
-            `).join('')}
+              `;
+            }).join('')}
           </div>
         </div>
 
@@ -3300,33 +3522,26 @@ function renderStage3_Analysis() {
         <div class="lg:col-span-5 glass-card p-6 space-y-3.5">
           <div class="flex items-center justify-between border-b border-[#D4B07B]/30 pb-2.5">
             <div>
-              <h2 class="font-bold text-[#0D2B22] text-xs md:text-sm">Biến Động 4 Quý (2025)</h2>
-              <p class="text-[10px] text-[#4A635A]">Doanh thu thuần theo quý (Tỷ VNĐ)</p>
+              <h2 class="font-bold text-[#0D2B22] text-xs md:text-sm">Biến Động 4 Quý (${dominantYear})</h2>
+              <p class="text-[10px] text-[#4A635A]">Doanh thu thuần theo quý (Dữ liệu thực tế)</p>
             </div>
             <span class="text-[10px] font-mono text-[#4A635A]">Q1 - Q4</span>
           </div>
 
           <div class="h-40 flex items-end justify-between gap-3 pt-3 px-2">
-            <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-              <span class="text-[10px] font-mono text-[#4A635A]">5.12B</span>
-              <div class="w-full bg-[#F5EFE4] hover:bg-[#F5EFE4] rounded-t-xl transition" style="height: 65%;"></div>
-              <span class="text-xs font-bold text-[#0D2B22]">Q1</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-              <span class="text-[10px] font-mono text-[#4A635A]">5.78B</span>
-              <div class="w-full bg-[#F5EFE4] hover:bg-[#F5EFE4] rounded-t-xl transition" style="height: 75%;"></div>
-              <span class="text-xs font-bold text-[#0D2B22]">Q2</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-              <span class="text-[10px] font-mono text-[#4A635A]">6.21B</span>
-              <div class="w-full bg-[#D4B07B] hover:bg-[#164335] rounded-t-xl transition" style="height: 82%;"></div>
-              <span class="text-xs font-bold text-[#0D2B22]">Q3</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-              <span class="text-[10px] font-mono font-bold text-[#0D2B22]">6.14B</span>
-              <div class="w-full bg-[#0D2B22] rounded-t-xl transition shadow-md shadow-[#0E3326]/15" style="height: 80%;"></div>
-              <span class="text-xs font-black text-[#0D2B22]">Q4</span>
-            </div>
+            ${quarterly.map((q, qIdx) => {
+              const hPct = q.revenue > 0 ? Math.max(12, Math.round((q.revenue / maxQRev) * 85)) : 6;
+              const isMax = q.revenue === maxQRev && q.revenue > 0;
+              const barColor = isMax ? 'bg-[#0D2B22] shadow-md shadow-[#0E3326]/15' : (qIdx % 2 === 0 ? 'bg-[#E5DDCF]' : 'bg-[#D4B07B]');
+              const textWeight = isMax ? 'font-black text-[#0D2B22]' : 'font-bold text-[#0D2B22]';
+              return `
+                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                  <span class="text-[10px] font-mono ${isMax ? 'font-bold text-[#0D2B22]' : 'text-[#4A635A]'}">${formatQLabel(q.revenue)}</span>
+                  <div class="w-full ${barColor} rounded-t-xl transition duration-300" style="height: ${hPct}%;"></div>
+                  <span class="text-xs ${textWeight}">${q.quarter}</span>
+                </div>
+              `;
+            }).join('')}
           </div>
         </div>
 
@@ -3478,7 +3693,7 @@ function loadReportingData(showNotice = false) {
       const categories = activeManifest?.categories || [];
       const monthly = activeManifest?.monthly || [];
 
-      if (activeManifest && kpis.NetRevenue) {
+      if (activeManifest && (kpis.NetRevenue !== undefined || kpis.GrossProfit !== undefined || (activeRows && activeRows.length > 0))) {
         currentDashboardFilteredData = {
           summary_kpis: {
             net_revenue: kpis.NetRevenue,

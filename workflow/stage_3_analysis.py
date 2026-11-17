@@ -29,22 +29,101 @@ from typing import Dict, Any, List, Optional
 WORKSPACE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def normalize_key(k: str) -> str:
+    cleaned = re.sub(r'[^a-z0-9]', '', str(k).lower())
+    cleaned = re.sub(r'(vnd|dong|usd|vietnamdong)$', '', cleaned)
+    return cleaned
+
+
+def normalize_channel(raw_ch: Any) -> str:
+    if not raw_ch:
+        return "Khác"
+    import unicodedata
+    s = str(raw_ch).strip()
+    if not s or s.lower() in ("null", "none", "nan", "undefined"):
+        return "Khác"
+    unacc = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode('utf-8').lower().strip()
+    if "shopee" in unacc:
+        return "Shopee"
+    if "lazada" in unacc:
+        return "Lazada"
+    if "tiktok" in unacc:
+        return "TikTok Shop"
+    if "web" in unacc:
+        return "Website"
+    if any(x in unacc for x in ["cua hang", "store", "showroom", "truc tiep"]):
+        return "Cửa hàng trực tiếp"
+    if any(x in unacc for x in ["san", "thuong mai", "tmdt", "marketplace", "ecommerce"]):
+        return "Sàn thương mại điện tử"
+    if any(x in unacc for x in ["dien thoai", "tu van", "telesale", "hotline", "call", "phone"]):
+        return "Tư vấn điện thoại"
+    if any(x in unacc for x in ["dai ly", "b2b", "si"]):
+        return "Đại lý & B2B"
+    if any(x in unacc for x in ["mang xa hoi", "facebook", "zalo", "social"]):
+        return "Mạng xã hội"
+    return s.capitalize()
+
+
 def get_val(r: Dict[str, Any], candidates: List[str], default: float = 0.0) -> float:
+    # 1. Exact
     for c in candidates:
         if c in r and r[c] not in (None, "", "null", "NULL", "none", "None", "n/a", "N/A"):
             try:
-                s = str(r[c]).replace(",", "").replace("$", "").replace("đ", "").replace("₫", "").strip()
+                s = str(r[c]).replace(",", "").replace("$", "").replace("đ", "").replace("₫", "").replace("%", "").strip()
                 return float(s)
             except (ValueError, TypeError):
                 continue
+    # 2. Lowercase
+    r_lower = {k.lower(): k for k in r.keys()}
+    for c in candidates:
+        if c.lower() in r_lower:
+            orig = r_lower[c.lower()]
+            val = r[orig]
+            if val not in (None, "", "null", "NULL", "none", "None", "n/a", "N/A"):
+                try:
+                    s = str(val).replace(",", "").replace("$", "").replace("đ", "").replace("₫", "").replace("%", "").strip()
+                    return float(s)
+                except (ValueError, TypeError):
+                    continue
+    # 3. Normalized
+    r_norm = {normalize_key(k): k for k in r.keys()}
+    for c in candidates:
+        nc = normalize_key(c)
+        if nc in r_norm:
+            orig = r_norm[nc]
+            val = r[orig]
+            if val not in (None, "", "null", "NULL", "none", "None", "n/a", "N/A"):
+                try:
+                    s = str(val).replace(",", "").replace("$", "").replace("đ", "").replace("₫", "").replace("%", "").strip()
+                    return float(s)
+                except (ValueError, TypeError):
+                    continue
     return default
 
 
 def get_str(r: Dict[str, Any], candidates: List[str], default: str = "") -> str:
+    # 1. Exact
     for c in candidates:
         if c in r and r[c] not in (None, "", "null", "NULL", "none", "None", "n/a", "N/A"):
             val = str(r[c]).strip()
-            if val:
+            if val and val.lower() not in ("null", "none", "nan", "undefined"):
+                return val
+    # 2. Lowercase
+    r_lower = {k.lower(): k for k in r.keys()}
+    for c in candidates:
+        if c.lower() in r_lower:
+            orig = r_lower[c.lower()]
+            val = str(r[orig]).strip()
+            if val and val.lower() not in ("null", "none", "nan", "undefined"):
+                return val
+    # 3. Normalized
+    r_norm = {normalize_key(k): k for k in r.keys()}
+    for c in candidates:
+        nc = normalize_key(c)
+        if nc in r_norm:
+            orig = r_norm[nc]
+            val = str(r[orig]).strip()
+            if val and val.lower() not in ("null", "none", "nan", "undefined"):
                 return val
     return default
 
@@ -231,10 +310,11 @@ class AnalysisStage:
         # Kênh bán hàng (Channels)
         channels_map = defaultdict(lambda: {"revenue": 0.0, "profit": 0.0, "orders": 0, "discounts": 0.0})
         for r in cleaned_records:
-            ch = get_str(r, ["SalesChannel", "Sales_Channel", "Channel", "KenhBan", "Kenh"], "Chưa phân loại")
-            channels_map[ch]["revenue"] += get_val(r, ["NetRevenue", "NetSales", "NETSALES", "DoanhThuThuan", "Revenue_VND"], 0.0)
-            channels_map[ch]["profit"] += get_val(r, ["GrossProfit", "GROSSPROFIT", "Gross_Profit", "LoiNhuanGop", "Profit_VND"], 0.0)
-            channels_map[ch]["discounts"] += get_val(r, ["DiscountAmount", "DISCOUNT_AMOUNT", "ChietKhau"], 0.0)
+            raw_ch = get_str(r, ["SalesChannel", "Sales_Channel", "Channel", "KenhBan", "Kenh"], "Khác")
+            ch = normalize_channel(raw_ch)
+            channels_map[ch]["revenue"] += get_val(r, ["NetRevenue", "NetSales", "NETSALES", "Net_Sales", "Net_Revenue", "DoanhThuThuan", "Revenue_VND", "Revenue"], 0.0)
+            channels_map[ch]["profit"] += get_val(r, ["GrossProfit", "GROSSPROFIT", "Gross_Profit", "LoiNhuanGop", "Profit_VND", "Profit"], 0.0)
+            channels_map[ch]["discounts"] += get_val(r, ["DiscountAmount", "DISCOUNT_AMOUNT", "Discount_Amount", "ChietKhau"], 0.0)
             channels_map[ch]["orders"] += 1
 
         channels_comparison = []

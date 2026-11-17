@@ -31,18 +31,70 @@ from typing import Dict, Any, List, Optional, Tuple
 WORKSPACE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def normalize_column_name(c: str) -> str:
+    cleaned = re.sub(r'[^a-z0-9]', '', str(c).lower())
+    cleaned = re.sub(r'(vnd|dong|usd|vietnamdong)$', '', cleaned)
+    return cleaned
+
+
+def normalize_channel(raw_ch: Any) -> str:
+    if not raw_ch:
+        return "Khác"
+    import unicodedata
+    s = str(raw_ch).strip()
+    if not s or s.lower() in ("null", "none", "nan", "undefined"):
+        return "Khác"
+    unacc = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode('utf-8').lower().strip()
+    if "shopee" in unacc:
+        return "Shopee"
+    if "lazada" in unacc:
+        return "Lazada"
+    if "tiktok" in unacc:
+        return "TikTok Shop"
+    if "web" in unacc:
+        return "Website"
+    if any(x in unacc for x in ["cua hang", "store", "showroom", "truc tiep"]):
+        return "Cửa hàng trực tiếp"
+    if any(x in unacc for x in ["san", "thuong mai", "tmdt", "marketplace", "ecommerce"]):
+        return "Sàn thương mại điện tử"
+    if any(x in unacc for x in ["dien thoai", "tu van", "telesale", "hotline", "call", "phone"]):
+        return "Tư vấn điện thoại"
+    if any(x in unacc for x in ["dai ly", "b2b", "si"]):
+        return "Đại lý & B2B"
+    if any(x in unacc for x in ["mang xa hoi", "facebook", "zalo", "social"]):
+        return "Mạng xã hội"
+    return s.capitalize()
+
+
 def find_column(fieldnames: List[str], candidates: List[str]) -> Optional[str]:
     """
     Tìm tên cột thực tế trong fieldnames dựa trên danh sách candidates
-    (không phân biệt hoa thường, bỏ ký tự đặc biệt, khoảng trắng, gạch dưới).
+    (không phân biệt hoa thường, bỏ ký tự đặc biệt, khoảng trắng, gạch dưới, hậu tố tiền tệ VND/USD/DONG).
     """
     if not fieldnames:
         return None
-    norm_map = {re.sub(r'[^a-z0-9]', '', c.lower()): c for c in fieldnames}
+    # 1. Exact match
     for cand in candidates:
-        norm_cand = re.sub(r'[^a-z0-9]', '', cand.lower())
+        if cand in fieldnames:
+            return cand
+    # 2. Lowercase match
+    lower_map = {c.lower(): c for c in fieldnames}
+    for cand in candidates:
+        if cand.lower() in lower_map:
+            return lower_map[cand.lower()]
+    # 3. Normalized match
+    norm_map = {normalize_column_name(c): c for c in fieldnames}
+    for cand in candidates:
+        norm_cand = normalize_column_name(cand)
         if norm_cand in norm_map:
             return norm_map[norm_cand]
+    # 4. Partial match
+    for cand in candidates:
+        norm_cand = normalize_column_name(cand)
+        if len(norm_cand) >= 4:
+            for k, orig in norm_map.items():
+                if k.startswith(norm_cand) or norm_cand.startswith(k):
+                    return orig
     return None
 
 
@@ -640,8 +692,9 @@ class CleaningStage:
 
             # Gán alias chuẩn hóa cho các chiều phân tích (Dimensions)
             if channel_col and channel_col in clean_row:
-                clean_row["Channel"] = clean_row[channel_col]
-                clean_row["SalesChannel"] = clean_row[channel_col]
+                norm_c_name = normalize_channel(clean_row[channel_col])
+                clean_row["Channel"] = norm_c_name
+                clean_row["SalesChannel"] = norm_c_name
             if cust_col and cust_col in clean_row:
                 clean_row["CustomerID"] = clean_row[cust_col]
             if prod_col and prod_col in clean_row:
