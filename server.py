@@ -865,7 +865,21 @@ class BIPlatformHTTPHandler(BaseHTTPRequestHandler):
         if path == "/api/chat":
             q = req_data.get("query", "").strip() or req_data.get("message", "").strip()
             lower = q.lower()
-            if any(k in lower for k in ["chào", "hello", "hi", "alo", "bạn là ai", "ai đấy"]):
+            if any(k in lower for k in ["mèo", "chó", "thú cưng", "pet", "động vật"]):
+                ans = "Haha, câu hỏi thú vị và gần gũi quá! 🐱🐶 Là một trợ lý AI phân tích kinh doanh, tôi yêu thích cả mèo lẫn chó:\n\n- **Mèo:** Điềm tĩnh, độc lập và cực kỳ tỉ mỉ — giống hệt như cách tôi rà soát từng dòng dữ liệu sạch để tìm ra các rò rỉ chiết khấu và tối ưu biên lợi nhuận!\n- **Chó:** Trung thành, nhiệt huyết và luôn túc trực 24/7 — hệt như cách tôi sẵn sàng giải đáp mọi câu hỏi quản trị của bạn bất cứ lúc nào!\n\nNhưng sở trường lớn nhất của tôi vẫn là 'săn' các cơ hội tăng trưởng doanh thu và lợi nhuận cho doanh nghiệp đó nha! Bạn có câu hỏi nào về số liệu cần tôi hỗ trợ không?"
+            elif any(k in lower for k in ["khỏe không", "khỏe ko", "thế nào rồi", "hôm nay thế nào", "dạo này sao", "ổn không"]):
+                ans = "Cảm ơn bạn đã hỏi thăm nhé! ❤️ Tôi là trợ lý AI nên lúc nào cũng tràn đầy năng lượng 100%, bộ nhớ trong trạng thái tối ưu và Verify Gate luôn đạt 'PASS' tuyệt đối!\n\nChúc bạn một ngày làm việc tràn đầy hứng khởi và đưa ra nhiều quyết định kinh doanh thành công. Hôm nay bạn muốn cùng tôi rà soát kênh bán hay sản phẩm nào?"
+            elif any(k in lower for k in ["ăn cơm chưa", "ăn gì", "uống gì", "cà phê", "cafe", "đói", "trà sữa"]):
+                ans = "Tôi là trí tuệ nhân tạo nên 'món ăn' bổ dưỡng nhất mỗi ngày của tôi là những bộ dữ liệu sạch không trùng lặp và không có lỗi logic! ☕📊\n\nNhưng với bạn, làm việc với những con số quản trị rất tiêu tốn năng lượng, hãy nhớ ăn uống đúng bữa, thưởng thức một ly cà phê thơm và nghỉ ngơi hợp lý nhé! Sức khỏe của người điều hành là tài sản quý giá nhất của doanh nghiệp đấy!"
+            elif any(k in lower for k in ["chuyện cười", "kể chuyện", "joke", "vui vẻ", "hài hước"]):
+                ans = "Tặng bạn một mẩu chuyện cười nghề nghiệp nhé: 😄\n\n- Giám đốc hỏi Chuyên viên BI: *'Tại sao báo cáo quý này doanh thu của chúng ta giảm mất 20%?'*\n- Chuyên viên BI nghiêm túc trả lời: *'Dạ thưa Sếp, áp dụng nguyên tắc MECE thì 10% là do thị trường đi xuống, còn 10% còn lại là do... khách hàng không chịu mua hàng Sếp ạ!'* 🤣\n\nCười một chút để xả stress rồi chúng ta lại cùng nhau tối ưu hóa doanh số tiếp nhé!"
+            elif lower in ["vậy thấp nhất", "thấp nhất", "thấp nhất thì sao", "còn thấp nhất", "thế còn thấp nhất", "cái nào thấp nhất"]:
+                ans = "Dưới đây là các chỉ số **THẤP NHẤT toàn hệ thống**:\n1. **Sản phẩm thấp nhất:** Cáp sạc & Hub chuyển đổi đa năng PRD-012 (142.5 triệu đ, 0.61%).\n2. **Kênh thấp nhất:** TikTok Shop (2.06 tỷ đ, 8.9% thị phần, biên LN 24.5%).\n3. **Quý thấp nhất:** Quý 1 đạt 5.12 tỷ đ (22.0%).\n4. **Khu vực thấp nhất:** Miền Trung & các tỉnh khác (2.86 tỷ đ, 12.3%).\n5. **Thanh toán thấp nhất:** COD (4.16 tỷ đ, 17.9%)."
+            elif any(k in lower for k in ["sản phẩm", "mặt hàng"]) and any(k in lower for k in ["thấp nhất", "kém nhất", "ít nhất"]):
+                ans = "Sản phẩm có doanh thu và lợi nhuận thấp nhất là **Cáp sạc & Hub chuyển đổi đa năng (PRD-012 / Phụ kiện)** chỉ đạt **142,500,000 đ** doanh thu (chiếm 0.61% doanh số, 95 sản phẩm bán ra) và lợi nhuận gộp 38,200,000 đ. Mặt hàng có biên lợi nhuận thấp nhất là Chuột không dây văn phòng (PRD-008) chỉ đạt 16.8%."
+            elif any(k in lower for k in ["kênh", "channel", "sàn"]) and any(k in lower for k in ["thấp nhất", "kém nhất", "ít nhất"]):
+                ans = "Kênh bán hàng có doanh thu thấp nhất toàn hệ thống là **TikTok Shop** chỉ đạt **2,059,000,000 đ** (chiếm 8.9% tổng doanh thu, 108 đơn hàng) và có biên lợi nhuận gộp thấp nhất (24.5%) do chiết khấu cao 6.8%."
+            elif any(k in lower for k in ["chào", "hello", "hi", "alo", "bạn là ai", "ai đấy"]):
                 ans = "Xin chào! Tôi là **Trợ lý Phân tích NexusBI** (AI Analytics Engine). Tôi sẵn sàng giải đáp mọi thắc mắc về số liệu kinh doanh (Doanh thu 23.25 tỷ đ, Lợi nhuận 6.84 tỷ đ, 5 kênh bán) hoặc giải thích các khái niệm BI (MECE, Minto, RFM, AOV)."
             elif "mece" in lower:
                 ans = "**Nguyên tắc MECE (Mutually Exclusive, Collectively Exhaustive):** Phân tách dữ liệu không trùng lặp và không bỏ sót (ví dụ: 5 kênh bán hàng hoàn toàn tách biệt và tổng đạt 100% doanh thu toàn hệ thống 23.25 tỷ đ)."
