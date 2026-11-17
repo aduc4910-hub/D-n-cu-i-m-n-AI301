@@ -105,6 +105,7 @@ let isReportOutlineOpen = false;
 let activeReportWriterTab = "preview"; // "preview" hoặc "editor"
 let currentGeneratedReportMarkdown = "";
 let isReportGenerating = false;
+let isReportWriterCollapsed = false; // Trạng thái thu gọn/mở rộng card Báo cáo Bước 4
 
 // Trạng thái Bước 4: WHAT-IF SIMULATION & EXECUTIVE DECISION SUPPORT
 let whatIfDiscountReductionPct = 3.0; // Mặc định giảm 3% chiết khấu
@@ -3060,6 +3061,9 @@ function updateWhatIfSimulationUI() {
 
 function applyWhatIfToReport() {
   isWhatIfAppliedToReport = true;
+  if (isReportWriterCollapsed) {
+    toggleReportWriterCollapse();
+  }
   currentGeneratedReportMarkdown = buildReportMarkdownClientSide(selectedReportType);
   const prevEl = document.getElementById('report-live-preview-box');
   if (prevEl) prevEl.innerHTML = renderMarkdownToHtml(currentGeneratedReportMarkdown);
@@ -3086,6 +3090,34 @@ function resetWhatIfSimulation() {
   if (sliderGrowth) sliderGrowth.value = 10.0;
 
   updateWhatIfSimulationUI();
+}
+
+function toggleReportWriterCollapse() {
+  isReportWriterCollapsed = !isReportWriterCollapsed;
+  const contentEl = document.getElementById('report-writer-collapsible-body');
+  const btnEl = document.getElementById('btn-toggle-report-collapse');
+  const summaryEl = document.getElementById('report-writer-collapsed-summary');
+  if (contentEl && btnEl) {
+    if (isReportWriterCollapsed) {
+      contentEl.classList.add('hidden');
+      if (summaryEl) summaryEl.classList.remove('hidden');
+      btnEl.innerHTML = `
+        <svg class="w-3.5 h-3.5 text-[#0D7A5F]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        <span>Mở rộng</span>
+      `;
+      btnEl.className = "px-3.5 py-2 rounded-xl bg-[#0D7A5F]/10 hover:bg-[#0D7A5F]/20 text-[#0D7A5F] border border-[#0D7A5F]/30 text-xs font-bold transition flex items-center gap-1.5 shadow-xs";
+    } else {
+      contentEl.classList.remove('hidden');
+      if (summaryEl) summaryEl.classList.add('hidden');
+      btnEl.innerHTML = `
+        <svg class="w-3.5 h-3.5 text-[#7A8F87]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+        <span>Thu gọn</span>
+      `;
+      btnEl.className = "px-3.5 py-2 rounded-xl bg-white hover:bg-[#F5EFE4] text-[#4A635A] border border-[#ECE4D8] text-xs font-bold transition flex items-center gap-1.5 shadow-xs";
+    }
+  } else {
+    renderCurrentWorkspace();
+  }
 }
 
 // ================= PROFESSIONAL REPORT WRITER SKILL (CLIENT-SIDE ENGINE) =================
@@ -4495,9 +4527,35 @@ function renderStage4_Reporting() {
                 <span>⚡ Biên soạn lại</span>
               `}
             </button>
+            <!-- Nút Thu gọn / Mở rộng Báo cáo -->
+            <button id="btn-toggle-report-collapse" onclick="toggleReportWriterCollapse()" class="px-3.5 py-2 rounded-xl ${isReportWriterCollapsed ? 'bg-[#0D7A5F]/10 hover:bg-[#0D7A5F]/20 text-[#0D7A5F] border border-[#0D7A5F]/30' : 'bg-white hover:bg-[#F5EFE4] text-[#4A635A] border border-[#ECE4D8]'} text-xs font-bold transition flex items-center gap-1.5 shadow-xs" title="${isReportWriterCollapsed ? 'Mở rộng toàn bộ văn bản và công cụ soạn thảo' : 'Thu gọn nội dung báo cáo để trang gọn gàng hơn'}">
+              ${isReportWriterCollapsed ? `
+                <svg class="w-3.5 h-3.5 text-[#0D7A5F]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <span>Mở rộng</span>
+              ` : `
+                <svg class="w-3.5 h-3.5 text-[#7A8F87]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                <span>Thu gọn</span>
+              `}
+            </button>
           </div>
         </div>
 
+        <!-- Compact Summary Strip when Collapsed -->
+        <div id="report-writer-collapsed-summary" class="${isReportWriterCollapsed ? '' : 'hidden '}bg-[#FAF8F5] p-3.5 rounded-2xl border border-[#ECE4D8] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+            <span class="font-bold text-[#0A261D]">Báo cáo đang ở trạng thái thu gọn</span>
+            <span class="text-[#7A8F87]">·</span>
+            <span class="text-[#4A635A]">${selectedReportType === 'EXECUTIVE' ? 'Báo cáo Quản trị Minto Pyramid (SCQA)' : 'Báo cáo Phân tích Kỹ thuật ISO 8000'} (${currentGeneratedReportMarkdown.length.toLocaleString()} ký tự)</span>
+          </div>
+          <button onclick="toggleReportWriterCollapse()" class="text-xs font-bold text-[#0D7A5F] hover:underline flex items-center gap-1 w-fit">
+            <span>Bấm để mở rộng toàn văn</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+        </div>
+
+        <!-- Collapsible Body Container -->
+        <div id="report-writer-collapsible-body" class="${isReportWriterCollapsed ? 'hidden ' : ''}space-y-5">
         <!-- Controls: Selector & Outline Button & Tab Switcher -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-[#F9F7F4] p-3.5 rounded-2xl border border-[#ECE4D8]">
           <div class="flex items-center gap-3 flex-wrap">
@@ -4582,6 +4640,7 @@ function renderStage4_Reporting() {
           </div>
         </div>
 
+        </div>
       </div>
 
       <!-- ================= 4. XUẤT TỆP & BÀN GIAO (3 DIRECT EXPORT CARDS) ================= -->
