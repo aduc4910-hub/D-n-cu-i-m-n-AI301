@@ -35,6 +35,7 @@ from workflow.stage_1_sheet import SheetStage
 from workflow.stage_2_cleaning import CleaningStage
 from workflow.stage_3_analysis import AnalysisStage
 from workflow.stage_4_reporting import ReportingStage
+from skills.skill_11_report_generation import ReportGenerationSkill
 
 class BIPlatformHTTPHandler(BaseHTTPRequestHandler):
     def address_string(self):
@@ -770,6 +771,65 @@ class BIPlatformHTTPHandler(BaseHTTPRequestHandler):
                 "workflow_completed": True,
                 "exports": manifest_step4.get("exports", {}),
                 "verify_passed": True
+            })
+            return
+
+        # 3k. API Report Writer Outline (Professional Report Writer Skill)
+        if path == "/api/report/outline":
+            rep_type = req_data.get("report_type", "EXECUTIVE")
+            s1 = req_data.get("stage1")
+            s2 = req_data.get("stage2")
+            s3 = req_data.get("stage3")
+
+            # Nếu client không truyền, đọc trực tiếp từ manifest lưu trên disk
+            if not s1:
+                p1 = os.path.join(WORKSPACE_ROOT, "data", "sheet_handover_manifest.json")
+                if os.path.exists(p1):
+                    with open(p1, "r", encoding="utf-8") as f: s1 = json.load(f)
+            if not s2:
+                p2 = os.path.join(WORKSPACE_ROOT, "data", "cleaning_handover_manifest.json")
+                if os.path.exists(p2):
+                    with open(p2, "r", encoding="utf-8") as f: s2 = json.load(f)
+            if not s3:
+                p3 = os.path.join(WORKSPACE_ROOT, "data", "analysis_handover_manifest.json")
+                if os.path.exists(p3):
+                    with open(p3, "r", encoding="utf-8") as f: s3 = json.load(f)
+
+            writer = ReportGenerationSkill()
+            outline = writer.get_report_outline(rep_type, s1, s2, s3)
+            self._send_json({
+                "status": "SUCCESS",
+                "report_type": rep_type,
+                "outline": outline
+            })
+            return
+
+        # 3l. API Report Writer Generate Report (Professional Report Writer Skill)
+        if path == "/api/report/generate":
+            rep_type = req_data.get("report_type", "EXECUTIVE")
+            s1 = req_data.get("stage1")
+            s2 = req_data.get("stage2")
+            s3 = req_data.get("stage3")
+
+            if not s1:
+                p1 = os.path.join(WORKSPACE_ROOT, "data", "sheet_handover_manifest.json")
+                if os.path.exists(p1):
+                    with open(p1, "r", encoding="utf-8") as f: s1 = json.load(f)
+            if not s2:
+                p2 = os.path.join(WORKSPACE_ROOT, "data", "cleaning_handover_manifest.json")
+                if os.path.exists(p2):
+                    with open(p2, "r", encoding="utf-8") as f: s2 = json.load(f)
+            if not s3:
+                p3 = os.path.join(WORKSPACE_ROOT, "data", "analysis_handover_manifest.json")
+                if os.path.exists(p3):
+                    with open(p3, "r", encoding="utf-8") as f: s3 = json.load(f)
+
+            writer = ReportGenerationSkill()
+            report_md = writer.generate_report(rep_type, s1, s2, s3)
+            self._send_json({
+                "status": "SUCCESS",
+                "report_type": rep_type,
+                "markdown": report_md
             })
             return
 
