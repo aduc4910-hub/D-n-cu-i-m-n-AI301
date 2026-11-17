@@ -29,6 +29,26 @@ from typing import Dict, Any, List, Optional
 WORKSPACE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def get_val(r: Dict[str, Any], candidates: List[str], default: float = 0.0) -> float:
+    for c in candidates:
+        if c in r and r[c] not in (None, "", "null", "NULL", "none", "None", "n/a", "N/A"):
+            try:
+                s = str(r[c]).replace(",", "").replace("$", "").replace("đ", "").replace("₫", "").strip()
+                return float(s)
+            except (ValueError, TypeError):
+                continue
+    return default
+
+
+def get_str(r: Dict[str, Any], candidates: List[str], default: str = "") -> str:
+    for c in candidates:
+        if c in r and r[c] not in (None, "", "null", "NULL", "none", "None", "n/a", "N/A"):
+            val = str(r[c]).strip()
+            if val:
+                return val
+    return default
+
+
 class AnalysisStage:
     def __init__(self):
         self.stage_name = "ANALYSIS"
@@ -85,15 +105,26 @@ class AnalysisStage:
         # 3. TÍNH TOÁN CÂY CHỈ SỐ KPI (KPI METRIC TREE)
         # -------------------------------------------------------------
         total_txns = len(cleaned_records)
-        unique_orders = len(set(r.get("OrderID", r.get("TransactionID")) for r in cleaned_records))
-        total_units = sum(int(float(r.get("Quantity", 1))) for r in cleaned_records)
+        unique_orders = len(set(
+            get_str(r, ["OrderID", "Order_ID", "TransactionID", "MaDonHang", "MaGiaoDich"]) or f"ORD-{idx}"
+            for idx, r in enumerate(cleaned_records)
+        ))
+        total_units = sum(int(get_val(r, ["Quantity", "QUANTITY", "SoLuong", "Units"], 1.0)) for r in cleaned_records)
 
-        gross_rev = sum(float(r.get("GrossSales", 0)) for r in cleaned_records)
-        discounts = sum(float(r.get("DiscountAmount", 0)) for r in cleaned_records)
-        net_rev = sum(float(r.get("NetSales", 0)) for r in cleaned_records)
-        total_cogs = sum(float(r.get("TotalCOGS", 0)) for r in cleaned_records)
-        gross_profit = sum(float(r.get("GrossProfit", 0)) for r in cleaned_records)
-        shipping_fee = sum(float(r.get("ShippingFee", 0)) for r in cleaned_records)
+        gross_rev = sum(get_val(r, ["GrossSales", "GROSSSALES", "Gross_Sales", "GrossRevenue", "DoanhThuGop", "TongTien"], 0.0) for r in cleaned_records)
+        discounts = sum(get_val(r, ["DiscountAmount", "DISCOUNT_AMOUNT", "Discount_Amount", "ChietKhau", "GiamGia", "Discounts"], 0.0) for r in cleaned_records)
+        net_rev = sum(get_val(r, ["NetRevenue", "NetSales", "NETSALES", "Net_Revenue", "Net_Sales", "DoanhThuThuan", "Revenue_VND", "DoanhThu"], 0.0) for r in cleaned_records)
+        total_cogs = sum(get_val(r, ["CostOfGoodsSold", "TotalCOGS", "TOTALCOGS", "Total_COGS", "COGS", "GiaVon", "Cost_VND"], 0.0) for r in cleaned_records)
+        gross_profit = sum(get_val(r, ["GrossProfit", "GROSSPROFIT", "Gross_Profit", "LoiNhuanGop", "LoiNhuan", "Profit_VND"], 0.0) for r in cleaned_records)
+        shipping_fee = sum(get_val(r, ["ShippingFee", "Shipping_Fee", "PhiVanChuyen"], 0.0) for r in cleaned_records)
+
+        # Fallback derivations nếu một số cột bị thiếu trong file nguồn
+        if gross_rev == 0 and total_units > 0:
+            gross_rev = sum(get_val(r, ["UnitPrice", "UNIT_PRICE", "DonGia"], 0.0) * get_val(r, ["Quantity", "QUANTITY"], 1.0) for r in cleaned_records)
+        if net_rev == 0 and gross_rev > 0:
+            net_rev = max(0.0, gross_rev - discounts)
+        if gross_profit == 0 and net_rev > 0:
+            gross_profit = net_rev - total_cogs
 
         gross_margin_pct = round((gross_profit / net_rev * 100.0), 2) if net_rev > 0 else 0.0
         discount_rate_pct = round((discounts / gross_rev * 100.0), 2) if gross_rev > 0 else 0.0
@@ -103,7 +134,7 @@ class AnalysisStage:
         # Phân loại trạng thái đơn hàng (hỗ trợ cả tiếng Việt và tiếng Anh)
         status_counts = defaultdict(int)
         for r in cleaned_records:
-            st = (r.get("OrderStatus") or r.get("Order_Status") or "Hoàn thành").strip()
+            st = get_str(r, ["OrderStatus", "Order_Status", "TrangThai"], "Hoàn thành")
             status_counts[st] += 1
 
         returned_count = status_counts.get("Hoàn trả", 0) + status_counts.get("Returned", 0)
@@ -200,10 +231,10 @@ class AnalysisStage:
         # Kênh bán hàng (Channels)
         channels_map = defaultdict(lambda: {"revenue": 0.0, "profit": 0.0, "orders": 0, "discounts": 0.0})
         for r in cleaned_records:
-            ch = r.get("Channel", "Chưa phân loại")
-            channels_map[ch]["revenue"] += float(r.get("NetSales", 0))
-            channels_map[ch]["profit"] += float(r.get("GrossProfit", 0))
-            channels_map[ch]["discounts"] += float(r.get("DiscountAmount", 0))
+            ch = get_str(r, ["SalesChannel", "Sales_Channel", "Channel", "KenhBan", "Kenh"], "Chưa phân loại")
+            channels_map[ch]["revenue"] += get_val(r, ["NetRevenue", "NetSales", "NETSALES", "DoanhThuThuan", "Revenue_VND"], 0.0)
+            channels_map[ch]["profit"] += get_val(r, ["GrossProfit", "GROSSPROFIT", "Gross_Profit", "LoiNhuanGop", "Profit_VND"], 0.0)
+            channels_map[ch]["discounts"] += get_val(r, ["DiscountAmount", "DISCOUNT_AMOUNT", "ChietKhau"], 0.0)
             channels_map[ch]["orders"] += 1
 
         channels_comparison = []
@@ -228,42 +259,36 @@ class AnalysisStage:
             })
 
         # Top Sản phẩm (Products)
-        prods_map = defaultdict(lambda: {"revenue": 0.0, "profit": 0.0, "units": 0, "orders": 0})
+        prods_map = defaultdict(lambda: {"id": "", "name": "", "category": "", "revenue": 0.0, "profit": 0.0, "units": 0, "orders": 0})
         for r in cleaned_records:
-            p_id = r.get("ProductID", "UNKNOWN")
-            prods_map[p_id]["revenue"] += float(r.get("NetSales", 0))
-            prods_map[p_id]["profit"] += float(r.get("GrossProfit", 0))
-            prods_map[p_id]["units"] += int(float(r.get("Quantity", 1)))
-            prods_map[p_id]["orders"] += 1
+            p_id = get_str(r, ["ProductID", "Product_ID", "MaSanPham", "MaSP"], "UNKNOWN")
+            p_name = get_str(r, ["ProductName", "Product_Name", "TenSanPham", "ProductLine"], "")
+            if not p_name:
+                p_name = prod_names.get(p_id, f"Sản phẩm {p_id}")
+            p_cat = get_str(r, ["ProductCategory", "Product_Category", "Category", "DanhMuc", "NganhHang"], "Chung")
+            p_net = get_val(r, ["NetRevenue", "NetSales", "NETSALES", "DoanhThuThuan", "Revenue_VND"], 0.0)
+            p_prof = get_val(r, ["GrossProfit", "GROSSPROFIT", "Gross_Profit", "LoiNhuanGop", "Profit_VND"], 0.0)
+            p_units = int(get_val(r, ["Quantity", "QUANTITY", "SoLuong"], 1.0))
 
-        # Tên sản phẩm ánh xạ
-        prod_names = {
-            "PRD-101": "Laptop Gaming Asus ROG Strix G16",
-            "PRD-102": "MacBook Air M2 13.6 inch 256GB",
-            "PRD-103": "Dell XPS 13 9315 Core i7",
-            "PRD-104": "Lenovo ThinkPad E14 Gen 5",
-            "PRD-105": "PC Workstation Creator Pro i9",
-            "PRD-201": "Samsung Galaxy S24 Ultra 512GB",
-            "PRD-202": "iPhone 15 Pro Max 256GB Natural",
-            "PRD-203": "iPad Pro M4 11 inch 128GB Wi-Fi",
-            "PRD-204": "Xiaomi 14 Ultra 5G 512GB",
-            "PRD-205": "Sony WH-1000XM5 Noise Canceling",
-            "PRD-301": "Màn hình Dell UltraSharp 27 4K",
-            "PRD-302": "Bàn phím cơ Filco Majestouch 3",
-            "PRD-303": "Chuột không dây Logitech MX Master 3S",
-            "PRD-304": "Loa Bluetooth Marshall Stanmore III",
-            "PRD-305": "Ổ cứng SSD di động SanDisk Extreme 1TB"
-        }
+            p_key = p_name or p_id
+            prods_map[p_key]["id"] = p_id
+            prods_map[p_key]["name"] = p_name
+            prods_map[p_key]["category"] = p_cat
+            prods_map[p_key]["revenue"] += p_net
+            prods_map[p_key]["profit"] += p_prof
+            prods_map[p_key]["units"] += p_units
+            prods_map[p_key]["orders"] += 1
 
         top_products = []
-        for p_id, v in sorted(prods_map.items(), key=lambda x: x[1]["profit"], reverse=True)[:8]:
+        for p_key, v in sorted(prods_map.items(), key=lambda x: x[1]["profit"], reverse=True)[:8]:
             p_rev = v["revenue"]
             p_prof = v["profit"]
             p_units = v["units"]
             p_margin = round(p_prof / p_rev * 100, 2) if p_rev > 0 else 0.0
             top_products.append({
-                "product_id": p_id,
-                "product_name": prod_names.get(p_id, f"Sản phẩm {p_id}"),
+                "product_id": v["id"],
+                "product_name": v["name"],
+                "category": v["category"],
                 "revenue": p_rev,
                 "revenue_formatted": f"{p_rev:,.0f} đ",
                 "profit": p_prof,
@@ -275,8 +300,8 @@ class AnalysisStage:
         # Phương thức thanh toán (Payment Methods)
         pay_map = defaultdict(lambda: {"revenue": 0.0, "orders": 0})
         for r in cleaned_records:
-            pm = r.get("PaymentMethod", "Tiền mặt")
-            pay_map[pm]["revenue"] += float(r.get("NetSales", 0))
+            pm = get_str(r, ["PaymentMethod", "Payment_Method", "ThanhToan"], "Tiền mặt")
+            pay_map[pm]["revenue"] += get_val(r, ["NetRevenue", "NetSales", "NETSALES", "DoanhThuThuan", "Revenue_VND"], 0.0)
             pay_map[pm]["orders"] += 1
 
         payment_comparison = []
@@ -292,9 +317,9 @@ class AnalysisStage:
         # Khu vực địa lý (Regions)
         reg_map = defaultdict(lambda: {"revenue": 0.0, "profit": 0.0, "orders": 0})
         for r in cleaned_records:
-            rg = (r.get("Region") or "Chưa phân loại").strip().title()
-            reg_map[rg]["revenue"] += float(r.get("NetSales") or r.get("NETSALES") or 0)
-            reg_map[rg]["profit"] += float(r.get("GrossProfit") or r.get("GROSSPROFIT") or 0)
+            rg = get_str(r, ["Region", "KhuVuc", "City", "ThanhPho"], "Chưa phân loại").title()
+            reg_map[rg]["revenue"] += get_val(r, ["NetRevenue", "NetSales", "NETSALES", "DoanhThuThuan", "Revenue_VND"], 0.0)
+            reg_map[rg]["profit"] += get_val(r, ["GrossProfit", "GROSSPROFIT", "Gross_Profit"], 0.0)
             reg_map[rg]["orders"] += 1
 
         regions_comparison = []
@@ -315,9 +340,9 @@ class AnalysisStage:
         # Danh mục ngành hàng (Categories)
         cat_map = defaultdict(lambda: {"revenue": 0.0, "profit": 0.0, "orders": 0})
         for r in cleaned_records:
-            cat = (r.get("Product_Category") or r.get("ProductCategory") or "Khác").strip()
-            cat_map[cat]["revenue"] += float(r.get("NetSales") or r.get("NETSALES") or 0)
-            cat_map[cat]["profit"] += float(r.get("GrossProfit") or r.get("GROSSPROFIT") or 0)
+            cat = get_str(r, ["ProductCategory", "Product_Category", "Category", "DanhMuc", "NganhHang"], "Khác")
+            cat_map[cat]["revenue"] += get_val(r, ["NetRevenue", "NetSales", "NETSALES", "DoanhThuThuan", "Revenue_VND"], 0.0)
+            cat_map[cat]["profit"] += get_val(r, ["GrossProfit", "GROSSPROFIT", "Gross_Profit"], 0.0)
             cat_map[cat]["orders"] += 1
 
         categories_comparison = []
@@ -337,6 +362,15 @@ class AnalysisStage:
 
         # C. TREND ANALYSIS (Phân tích xu hướng 12 Tháng & 4 Quý)
         monthly_map = defaultdict(lambda: {"revenue": 0.0, "profit": 0.0, "orders": set(), "discounts": 0.0})
+        for r in cleaned_records:
+            ym = get_str(r, ["YearMonth"])
+            if not ym or len(ym) < 7:
+                od = get_str(r, ["OrderDate", "Order_Date", "Date"])
+                ym = od[:7] if len(od) >= 7 else "2025-01"
+            monthly_map[ym]["revenue"] += get_val(r, ["NetRevenue", "NetSales", "NETSALES", "DoanhThuThuan", "Revenue_VND"], 0.0)
+            monthly_map[ym]["profit"] += get_val(r, ["GrossProfit", "GROSSPROFIT", "Gross_Profit"], 0.0)
+            monthly_map[ym]["discounts"] += get_val(r, ["DiscountAmount", "DISCOUNT_AMOUNT", "ChietKhau"], 0.0)
+            monthly_map[ym]["orders"].add(get_str(r, ["OrderID", "Order_ID", "TransactionID"]) or "ORD")
         for r in cleaned_records:
             ym = r.get("YearMonth", "2025-01")
             monthly_map[ym]["revenue"] += float(r.get("NetSales", 0))
@@ -472,10 +506,14 @@ class AnalysisStage:
         # 5. TRẢ LỜI CÂU HỎI KINH DOANH (QUESTION ANSWERING ENGINE)
         # -------------------------------------------------------------
         # Chuẩn bị thông tin sản phẩm và kênh thấp nhất
-        prods_by_rev = sorted(prods_map.items(), key=lambda x: x[1]["revenue"])
-        low_p_id, low_p_val = prods_by_rev[0] if prods_by_rev else ("PRD-012", {"revenue": 142500000, "profit": 38200000, "units": 95})
-        low_p_name = prod_names.get(low_p_id, "Cáp sạc & Hub chuyển đổi đa năng PRD-012")
-        low_ch = channels_comparison[-1] if channels_comparison else {"channel": "TikTok Shop", "revenue_formatted": "2,059,000,000 đ", "market_share_pct": 8.9, "margin_pct": 24.5, "orders_count": 108}
+        prods_by_rev = sorted(prods_map.values(), key=lambda x: x["revenue"])
+        if prods_by_rev:
+            low_p_val = prods_by_rev[0]
+            low_p_name = low_p_val.get("name") or low_p_val.get("id") or "Sản phẩm quy mô nhỏ"
+        else:
+            low_p_val = {"revenue": 0.0, "profit": 0.0, "units": 0}
+            low_p_name = "Sản phẩm quy mô nhỏ"
+        low_ch = channels_comparison[-1] if channels_comparison else {"channel": "Kênh khác", "revenue_formatted": "0 đ", "market_share_pct": 0.0, "margin_pct": 0.0, "orders_count": 0}
 
         answered_questions = []
         for idx, q_text in enumerate(questions):
@@ -889,41 +927,51 @@ class AnalysisStage:
         # -------------------------------------------------------------
         top_ch0 = channels_comparison[0] if len(channels_comparison) > 0 else {"market_share_pct": 50.0, "revenue_formatted": "0 đ", "channel": "Kênh chính"}
         top_ch1 = channels_comparison[1] if len(channels_comparison) > 1 else {"market_share_pct": 0.0, "revenue_formatted": "0 đ", "channel": "Kênh phụ"}
+        top_prod0 = top_products[0] if top_products else {
+            "product_id": "HERO",
+            "product_name": "Sản phẩm chủ lực",
+            "profit": 0,
+            "profit_formatted": "0 đ",
+            "revenue": 0,
+            "revenue_formatted": "0 đ",
+            "units_sold": 0,
+            "margin_pct": 0.0
+        }
         insights = [
             {
                 "id": "INSIGHT_01",
-                "title": "Kênh Online Web & Sàn TMĐT dẫn đầu độ phủ, nhưng Chuỗi bán lẻ trực tiếp giữ biên lợi nhuận cao nhất",
+                "title": f"Kênh {top_ch0['channel']} dẫn đầu tăng trưởng doanh thu với {top_ch0['market_share_pct']}% thị phần toàn hệ thống",
                 "urgency": "HIGH",
                 "chain": {
                     "Observation": f"{top_ch0['channel']} và {top_ch1['channel']} chiếm tổng cộng {round(top_ch0['market_share_pct'] + top_ch1['market_share_pct'], 1)}% tổng doanh thu thuần toàn công ty ({top_ch0['revenue_formatted']} và {top_ch1['revenue_formatted']}).",
-                    "Finding": "Mặc dù kênh Online và TMĐT có khối lượng đơn vượt trội (hơn 700 đơn hàng), biên lợi nhuận gộp tại chuỗi cửa hàng Retail Store HCM và Retail Store DN lại nhỉnh hơn 0.5% - 1.0% do không phải chịu áp lực mã giảm giá sàn.",
-                    "Hypothesis": "Khách hàng mua sắm tại cửa hàng trực tiếp thường có tâm lý trải nghiệm thực tế và mua kèm các thiết bị phụ kiện cao cấp (AOV đạt trên 23.5 triệu đ), ít đòi hỏi voucher giảm giá tiền mặt trực tiếp.",
-                    "Conclusion": "Sàn TMĐT đóng vai trò phễu mở rộng nhận diện thương hiệu và khối lượng đơn (Volume Driver), trong khi chuỗi cửa hàng bán lẻ là điểm tựa lợi nhuận bền vững (Profit Driver).",
-                    "Action": "Duy trì TMĐT để mở rộng thị phần, nhưng chuyển đổi chiến lược khuyến mãi từ giảm tiền mặt sang tặng gói bảo hành VIP, đồng thời thúc đẩy mô hình O2O (Click & Collect) kéo khách từ Online ra cửa hàng vật lý."
+                    "Finding": f"Kênh {top_ch0['channel']} có độ phủ và lượng đơn áp đảo, đóng vai trò đầu tàu mở rộng quy mô thị trường cho doanh nghiệp.",
+                    "Hypothesis": "Tận dụng tốt các chiến dịch xúc tiến bán hàng, trải nghiệm khách hàng thuận tiện và năng lực chuyển đổi đơn hàng cao.",
+                    "Conclusion": f"Kênh {top_ch0['channel']} là trụ cột giữ vững dòng tiền và độ phủ thương hiệu của doanh nghiệp trong giai đoạn hiện tại.",
+                    "Action": f"Tiếp tục củng cố vị thế trên kênh {top_ch0['channel']}, đồng thời tối ưu chi phí hoa hồng và chiết khấu để bảo toàn biên lợi nhuận ròng."
                 }
             },
             {
                 "id": "INSIGHT_02",
-                "title": "Sản phẩm PC Workstation Creator Pro i9 (PRD-105) là cỗ máy tạo lợi nhuận số 1 toàn hệ thống",
+                "title": f"Sản phẩm {top_prod0['product_name']} là cỗ máy tạo lợi nhuận số 1 toàn hệ thống",
                 "urgency": "CRITICAL",
                 "chain": {
-                    "Observation": f"PRD-105 chỉ bán ra 100 sản phẩm nhưng mang lại doanh thu thuần 3.91 tỷ VNĐ và lợi nhuận gộp 710,000,000 VNĐ, đứng đầu toàn bộ danh mục sản phẩm.",
-                    "Finding": "Tỷ suất lợi nhuận trên mỗi chiếc PC Workstation Creator Pro i9 đạt 7.1 triệu VNĐ/chiếc, cao gấp 3.5 lần so với các dòng laptop phổ thông.",
-                    "Hypothesis": "Phân khúc khách hàng làm đồ họa, kỹ sư AI và nhà sáng tạo nội dung có mức độ sẵn sàng chi trả cao và không nhạy cảm về giá, ưu tiên độ ổn định cấu hình hơn khuyến mại.",
-                    "Conclusion": "Sản phẩm công nghệ cấu hình cao cho giới chuyên nghiệp là trụ cột tạo dòng tiền chất lượng cao nhất của doanh nghiệp.",
-                    "Action": "Tập trung xây dựng các gói combo chuyên biệt (PC Workstation + Màn hình UltraSharp 4K + Bàn phím cơ cao cấp) để tăng giá trị trọn gói lên mức 60 - 80 triệu đ/đơn hàng."
+                    "Observation": f"{top_prod0['product_name']} tiêu thụ {top_prod0['units_sold']} sản phẩm, đóng góp {top_prod0['revenue_formatted']} doanh thu và {top_prod0['profit_formatted']} lợi nhuận gộp.",
+                    "Finding": f"Biên lợi nhuận gộp đạt {top_prod0['margin_pct']}%, vượt trội so với các nhóm mặt hàng phụ trợ khác.",
+                    "Hypothesis": "Phân khúc khách hàng mục tiêu có mức độ sẵn sàng chi trả cao và tín nhiệm chất lượng sản phẩm vượt trội.",
+                    "Conclusion": f"{top_prod0['product_name']} là sản phẩm Hero đóng góp dòng tiền lợi nhuận tuyệt đối lớn nhất cho doanh nghiệp.",
+                    "Action": f"Bảo đảm hạn mức tồn kho an toàn cho dòng {top_prod0['product_name']} và phát triển các gói bảo hành, dịch vụ giá trị gia tăng đi kèm."
                 }
             },
             {
                 "id": "INSIGHT_03",
-                "title": "Doanh thu bùng nổ mạnh trong Quý 4 (chiếm trên 32% doanh số năm) nhờ mùa lễ hội và Black Friday",
+                "title": "Cơ cấu phân bổ doanh thu và kiểm soát chiết khấu bảo vệ biên lợi nhuận",
                 "urgency": "MEDIUM",
                 "chain": {
-                    "Observation": "Doanh thu tháng 11 và tháng 12 đạt mức cao nhất trong năm (vượt 2.9 tỷ đ/tháng), tăng trưởng MoM đạt trên 18.5%.",
-                    "Finding": "Quý 4 đóng góp 8.6 tỷ VNĐ (chiếm 32.5% tổng doanh thu cả năm), tạo ra điểm rơi lợi nhuận lớn nhất cho năm tài chính 2025.",
-                    "Hypothesis": "Nhu cầu mua sắm nâng cấp máy tính cuối năm, ngân sách chi tiêu Tết và các đợt Siêu Sale 11.11, 12.12 tạo cú huých tiêu dùng cực lớn.",
-                    "Conclusion": "Tính mùa vụ của ngành bán lẻ công nghệ rất rõ rệt; Quý 4 quyết định hơn 40% chỉ tiêu lợi nhuận cả năm của công ty.",
-                    "Action": "Chủ động chuẩn bị nguồn hàng và thỏa thuận hạn mức tín dụng với nhà cung cấp trước tháng 9 hàng năm để đảm bảo không bị đứt gãy tồn kho các dòng máy bán chạy trong Quý 4."
+                    "Observation": f"Toàn hệ thống đạt doanh thu thuần {net_rev:,.0f} đ với tỷ lệ chiết khấu {discount_rate_pct}% trên tổng doanh thu gộp.",
+                    "Finding": f"Biên lợi nhuận gộp đạt {gross_margin_pct}%, giữ vững vị thế an toàn tài chính theo mô hình MECE.",
+                    "Hypothesis": "Chính sách giá bán và cơ cấu danh mục hàng hóa đáp ứng tốt nhu cầu thị trường mục tiêu.",
+                    "Conclusion": "Kiểm soát tốt tỷ lệ chiết khấu dưới 5% là điều kiện tiên quyết duy trì sức khỏe tài chính lành mạnh.",
+                    "Action": "Thường xuyên đối soát dữ liệu doanh thu và chi phí giá vốn theo từng quý để kịp thời phát hiện rò rỉ lợi nhuận."
                 }
             }
         ]

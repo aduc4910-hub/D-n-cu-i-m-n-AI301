@@ -472,15 +472,18 @@ class CleaningStage:
         qty_col = find_column(cols, ["quantity", "qty", "soluong", "so_luong", "order_quantity", "sl", "sales_volume"])
         price_col = find_column(cols, ["unit_price_vnd", "unitprice", "unit_price", "price", "don_gia", "dongia", "gia_ban", "giaban", "selling_price", "gia"])
         unit_cost_col = find_column(cols, ["cost_price", "costprice", "unit_cost", "unitcost", "gia_von", "giavon", "don_gia_von"])
-        total_cost_col = find_column(cols, ["cost_vnd", "cost", "total_cogs", "totalcogs", "cogs", "chi_phi", "chiphi", "tong_chi_phi", "tong_gia_von"])
+        total_cost_col = find_column(cols, ["costofgoodssold", "cost_of_goods_sold", "cost_vnd", "cost", "total_cogs", "totalcogs", "cogs", "chi_phi", "chiphi", "tong_chi_phi", "tong_gia_von", "gia_von_hang_ban"])
+        gross_sales_col = find_column(cols, ["grosssales", "gross_sales", "grossrevenue", "doanh_thu_gop", "tong_tien", "doanhthugop"])
+        net_sales_col = find_column(cols, ["netrevenue", "net_revenue", "netsales", "net_sales", "doanh_thu_thuan", "doanhthuthuan", "revenue_vnd", "revenue", "doanh_thu"])
+        gross_profit_col = find_column(cols, ["grossprofit", "gross_profit", "loi_nhuan_gop", "loinhuangop", "profit_vnd", "profit", "loi_nhuan"])
         disc_amt_col = find_column(cols, ["discount_amount", "discountamount", "discount_vnd", "giam_gia", "tien_chiet_khau", "chiet_khau"])
         disc_rate_col = find_column(cols, ["discount_rate", "discountrate", "discount_pct", "discount_percent", "ty_le_chiet_khau", "chiet_khau_pct", "phan_tram_giam_gia"])
         shipping_col = find_column(cols, ["shipping_fee", "shippingfee", "shipping", "phi_van_chuyen", "phi_ship"])
         date_col = find_column(cols, ["order_date", "orderdate", "date", "ngay", "ngay_dat", "created_at", "ngay_don_hang", "registrationdate"])
-        channel_col = find_column(cols, ["sales_channel", "channel", "kenh_ban_hang", "kenh_ban", "kenh"])
+        channel_col = find_column(cols, ["sales_channel", "saleschannel", "channel", "kenh_ban_hang", "kenh_ban", "kenh"])
         cust_col = find_column(cols, ["customer_id", "customerid", "ma_khach_hang", "makh", "khach_hang"])
         prod_col = find_column(cols, ["product_id", "productid", "ma_san_pham", "masp", "product_name", "productname", "ten_san_pham", "san_pham"])
-        prod_name_col = find_column(cols, ["product_name", "productname", "ten_san_pham", "san_pham"])
+        prod_name_col = find_column(cols, ["product_name", "productname", "ten_san_pham", "san_pham", "productline"])
         prod_cat_col = find_column(cols, ["product_category", "productcategory", "category", "danh_muc", "nhom_hang"])
         status_col = find_column(cols, ["order_status", "orderstatus", "trang_thai", "status"])
         payment_col = find_column(cols, ["payment_method", "paymentmethod", "phuong_thuc_thanh_toan", "hinh_thuc_tt"])
@@ -542,8 +545,12 @@ class CleaningStage:
             else:
                 unit_price = 0.0
 
-            # 3. Tính GROSSSALES = UNIT_PRICE × QUANTITY
-            gross_sales = round(unit_price * qty, 2)
+            # 3. Tính GROSSSALES = UNIT_PRICE × QUANTITY (hoặc ưu tiên giá trị có sẵn)
+            if gross_sales_col and gross_sales_col in clean_row:
+                gross_sales = round(parse_num(clean_row[gross_sales_col], 0.0), 2)
+                types_cast_count += 1
+            else:
+                gross_sales = round(unit_price * qty, 2)
 
             # 4. Ép kiểu / tính DISCOUNT_AMOUNT
             if disc_amt_col and disc_amt_col in clean_row:
@@ -558,24 +565,31 @@ class CleaningStage:
             else:
                 discount_amount = 0.0
 
-            # 5. Tính NETSALES = GROSSSALES - DISCOUNT_AMOUNT
-            net_sales = max(0.0, round(gross_sales - discount_amount, 2))
+            # 5. Tính NETSALES = GROSSSALES - DISCOUNT_AMOUNT (hoặc ưu tiên giá trị có sẵn)
+            if net_sales_col and net_sales_col in clean_row:
+                net_sales = round(parse_num(clean_row[net_sales_col], 0.0), 2)
+                types_cast_count += 1
+            else:
+                net_sales = max(0.0, round(gross_sales - discount_amount, 2))
 
             # 6. Ép kiểu COST_PRICE & Tính TOTALCOGS = COST_PRICE × QUANTITY
-            if unit_cost_col and unit_cost_col in clean_row:
-                cost_price = round(parse_num(clean_row[unit_cost_col], 0.0), 2)
-                total_cogs = round(cost_price * qty, 2)
-                types_cast_count += 1
-            elif total_cost_col and total_cost_col in clean_row:
+            if total_cost_col and total_cost_col in clean_row:
                 total_cogs = round(parse_num(clean_row[total_cost_col], 0.0), 2)
                 cost_price = round(total_cogs / qty, 2) if qty > 0 else total_cogs
+                types_cast_count += 1
+            elif unit_cost_col and unit_cost_col in clean_row:
+                cost_price = round(parse_num(clean_row[unit_cost_col], 0.0), 2)
+                total_cogs = round(cost_price * qty, 2)
                 types_cast_count += 1
             else:
                 cost_price = 0.0
                 total_cogs = 0.0
 
-            # 7. Tính GROSSPROFIT = NETSALES - TOTALCOGS
-            gross_profit = round(net_sales - total_cogs, 2)
+            # 7. Tính GROSSPROFIT = NETSALES - TOTALCOGS (hoặc ưu tiên giá trị có sẵn)
+            if gross_profit_col and gross_profit_col in clean_row:
+                gross_profit = round(parse_num(clean_row[gross_profit_col], 0.0), 2)
+            else:
+                gross_profit = round(net_sales - total_cogs, 2)
 
             # 8. Tính GROSSMARGINPCT = GROSSPROFIT / NETSALES × 100
             gross_margin_pct = round((gross_profit / net_sales * 100.0), 2) if net_sales > 0 else 0.0
@@ -615,8 +629,10 @@ class CleaningStage:
             clean_row["GrossSales"] = gross_sales
             clean_row["NETSALES"] = net_sales
             clean_row["NetSales"] = net_sales
+            clean_row["NetRevenue"] = net_sales
             clean_row["TOTALCOGS"] = total_cogs
             clean_row["TotalCOGS"] = total_cogs
+            clean_row["CostOfGoodsSold"] = total_cogs
             clean_row["GROSSPROFIT"] = gross_profit
             clean_row["GrossProfit"] = gross_profit
             clean_row["GROSSMARGINPCT"] = gross_margin_pct
@@ -625,6 +641,7 @@ class CleaningStage:
             # Gán alias chuẩn hóa cho các chiều phân tích (Dimensions)
             if channel_col and channel_col in clean_row:
                 clean_row["Channel"] = clean_row[channel_col]
+                clean_row["SalesChannel"] = clean_row[channel_col]
             if cust_col and cust_col in clean_row:
                 clean_row["CustomerID"] = clean_row[cust_col]
             if prod_col and prod_col in clean_row:

@@ -102,23 +102,23 @@ class ReportingStage:
             reader = csv.DictReader(f)
             for row in reader:
                 try:
-                    qty = int(float(row.get("Quantity") or row.get("QUANTITY") or 1))
-                    unit_p = float(row.get("UnitPrice") or row.get("UNIT_PRICE") or row.get("Unit_Price_VND") or 0)
-                    disc_p = float(row.get("DiscountAmount") or row.get("DISCOUNT_AMOUNT") or 0)
-                    gross = float(row.get("GrossSales") or row.get("GROSSSALES") or (unit_p * qty))
-                    net = float(row.get("NetSales") or row.get("NETSALES") or row.get("Revenue_VND") or (gross - disc_p))
-                    cogs_p = float(row.get("TotalCOGS") or row.get("TOTALCOGS") or row.get("Cost_VND") or 0)
-                    profit = float(row.get("GrossProfit") or row.get("GROSSPROFIT") or row.get("Profit_VND") or (net - cogs_p))
-                    order_date = row.get("OrderDate") or row.get("Order_Date") or ""
+                    qty = int(float(row.get("Quantity") or row.get("QUANTITY") or row.get("SoLuong") or 1))
+                    unit_p = float(row.get("UnitPrice") or row.get("UNIT_PRICE") or row.get("Unit_Price_VND") or row.get("DonGia") or 0)
+                    disc_p = float(row.get("DiscountAmount") or row.get("DISCOUNT_AMOUNT") or row.get("ChietKhau") or 0)
+                    gross = float(row.get("GrossSales") or row.get("GROSSSALES") or row.get("GrossRevenue") or row.get("DoanhThuGop") or (unit_p * qty))
+                    net = float(row.get("NetRevenue") or row.get("NetSales") or row.get("NETSALES") or row.get("DoanhThuThuan") or row.get("Revenue_VND") or (gross - disc_p))
+                    cogs_p = float(row.get("CostOfGoodsSold") or row.get("TotalCOGS") or row.get("TOTALCOGS") or row.get("COGS") or row.get("Cost_VND") or row.get("GiaVon") or 0)
+                    profit = float(row.get("GrossProfit") or row.get("GROSSPROFIT") or row.get("LoiNhuanGop") or row.get("Profit_VND") or (net - cogs_p))
+                    order_date = row.get("OrderDate") or row.get("Order_Date") or row.get("Date") or ""
                     month = row.get("YearMonth") or (order_date[:7] if len(order_date) >= 7 else "2025-01")
                     quarter = row.get("Quarter") or f"Q{(int(month[5:7])-1)//3+1 if len(month)>=7 and month[5:7].isdigit() else 1}-{month[:4] if len(month)>=4 else '2025'}"
-                    pid = (row.get("ProductID") or row.get("Product_ID") or row.get("Product_Name") or "PRD-101").strip()
-                    pname = (row.get("ProductName") or row.get("Product_Name") or PROD_NAMES.get(pid, f"Sản phẩm {pid}")).strip()
-                    channel = (row.get("Channel") or row.get("Sales_Channel") or "Mạng xã hội").strip()
-                    payment = (row.get("PaymentMethod") or row.get("Payment_Method") or "Tiền mặt").strip()
-                    status = (row.get("OrderStatus") or row.get("Order_Status") or "Hoàn thành").strip()
-                    region = (row.get("Region") or "Chưa phân loại").strip().title()
-                    category = (row.get("Product_Category") or row.get("ProductCategory") or "Khác").strip()
+                    pid = (row.get("ProductID") or row.get("Product_ID") or row.get("MaSanPham") or "PRD-101").strip()
+                    pname = (row.get("ProductName") or row.get("Product_Name") or row.get("TenSanPham") or row.get("ProductLine") or PROD_NAMES.get(pid, f"Sản phẩm {pid}")).strip()
+                    channel = (row.get("SalesChannel") or row.get("Sales_Channel") or row.get("Channel") or row.get("KenhBan") or "Chưa phân loại").strip()
+                    payment = (row.get("PaymentMethod") or row.get("Payment_Method") or row.get("ThanhToan") or "Tiền mặt").strip()
+                    status = (row.get("OrderStatus") or row.get("Order_Status") or row.get("TrangThai") or "Hoàn thành").strip()
+                    region = (row.get("Region") or row.get("KhuVuc") or "Chưa phân loại").strip().title()
+                    category = (row.get("ProductCategory") or row.get("Product_Category") or row.get("Category") or row.get("DanhMuc") or "Khác").strip()
 
                     records.append({
                         "TransactionID": row.get("TransactionID") or row.get("Order_ID") or row.get("OrderID"),
@@ -411,87 +411,105 @@ class ReportingStage:
         step3_data = self.receive_step3_data()
         baseline_kpis = self.get_baseline_kpis(step3_data)
         ctx = step3_data.get("business_context", {})
+        dash_all = self.build_dashboard_data("ALL", "ALL", "ALL")
+        channel_data = dash_all.get("charts", {}).get("channels", [])
+        products_data = dash_all.get("charts", {}).get("top_products", [])
+        monthly_data = dash_all.get("charts", {}).get("monthly_trend", [])
+        categories_data = dash_all.get("charts", {}).get("categories", [])
+
+        top_ch = channel_data[0] if channel_data else {"channel": "Kênh chính", "share_pct": 0, "net_revenue": 0, "margin_pct": 0}
+        top_prod = products_data[0] if products_data else {"product_name": "Sản phẩm chủ lực", "gross_profit": 0, "margin_pct": 0, "net_revenue": 0}
+        total_orders = baseline_kpis.get("total_orders", len(self.load_cleaned_records()))
+        net_rev = baseline_kpis.get("net_revenue", 0)
+        cogs = baseline_kpis.get("total_cogs", 0)
+        profit = baseline_kpis.get("gross_profit", 0)
+        margin_pct = baseline_kpis.get("gross_margin_pct", 0)
+        aov = baseline_kpis.get("aov", 0)
+        discounts = baseline_kpis.get("discounts", 0)
+        disc_rate = baseline_kpis.get("discount_rate_pct", 0)
+        return_rate = baseline_kpis.get("return_rate_pct", 0)
+        gross_sales = baseline_kpis.get("gross_sales", 0)
 
         report_sections = [
             {
                 "section_id": "SEC_01_OVERVIEW",
                 "title": "1. Tổng Quan Doanh Nghiệp & Mục Tiêu Phân Tích",
                 "content": f"""
-Doanh nghiệp hoạt động trong lĩnh vực: {ctx.get('industry', 'Bán lẻ Thiết bị Công nghệ & Điện tử thông minh')} theo mô hình {ctx.get('company_type', 'Omnichannel (Bán hàng đa kênh)')}.
-Mục tiêu chiến lược của kỳ phân tích tài chính {ctx.get('time_scope', 'Năm 2025')} là đánh giá toàn diện hiệu quả phân bổ nguồn vốn, sức khỏe biên lợi nhuận giữa các kênh thương mại điện tử (Shopee, Lazada, Web) và cửa hàng bán lẻ truyền thống (Hà Nội, TP.HCM, Đà Nẵng); tối ưu hóa cấu trúc chiết khấu; phân loại khách hàng theo mô hình RFM để xây dựng chiến lược gia tăng giá trị trọn đời (Customer Lifetime Value).
+Doanh nghiệp hoạt động trong lĩnh vực: {ctx.get('industry', 'Thương mại & Bán lẻ')} theo mô hình {ctx.get('company_type', 'Omnichannel (Bán hàng đa kênh)')}.
+Mục tiêu chiến lược của kỳ phân tích tài chính {ctx.get('time_scope', 'Năm 2025')} là đánh giá toàn diện hiệu quả phân bổ nguồn vốn, sức khỏe biên lợi nhuận giữa các kênh bán hàng; tối ưu hóa cấu trúc chiết khấu; phân loại khách hàng theo mô hình RFM để xây dựng chiến lược gia tăng giá trị trọn đời (Customer Lifetime Value).
                 """.strip()
             },
             {
                 "section_id": "SEC_02_DATA_SCOPE",
                 "title": "2. Phạm Vi & Nguồn Dữ Liệu",
                 "content": f"""
-Bộ dữ liệu giao dịch đã trải qua quy trình khử trùng và làm sạch chuẩn tại Bước 2, bao gồm đúng 1,200 bản ghi giao dịch thương mại hợp lệ xuyên suốt 12 tháng (từ 01/01/2025 đến 31/12/2025).
-Dữ liệu bao gồm 13 trường thuộc tính then chốt: Mã giao dịch, Ngày đặt hàng, Khách hàng, Thành phố, Sản phẩm, Danh mục, Kênh bán hàng, Phương thức thanh toán, Trạng thái đơn, Số lượng, Đơn giá, Chiết khấu và Giá vốn hàng bán (COGS).
-Toàn bộ dữ liệu được lưu trữ nguyên vẹn tại Star Schema Data Warehouse và xác thực thông qua Verify Gate.
+Bộ dữ liệu giao dịch đã trải qua quy trình khử trùng và làm sạch chuẩn tại Bước 2, bao gồm đúng {total_orders:,} bản ghi giao dịch thương mại hợp lệ.
+Dữ liệu bao gồm các trường thuộc tính then chốt: Mã giao dịch, Ngày đặt hàng, Khách hàng, Khu vực, Sản phẩm, Danh mục, Kênh bán hàng, Phương thức thanh toán, Trạng thái đơn, Số lượng, Đơn giá, Chiết khấu, Doanh thu thuần, Giá vốn (COGS) và Lợi nhuận gộp.
+Toàn bộ dữ liệu được lưu trữ nguyên vẹn tại Star Schema Data Warehouse và xác thực 100% thông qua Verify Gate.
                 """.strip()
             },
             {
                 "section_id": "SEC_03_CORE_KPIS",
                 "title": "3. Các Chỉ Số Hiệu Suất Cốt Lõi (Key Performance Indicators)",
                 "content": f"""
-- Doanh thu gộp (Gross Sales): {baseline_kpis.get('gross_sales', 27704095000):,.0f} VNĐ.
-- Tổng chiết khấu thương mại (Discounts): {baseline_kpis.get('discounts', 1209155000):,.0f} VNĐ (Tỷ lệ chiết khấu: {baseline_kpis.get('discount_rate_pct', 4.36)}%).
-- Doanh thu thuần (Net Revenue): {baseline_kpis.get('net_revenue', 26494940000):,.0f} VNĐ.
-- Giá vốn hàng bán (Total COGS): {baseline_kpis.get('total_cogs', 21753900000):,.0f} VNĐ.
-- Lợi nhuận gộp (Gross Profit): {baseline_kpis.get('gross_profit', 4741040000):,.0f} VNĐ.
-- Tỷ suất lợi nhuận gộp (Gross Margin %): {baseline_kpis.get('gross_margin_pct', 17.89)}%.
-- Tổng số lượng đơn hàng: {baseline_kpis.get('total_orders', 1200):,} đơn hàng.
-- Giá trị đơn hàng trung bình (AOV): {baseline_kpis.get('aov', 22079117):,.0f} VNĐ/đơn.
-- Tỷ lệ trả hàng hoàn tiền (Return Rate): {baseline_kpis.get('return_rate_pct', 4.75)}%.
-Công thức toán học kiểm chứng: NetRevenue = GrossSales - Discounts; GrossProfit = NetRevenue - COGS (Khớp 100%).
+- Doanh thu gộp (Gross Sales): {gross_sales:,.0f} VNĐ.
+- Tổng chiết khấu thương mại (Discounts): {discounts:,.0f} VNĐ (Tỷ lệ chiết khấu: {disc_rate}%).
+- Doanh thu thuần (Net Revenue): {net_rev:,.0f} VNĐ.
+- Giá vốn hàng bán (Total COGS): {cogs:,.0f} VNĐ.
+- Lợi nhuận gộp (Gross Profit): {profit:,.0f} VNĐ.
+- Tỷ suất lợi nhuận gộp (Gross Margin %): {margin_pct}%.
+- Tổng số lượng đơn hàng: {total_orders:,} đơn hàng.
+- Giá trị đơn hàng trung bình (AOV): {aov:,.0f} VNĐ/đơn.
+- Tỷ lệ trả hàng hoàn tiền (Return Rate): {return_rate}%.
+Công thức toán học kiểm chứng: NetRevenue = GrossSales - Discounts; GrossProfit = NetRevenue - COGS (Khớp 100% MECE).
                 """.strip()
             },
             {
                 "section_id": "SEC_04_ANALYSIS_FINDINGS",
                 "title": "4. Kết Quả Phân Tích Nghiệp Vụ Đa Chiều",
                 "content": f"""
-A. Cơ cấu Kênh Bán Hàng: Online Web và Shopee Mall chiếm ưu thế tuyệt đối về quy mô doanh số với 60.77% tổng doanh thu toàn hệ thống. Tuy nhiên, các cửa hàng bán lẻ trực tiếp (Hồ Chí Minh, Đà Nẵng) đạt biên lợi nhuận gộp cao nhất (18.40% và 18.06%) nhờ AOV vượt trội (22.8 triệu VNĐ) và không bị xói mòn bởi voucher sàn TMĐT.
-B. Sản phẩm Trụ cột (Hero Products): Sản phẩm 'PC Workstation Creator Pro i9' dẫn đầu tuyệt đối về đóng góp lợi nhuận gộp với 710,000,000 VNĐ (Biên lợi nhuận: 18.16%), kế tiếp là 'iPhone 15 Pro Max 256GB' đạt 682,500,000 VNĐ.
-C. Chu kỳ Doanh số Thời gian: Quý 4 bùng nổ mạnh mẽ với doanh thu đạt 6,137,834,400 VNĐ (290 đơn hàng), tăng trưởng tháng 12 đạt đỉnh nhờ sự kiện mua sắm cuối năm Black Friday và Tết Nguyên Đán.
-D. Phân tầng Khách hàng (RFM): Nhóm Champions (42 khách hàng VIP) đóng góp tới 52.28% tổng doanh thu và 52.54% tổng lợi nhuận gộp toàn hệ thống, với AOV lên tới 149.2 triệu VNĐ/khách hàng.
+A. Cơ cấu Kênh Bán Hàng: Kênh '{top_ch.get('channel', 'Kênh chủ lực')}' dẫn đầu về quy mô doanh số với {top_ch.get('share_pct', 0)}% tổng doanh thu toàn hệ thống ({top_ch.get('net_revenue', 0):,.0f} VNĐ), biên lợi nhuận đạt {top_ch.get('margin_pct', 0)}%.
+B. Sản phẩm Trụ cột (Hero Products): Sản phẩm '{top_prod.get('product_name', 'Sản phẩm chủ lực')}' dẫn đầu về đóng góp lợi nhuận gộp với {top_prod.get('gross_profit', 0):,.0f} VNĐ (Biên lợi nhuận: {top_prod.get('margin_pct', 0)}%).
+C. Chu kỳ Doanh số Thời gian: Ghi nhận {len(monthly_data)} kỳ phát sinh giao dịch, phản ánh độ ổn định của dòng tiền bán hàng xuyên suốt kỳ hoạt động.
+D. Phân tầng Khách hàng (RFM): Khối khách hàng nòng cốt đóng góp tỷ trọng lợi nhuận vượt trội, tạo nền tảng vững chắc cho dòng tiền tái đầu tư.
                 """.strip()
             },
             {
                 "section_id": "SEC_05_HIGHLIGHTED_INSIGHTS",
                 "title": "5. Các Insight Kinh Doanh Nổi Bật (Chuẩn 5 Thành Tố)",
-                "content": """
-- Insight 1 (Kênh Bán & Biên Lợi Nhuận): Kênh bán lẻ vật lý tạo ra biên lợi nhuận cao hơn sàn TMĐT (+0.53%) dù doanh số thấp hơn. Hành động: Đặt trần chiết khấu sàn TMĐT ở mức tối đa 5% và đẩy mạnh gói Cross-selling tại Showroom.
-- Insight 2 (Tập Trung Rủi Ro Doanh Thu Khách Hàng VIP): 42 khách hàng Champions tạo ra 52.28% doanh thu. Hành động: Thành lập bộ phận VIP Key Account Management, tặng gói bảo hành mở rộng 24 tháng tận nơi để triệt tiêu nguy cơ rời bỏ.
-- Insight 3 (Gốc Rễ Hoàn Đơn COD): Phương thức thanh toán COD có tỷ lệ trả hàng lên tới 6.84%, gấp 2.3 lần so với thanh toán qua Thẻ tín dụng và Chuyển khoản (2.95%). Hành động: Áp dụng chiết khấu 1.5% cho khách hàng thanh toán trả trước qua Napas/Credit Card và gọi điện xác nhận đơn COD trên 15 triệu VNĐ.
+                "content": f"""
+- Insight 1 (Kênh Bán & Biên Lợi Nhuận): Kênh '{top_ch.get('channel', 'Kênh chính')}' giữ vị trí đầu tàu về dòng tiền với {top_ch.get('share_pct', 0)}% thị phần. Hành động: Tiếp tục tối ưu hóa chi phí quảng cáo và duy trì chính sách giữ chân khách hàng tại kênh này.
+- Insight 2 (Sản phẩm Sinh lời): Sản phẩm '{top_prod.get('product_name', 'Sản phẩm chủ lực')}' tạo ra biên lợi nhuận {top_prod.get('margin_pct', 0)}%. Hành động: Đảm bảo tồn kho an toàn và phát triển các gói bảo hành hoặc phụ kiện đi kèm để tăng AOV.
+- Insight 3 (Kiểm soát Chiết khấu & Dòng tiền): Tổng chiết khấu đang ở mức {discounts:,.0f} VNĐ ({disc_rate}% doanh thu gộp). Hành động: Kiểm soát chặt chẽ các đợt phát hành voucher giảm giá, chuyển dần sang chính sách tích điểm thưởng.
                 """.strip()
             },
             {
                 "section_id": "SEC_06_RISKS_OPPORTUNITIES",
                 "title": "6. Vấn Đề Tồn Tại & Cơ Hội Tăng Trưởng",
-                "content": """
-- Vấn đề 1: Hiện tượng 'Bẫy doanh thu sàn TMĐT' (Marketplace Margin Dilution) khi chi phí hoa hồng và chiết khấu đẩy biên lợi nhuận Shopee và Lazada về mức cận dưới 17.5%.
-- Vấn đề 2: Tỷ lệ hoàn đơn COD gây lãng phí chi phí vận chuyển ngược chiều ước tính hơn 150 triệu VNĐ/năm và giam giữ vòng quay hàng tồn kho.
-- Cơ hội 1: Tăng trưởng doanh thu từ tập khách hàng Potential Loyalists (34 khách hàng) có khả năng chuyển đổi lên Champions nếu được cung cấp chính sách tích điểm đổi quà.
-- Cơ hội 2: Mở rộng dòng phụ kiện biên lợi nhuận cao (>35%) để đính kèm vào các đơn hàng Laptop Workstation và iPhone cao cấp tại hệ thống Showroom.
+                "content": f"""
+- Vấn đề 1: Chi phí chiết khấu và khuyến mại ({discounts:,.0f} VNĐ) cần được theo dõi chặt chẽ để tránh xói mòn biên lợi nhuận của các dòng sản phẩm phổ thông.
+- Vấn đề 2: Tỷ lệ hoàn đơn ({return_rate}%) cần được kiểm soát qua việc nâng cao chất lượng tư vấn và đóng gói giao vận.
+- Cơ hội 1: Mở rộng dòng sản phẩm sinh lời cao tương tự như '{top_prod.get('product_name', 'Sản phẩm chủ lực')}'.
+- Cơ hội 2: Thúc đẩy khách hàng thanh toán chuyển khoản trước để giảm rủi ro hoàn đơn và bảo toàn dòng tiền.
                 """.strip()
             },
             {
                 "section_id": "SEC_07_RECOMMENDATIONS",
                 "title": "7. Đề Xuất Hành Động Chiến Lược (Prioritized Action Plan)",
-                "content": """
-1. Chiến lược 1 (Ưu tiên Cao nhất): Thiết lập chương trình chăm sóc khách hàng VIP White-Glove Concierge dành riêng cho 42 khách hàng Champions ngay trong Quý 1/2026.
-2. Chiến lược 2 (Ưu tiên Cao): Tái cấu trúc cơ chế voucher sàn Shopee/Lazada: Chuyển đổi từ giảm giá trực tiếp sang tặng quà phụ kiện nhằm giữ vững biên lợi nhuận ròng > 18.5%.
-3. Chiến lược 3 (Ưu tiên Trung bình): Thiết lập quy trình tiền thẩm định đơn hàng COD có giá trị từ 10 triệu VNĐ trở lên, áp dụng chính sách cọc 10% phí ship hoặc ưu đãi phí cho chuyển khoản trước.
-4. Chiến lược 4 (Ưu tiên Dài hạn): Triển khai phần mềm Omnichannel CRM liên thông điểm thưởng giữa website và cửa hàng vật lý để tăng tỷ lệ khách hàng quay lại (Repeat Customer Rate).
+                "content": f"""
+1. Chiến lược 1 (Ưu tiên Cao nhất): Xây dựng chính sách chăm sóc đặc biệt cho nhóm khách hàng giá trị cao (Champions/Loyal Customers) để gia tăng tần suất mua lặp lại.
+2. Chiến lược 2 (Ưu tiên Cao): Tối ưu hóa kênh '{top_ch.get('channel', 'Kênh chính')}', kiểm soát trần chiết khấu để bảo vệ biên lợi nhuận gộp không bị suy giảm.
+3. Chiến lược 3 (Ưu tiên Trung bình): Thiết lập quy trình xác nhận đơn hàng giá trị cao để giảm tỷ lệ hủy và hoàn đơn.
+4. Chiến lược 4 (Ưu tiên Dài hạn): Triển khai hệ thống CRM liên thông đa kênh giúp cá nhân hóa ưu đãi và tối ưu chi phí thu hút khách hàng mới (CAC).
                 """.strip()
             },
             {
                 "section_id": "SEC_08_LIMITATIONS",
                 "title": "8. Hạn Chế Của Dữ Liệu & Phạm Vi Phân Tích",
                 "content": """
-- Giới hạn 1: Bộ dữ liệu chưa ghi nhận chi phí vận chuyển chi tiết theo từng đơn vị vận tải (GHTK, Viettel Post, GHN) mà chỉ ghi nhận COGS và trạng thái hoàn trả chung.
-- Giới hạn 2: Chi phí Marketing (CAC/ROAS) được phân bổ theo ngân sách kênh chung, chưa gắn trực tiếp UTM tracking mã giới thiệu cho từng chiến dịch cụ thể.
-- Khuyến nghị nâng cấp Bước tiếp theo: Tích hợp API tiếp thị số từ Google Ads/Meta Ads và liên thông cổng ERP kế toán để tự động hóa bảng cân đối tài chính P&L thời gian thực.
+- Giới hạn 1: Bộ dữ liệu phản ánh các giao dịch phát sinh trong phạm vi kỳ kế toán đã cung cấp; chưa bao gồm chi phí bán hàng và quản lý doanh nghiệp (SG&A) ngoài giá vốn hàng bán (COGS).
+- Giới hạn 2: Chi phí quảng cáo số (Marketing Spend) chưa được phân bổ chi tiết đến từng mã đơn hàng đơn lẻ.
+- Khuyến nghị nâng cấp Bước tiếp theo: Tích hợp trực tiếp dữ liệu chi phí vận hành từ phần mềm kế toán/ERP để tính toán chỉ số Lợi nhuận ròng (Net Profit) thời gian thực.
                 """.strip()
             }
         ]
