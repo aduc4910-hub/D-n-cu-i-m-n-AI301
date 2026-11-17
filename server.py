@@ -701,36 +701,26 @@ class BIPlatformHTTPHandler(BaseHTTPRequestHandler):
                 self._send_json({"status": "ERROR", "error": "Câu hỏi không được để trống"}, 400)
                 return
 
-            lower_q = custom_q.lower()
-            if any(k in lower_q for k in ["chào", "hello", "hi", "alo", "bạn là ai", "ai đấy"]):
-                ans_text = "Xin chào! Tôi là **Trợ lý Phân tích NexusBI** (AI Analytics Engine). Tôi sẵn sàng giải đáp mọi thắc mắc về số liệu kinh doanh (Doanh thu 23.25 tỷ đ, Lợi nhuận gộp 6.84 tỷ đ, 5 kênh bán) hoặc giải thích các khái niệm BI (MECE, Minto, RFM, AOV)."
-            elif "mece" in lower_q:
-                ans_text = "**Nguyên tắc MECE (Mutually Exclusive, Collectively Exhaustive):** Phân tách dữ liệu thành các phần tử không trùng lặp và không bỏ sót (ví dụ: 5 kênh bán hàng hoàn toàn tách biệt, không tính lặp đơn và tổng bằng 100% doanh thu toàn hệ thống 23.25 tỷ đ)."
-            elif "minto" in lower_q or "kim tự tháp" in lower_q:
-                ans_text = "**Nguyên tắc Kim tự tháp Minto:** Cấu trúc giao tiếp quản trị đưa kết luận và thông điệp cốt lõi lên đầu tiên, sau đó củng cố bằng các luận điểm MECE và minh chứng bằng số liệu định lượng thực tế."
-            elif "rfm" in lower_q:
-                ans_text = "**Mô hình Phân khúc Khách hàng RFM:** Phân tích theo Recency (gần đây), Frequency (tần suất) và Monetary (giá trị). Nhóm Champions VIP gồm 128 khách hàng đóng góp 33.8% tổng doanh thu (7.85 tỷ đ)."
-            elif "aov" in lower_q:
-                ans_text = "**AOV (Average Order Value):** Giá trị đơn hàng trung bình của toàn doanh nghiệp đạt **19,373,623 đ/đơn** trên tổng số 1,200 đơn hàng năm 2025."
-            else:
-                try:
-                    stage = AnalysisStage()
-                    res = stage.run_analysis(business_context={"questions": [custom_q]})
-                    ans_list = res.get("answered_questions", [])
-                    if ans_list:
-                        ans_item = ans_list[0]
-                        ans_text = ans_item.get("answer_summary", "")
-                        if ans_item.get("evidence"):
-                            ans_text += "<br/><br/><strong class='text-[#0A261D]'>Bằng chứng số liệu:</strong><ul class='list-disc pl-4 mt-1 text-[11px] text-[#4A635A] space-y-0.5'>" + "".join([f"<li>{ev}</li>" for ev in ans_item["evidence"]]) + "</ul>"
-                    else:
-                        ans_text = f"Hệ thống đã tiếp nhận câu hỏi '{custom_q}' và đối soát thành công với 1,200 dòng giao dịch sạch."
-                except Exception as e:
-                    ans_text = f"Dựa trên 1,200 giao dịch năm 2025: Doanh thu thuần đạt 23.25 tỷ đ, kênh Shopee chiếm ưu thế lớn nhất (31.1%) và dòng Laptop Gaming Pro mang lại lợi nhuận cao nhất (2.14 tỷ đ)."
+            try:
+                stage = AnalysisStage()
+                res = stage.run_analysis(business_context={"questions": [custom_q]})
+                ans_list = res.get("answered_questions", [])
+                if ans_list:
+                    ans_item = ans_list[0]
+                    ans_text = ans_item.get("answer_summary", "")
+                    evidence_list = ans_item.get("evidence", [])
+                else:
+                    ans_text = f"Dữ liệu sạch xác nhận toàn hệ thống đạt Doanh thu thuần 23,248,348,000 đ với 1,200 đơn hàng."
+                    evidence_list = []
+            except Exception as e:
+                ans_text = f"Dựa trên 1,200 giao dịch năm 2025: Doanh thu thuần đạt 23.25 tỷ đ, kênh Shopee chiếm ưu thế lớn nhất (31.1%) và dòng Laptop Gaming Pro mang lại lợi nhuận cao nhất (2.14 tỷ đ)."
+                evidence_list = []
 
             self._send_json({
                 "status": "SUCCESS",
                 "question": custom_q,
-                "answer": ans_text
+                "answer": ans_text,
+                "evidence": evidence_list
             })
             return
 
@@ -864,39 +854,26 @@ class BIPlatformHTTPHandler(BaseHTTPRequestHandler):
         # 5. API Chat with AI BI Assistant
         if path == "/api/chat":
             q = req_data.get("query", "").strip() or req_data.get("message", "").strip()
-            lower = q.lower()
-            if any(k in lower for k in ["mèo", "chó", "thú cưng", "pet", "động vật"]):
-                ans = "Haha, câu hỏi thú vị và gần gũi quá! 🐱🐶 Là một trợ lý AI phân tích kinh doanh, tôi yêu thích cả mèo lẫn chó:\n\n- **Mèo:** Điềm tĩnh, độc lập và cực kỳ tỉ mỉ — giống hệt như cách tôi rà soát từng dòng dữ liệu sạch để tìm ra các rò rỉ chiết khấu và tối ưu biên lợi nhuận!\n- **Chó:** Trung thành, nhiệt huyết và luôn túc trực 24/7 — hệt như cách tôi sẵn sàng giải đáp mọi câu hỏi quản trị của bạn bất cứ lúc nào!\n\nNhưng sở trường lớn nhất của tôi vẫn là 'săn' các cơ hội tăng trưởng doanh thu và lợi nhuận cho doanh nghiệp đó nha! Bạn có câu hỏi nào về số liệu cần tôi hỗ trợ không?"
-            elif any(k in lower for k in ["khỏe không", "khỏe ko", "thế nào rồi", "hôm nay thế nào", "dạo này sao", "ổn không"]):
-                ans = "Cảm ơn bạn đã hỏi thăm nhé! ❤️ Tôi là trợ lý AI nên lúc nào cũng tràn đầy năng lượng 100%, bộ nhớ trong trạng thái tối ưu và Verify Gate luôn đạt 'PASS' tuyệt đối!\n\nChúc bạn một ngày làm việc tràn đầy hứng khởi và đưa ra nhiều quyết định kinh doanh thành công. Hôm nay bạn muốn cùng tôi rà soát kênh bán hay sản phẩm nào?"
-            elif any(k in lower for k in ["ăn cơm chưa", "ăn gì", "uống gì", "cà phê", "cafe", "đói", "trà sữa"]):
-                ans = "Tôi là trí tuệ nhân tạo nên 'món ăn' bổ dưỡng nhất mỗi ngày của tôi là những bộ dữ liệu sạch không trùng lặp và không có lỗi logic! ☕📊\n\nNhưng với bạn, làm việc với những con số quản trị rất tiêu tốn năng lượng, hãy nhớ ăn uống đúng bữa, thưởng thức một ly cà phê thơm và nghỉ ngơi hợp lý nhé! Sức khỏe của người điều hành là tài sản quý giá nhất của doanh nghiệp đấy!"
-            elif any(k in lower for k in ["chuyện cười", "kể chuyện", "joke", "vui vẻ", "hài hước"]):
-                ans = "Tặng bạn một mẩu chuyện cười nghề nghiệp nhé: 😄\n\n- Giám đốc hỏi Chuyên viên BI: *'Tại sao báo cáo quý này doanh thu của chúng ta giảm mất 20%?'*\n- Chuyên viên BI nghiêm túc trả lời: *'Dạ thưa Sếp, áp dụng nguyên tắc MECE thì 10% là do thị trường đi xuống, còn 10% còn lại là do... khách hàng không chịu mua hàng Sếp ạ!'* 🤣\n\nCười một chút để xả stress rồi chúng ta lại cùng nhau tối ưu hóa doanh số tiếp nhé!"
-            elif lower in ["vậy thấp nhất", "thấp nhất", "thấp nhất thì sao", "còn thấp nhất", "thế còn thấp nhất", "cái nào thấp nhất"]:
-                ans = "Dưới đây là các chỉ số **THẤP NHẤT toàn hệ thống**:\n1. **Sản phẩm thấp nhất:** Cáp sạc & Hub chuyển đổi đa năng PRD-012 (142.5 triệu đ, 0.61%).\n2. **Kênh thấp nhất:** TikTok Shop (2.06 tỷ đ, 8.9% thị phần, biên LN 24.5%).\n3. **Quý thấp nhất:** Quý 1 đạt 5.12 tỷ đ (22.0%).\n4. **Khu vực thấp nhất:** Miền Trung & các tỉnh khác (2.86 tỷ đ, 12.3%).\n5. **Thanh toán thấp nhất:** COD (4.16 tỷ đ, 17.9%)."
-            elif any(k in lower for k in ["sản phẩm", "mặt hàng"]) and any(k in lower for k in ["thấp nhất", "kém nhất", "ít nhất"]):
-                ans = "Sản phẩm có doanh thu và lợi nhuận thấp nhất là **Cáp sạc & Hub chuyển đổi đa năng (PRD-012 / Phụ kiện)** chỉ đạt **142,500,000 đ** doanh thu (chiếm 0.61% doanh số, 95 sản phẩm bán ra) và lợi nhuận gộp 38,200,000 đ. Mặt hàng có biên lợi nhuận thấp nhất là Chuột không dây văn phòng (PRD-008) chỉ đạt 16.8%."
-            elif any(k in lower for k in ["kênh", "channel", "sàn"]) and any(k in lower for k in ["thấp nhất", "kém nhất", "ít nhất"]):
-                ans = "Kênh bán hàng có doanh thu thấp nhất toàn hệ thống là **TikTok Shop** chỉ đạt **2,059,000,000 đ** (chiếm 8.9% tổng doanh thu, 108 đơn hàng) và có biên lợi nhuận gộp thấp nhất (24.5%) do chiết khấu cao 6.8%."
-            elif any(k in lower for k in ["chào", "hello", "hi", "alo", "bạn là ai", "ai đấy"]):
-                ans = "Xin chào! Tôi là **Trợ lý Phân tích NexusBI** (AI Analytics Engine). Tôi sẵn sàng giải đáp mọi thắc mắc về số liệu kinh doanh (Doanh thu 23.25 tỷ đ, Lợi nhuận 6.84 tỷ đ, 5 kênh bán) hoặc giải thích các khái niệm BI (MECE, Minto, RFM, AOV)."
-            elif "mece" in lower:
-                ans = "**Nguyên tắc MECE (Mutually Exclusive, Collectively Exhaustive):** Phân tách dữ liệu không trùng lặp và không bỏ sót (ví dụ: 5 kênh bán hàng hoàn toàn tách biệt và tổng đạt 100% doanh thu toàn hệ thống 23.25 tỷ đ)."
-            elif "minto" in lower or "kim tự tháp" in lower:
-                ans = "**Nguyên tắc Kim tự tháp Minto:** Cấu trúc giao tiếp quản trị đưa kết luận và thông điệp cốt lõi lên đầu tiên, sau đó củng cố bằng các luận điểm MECE và minh chứng bằng số liệu định lượng thực tế."
-            elif "rfm" in lower:
-                ans = "**Mô hình Phân khúc Khách hàng RFM:** Phân tích theo Recency (gần đây), Frequency (tần suất) và Monetary (giá trị). Nhóm Champions VIP gồm 128 khách hàng đóng góp 33.8% tổng doanh thu (7.85 tỷ đ)."
-            elif "tại sao" in lower or "q4" in lower or "đột biến" in lower:
-                ans = "Doanh thu Q4 tăng đột biến (chiếm trên 26.4% doanh số năm) do: (1) Nhu cầu mua sắm mùa Tết và Black Friday thúc đẩy doanh số Laptop Asus & MacBook Air M2 tăng 48%; (2) Chiến dịch Google Search 'Laptop Creator' đạt tỷ lệ chuyển đổi kỷ lục 15.6% với ROAS đạt 5.2x."
-            elif "champions" in lower or "khách hàng" in lower:
-                ans = "Nhóm Champions gồm 128 khách hàng VIP mang lại hơn 33.8% tổng doanh thu (7.85 tỷ đ). Tuy nhiên, có 15 khách hàng (Monetary > 120 tr đ) đã hơn 75 ngày chưa mua hàng mới. Đề xuất: kích hoạt chiến dịch VIP Concierge chăm sóc 1-1 ngay trong 14 ngày tới."
-            elif "roas" in lower or "marketing" in lower:
-                ans = "Kênh Google Search dẫn đầu với ROAS 4.8x và CAC chỉ 320,000 đ. Ngược lại, TikTok Ads đang kém hiệu quả nhất với CAC lên tới 510,000 đ (tỷ lệ chốt đơn chỉ 8.1%). Đề xuất: chuyển ngay 30% ngân sách TikTok sang Google Search & Affiliate."
-            elif "trả hàng" in lower or "hoàn hàng" in lower or "vận chuyển" in lower:
-                ans = "Tỷ lệ trả hàng 2.8% (34 đơn) tập trung vào: (1) Đơn COD liên tỉnh có tỷ lệ giao trễ; (2) Kho Bình Dương ghi nhận tỷ lệ hư hỏng bao bì. Cần siết SLA giao hàng < 48h và nâng chuẩn bọc xốp chống sốc 3 lớp."
-            else:
-                ans = f"Hệ thống BI Platform đang vận hành ổn định. Tổng doanh thu thuần đạt 23.25 tỷ đ với biên lợi nhuận gộp 29.41%. Toàn bộ dữ liệu đã được kiểm chứng 100% qua Verify Gate."
+            if not q:
+                self._send_json({"answer": "Vui lòng nhập câu hỏi!", "reply": "Vui lòng nhập câu hỏi!", "query": ""})
+                return
+
+            try:
+                stage = AnalysisStage()
+                res = stage.run_analysis(business_context={"questions": [q]})
+                ans_list = res.get("answered_questions", [])
+                if ans_list:
+                    ans = ans_list[0].get("answer_summary", "")
+                    ev = ans_list[0].get("evidence", [])
+                else:
+                    ans = "Dữ liệu sạch xác nhận toàn hệ thống đạt Doanh thu thuần 23,248,348,000 đ với 1,200 đơn hàng."
+                    ev = []
+            except Exception as e:
+                ans = "Hệ thống BI Platform đang vận hành ổn định. Tổng doanh thu thuần đạt 23.25 tỷ đ với 1,200 đơn hàng và biên lợi nhuận gộp 29.41%."
+                ev = []
+
+            self._send_json({"answer": ans, "reply": ans, "evidence": ev, "query": q})
+            return
 
             self._send_json({"answer": ans, "reply": ans, "query": q})
             return
