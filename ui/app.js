@@ -105,7 +105,7 @@ let isReportOutlineOpen = false;
 let activeReportWriterTab = "preview"; // "preview" hoặc "editor"
 let currentGeneratedReportMarkdown = "";
 let isReportGenerating = false;
-let isReportWriterCollapsed = false; // Trạng thái thu gọn/mở rộng card Báo cáo Bước 4
+let isReportWriterCollapsed = true; // Luôn mặc định thu gọn khi vào Bước 4
 
 // Trạng thái Bước 4: WHAT-IF SIMULATION & EXECUTIVE DECISION SUPPORT
 let whatIfDiscountReductionPct = 3.0; // Mặc định giảm 3% chiết khấu
@@ -911,6 +911,9 @@ function goToStep(idx) {
   }
   currentActiveView = "STAGE";
   currentStepIdx = idx;
+  if (idx === 3) {
+    isReportWriterCollapsed = true; // Luôn mặc định thu gọn khi chuyển qua Bước 4
+  }
   updateSidebarNav();
   updateTopKPICards();
   renderHorizontalPipelineBar();
@@ -933,6 +936,9 @@ function advanceStep(fromIdx) {
   }
   currentActiveView = "STAGE";
   currentStepIdx = Math.min(WORKFLOW_STEPS.length - 1, fromIdx + 1);
+  if (currentStepIdx === 3) {
+    isReportWriterCollapsed = true; // Luôn mặc định thu gọn khi chuyển qua Bước 4
+  }
   updateSidebarNav();
   updateTopKPICards();
   renderHorizontalPipelineBar();
@@ -2955,6 +2961,7 @@ function startNewSession() {
     currentReportingManifest = null;
     currentDashboardFilteredData = null;
     activeDashboardPeriodFilter = "ALL";
+    isReportWriterCollapsed = true;
     currentBusinessContext = {
       company_type: "",
       industry: "",
