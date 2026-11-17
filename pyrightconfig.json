@@ -1,0 +1,26 @@
+{
+  "include": [
+    ".",
+    "core",
+    "skills",
+    "workflow",
+    "tests"
+  ],
+  "extraPaths": [
+    ".",
+    "skills",
+    "core",
+    "workflow"
+  ],
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": [
+        ".",
+        "skills",
+        "core",
+        "workflow"
+      ]
+    }
+  ]
+}

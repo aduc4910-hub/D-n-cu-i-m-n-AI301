@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusBI · Executive Business Intelligence Platform</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* ================= NEXUSBI 4K LUXURY DESIGN SYSTEM ================= */
+    :root {
+      --canvas-ivory: #FAF7F2;
+      --card-glass: rgba(255, 255, 255, 0.82);
+      --card-border: rgba(226, 217, 200, 0.75);
+      --emerald-sidebar: #082218;
+      --emerald-dark: #0A261D;
+      --emerald-primary: #0D2B22;
+      --emerald-accent: #134232;
+      --gold-champagne: #D4B07B;
+      --gold-deep: #C8A870;
+      --surface-cream: #F5EFE6;
+      --text-primary: #0A261D;
+      --text-muted: #4A635A;
+      --text-body: #2C423B;
+      --border-subtle: #E2D9C8;
+    }
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #FAF7F2; }
+    ::-webkit-scrollbar-thumb { background: #D8CEBE; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #0A261D; }
+
+    body {
+      background-color: #FAF7F2;
+      color: #0A261D;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* ================= FROSTED GLASS CARDS (Ô KÍNH MỜ TRONG SUỐT VỚI BLUR) ================= */
+    .glass-card {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.82) !important;
+      backdrop-filter: blur(16px) saturate(160%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+      border: 1px solid rgba(226, 217, 200, 0.75) !important;
+      box-shadow: 
+        0 14px 35px -8px rgba(10, 35, 26, 0.06),
+        0 2px 6px rgba(10, 35, 26, 0.02) !important;
+      border-radius: 1.25rem !important;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.90) !important;
+      border-color: rgba(212, 176, 123, 0.45) !important;
+      box-shadow: 
+        0 18px 45px -10px rgba(10, 35, 26, 0.08),
+        0 4px 12px rgba(10, 35, 26, 0.03) !important;
+    }
+
+    /* ================= FROSTED GLASS INPUTS (Ô NHẬP LIỆU KÍNH MỜ) ================= */
+    .glass-input {
+      background: rgba(255, 255, 255, 0.85) !important;
+      backdrop-filter: blur(12px) saturate(150%) !important;
+      -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
+      border: 1.5px solid rgba(226, 217, 200, 0.85) !important;
+      box-shadow: 
+        inset 0 1px 2px rgba(10, 35, 26, 0.02),
+        0 1px 3px rgba(10, 35, 26, 0.02) !important;
+      border-radius: 0.875rem !important;
+      color: #0A261D !important;
+      font-weight: 500 !important;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .glass-input:hover {
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-color: #C8A870 !important;
+      box-shadow: 0 4px 14px rgba(10, 35, 26, 0.05) !important;
+    }
+    .glass-input:focus, .glass-input:focus-within {
+      background: #FFFFFF !important;
+      border-color: #0A261D !important;
+      box-shadow: 
+        0 0 0 3px rgba(10, 35, 26, 0.10),
+        0 6px 18px rgba(200, 168, 112, 0.18) !important;
+      outline: none !important;
+    }
+
+    /* ================= FROSTED GLASS PILLS ================= */
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.80) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(226, 217, 200, 0.75) !important;
+      box-shadow: 0 2px 6px rgba(10, 35, 26, 0.03) !important;
+      color: #0A261D !important;
+      transition: all 0.2s ease !important;
+    }
+    .glass-pill:hover {
+      background: #F5EFE6 !important;
+      border-color: #0A261D !important;
+      color: #0A261D !important;
+    }
+
+    /* ================= SMOOTH WORKSPACE FADE & SLIDE-UP ANIMATION ================= */
+    @keyframes workspaceFadeSlideUp {
+      0% {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-slide-up {
+      animation: workspaceFadeSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* ================= SIDEBAR TABS (FULL CAPSULE PILLS & BRIGHTER LUXURY GOLD) ================= */
+    .sidebar-tab-active {
+      background: linear-gradient(135deg, #F8E3C6 0%, #EFCFA7 50%, #E1BC88 100%) !important;
+      color: #0A261D !important;
+      font-weight: 700 !important;
+      box-shadow: 
+        0 0 25px rgba(225, 188, 136, 0.40),
+        0 4px 16px rgba(10, 38, 29, 0.25) !important;
+      border-radius: 9999px !important;
+    }
+    .sidebar-tab-active svg {
+      color: #0A261D !important;
+      stroke: #0A261D !important;
+    }
+    .sidebar-tab-active .chevron-icon {
+      color: #0A261D !important;
+      stroke: #0A261D !important;
+      opacity: 0.9 !important;
+    }
+
+    .sidebar-tab-inactive {
+      color: #FAF7F2 !important;
+      font-weight: 500 !important;
+      background: transparent !important;
+      border-radius: 9999px !important;
+    }
+    .sidebar-tab-inactive svg {
+      color: #FAF7F2 !important;
+    }
+    .sidebar-tab-inactive:hover {
+      color: #FFFFFF !important;
+      background: rgba(255, 255, 255, 0.10) !important;
+    }
+    .sidebar-tab-inactive:hover svg {
+      color: #FFFFFF !important;
+    }
+  </style>
+  <script src="payload.js?v=14"></script>
+  <script src="app.js?v=29"></script>
+</head>
+<body class="antialiased min-h-screen selection:bg-[#0A261D] selection:text-white flex">
+
+  <!-- ================= LEFT SIDEBAR (SEAMLESS HAUTE EMERALD UNIFIED PALETTE & GOLD WAVES) ================= -->
+  <aside class="hidden lg:flex w-64 flex-col justify-between my-3 ml-3 h-[calc(100vh-1.5rem)] rounded-[32px] text-[#FAF7F2] p-5 border border-[#174D3B]/70 shadow-2xl shadow-[#04140E]/40 shrink-0 sticky top-3 z-20 overflow-hidden select-none" style="background: linear-gradient(180deg, #0A3025 0px, #072A26 75px, #072A26 140px, #06221B 350px, #041611 100%);">
+    
+    <!-- TOP BRAND & NAVIGATION -->
+    <div class="flex flex-col gap-4 relative z-10">
+      
+      <!-- BRAND HEADER BANNER (SEAMLESS INTEGRATION: ENLARGED 3D GOLD LOGO + RIGHT GOLDEN ARC & LENS FLARE) -->
+      <div class="-mx-5 -mt-5 cursor-pointer select-none relative group overflow-hidden transition-all duration-300 hover:brightness-105" onclick="switchToOverview()" title="NexusBI - Quay về Tổng quan">
+        <img src="brand_header_banner.png?v=6" class="w-full h-auto block select-none rounded-t-[32px]" alt="NexusBI - Data Drives Decisions" />
+      </div>
+
+      <!-- NAVIGATION MENU (5 ITEMS - FULL CAPSULE PILLS) -->
+      <nav class="flex flex-col gap-2 text-sm" id="sidebar-nav-container">
+        
+        <!-- 1. TỔNG QUAN -->
+        <button id="nav-btn-overview" onclick="switchToOverview()" class="flex items-center justify-between px-5 py-3 rounded-full sidebar-tab-active transition w-full text-left">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 shrink-0 nav-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+            </svg>
+            <span class="font-bold">Tổng quan</span>
+          </div>
+        </button>
+
+        <!-- 2. DỮ LIỆU -->
+        <button id="nav-btn-data" onclick="onSidebarDataClick()" class="flex items-center justify-between px-5 py-3 rounded-full sidebar-tab-inactive transition w-full text-left">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 shrink-0 nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="5" rx="8" ry="2.5"></ellipse>
+              <path d="M20 12c0 1.38-3.58 2.5-8 2.5s-8-1.12-8-2.5"></path>
+              <path d="M4 5v14c0 1.38 3.58 2.5 8 2.5s8-1.12 8-2.5V5"></path>
+            </svg>
+            <span class="font-medium">Dữ liệu</span>
+          </div>
+          <svg class="w-3.5 h-3.5 text-white/40 shrink-0 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+
+        <!-- 3. PHÂN TÍCH -->
+        <button id="nav-btn-analysis" onclick="goToStep(2)" class="flex items-center justify-between px-5 py-3 rounded-full sidebar-tab-inactive transition w-full text-left">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 shrink-0 nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="13" width="4" height="8" rx="2"></rect>
+              <rect x="10" y="5" width="4" height="16" rx="2"></rect>
+              <rect x="17" y="9" width="4" height="12" rx="2"></rect>
+            </svg>
+            <span class="font-medium">Phân tích</span>
+          </div>
+          <svg class="w-3.5 h-3.5 text-white/40 shrink-0 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+
+        <!-- 4. BÁO CÁO -->
+        <button id="nav-btn-reporting" onclick="goToStep(3)" class="flex items-center justify-between px-5 py-3 rounded-full sidebar-tab-inactive transition w-full text-left">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 shrink-0 nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span class="font-medium">Báo cáo</span>
+          </div>
+          <svg class="w-3.5 h-3.5 text-white/40 shrink-0 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+
+        <!-- 5. CÀI ĐẶT -->
+        <button id="nav-btn-settings" onclick="toggleDemoUnlock()" class="flex items-center justify-between px-5 py-3 rounded-full sidebar-tab-inactive transition w-full text-left">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 shrink-0 nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span class="font-medium">Cài đặt</span>
+          </div>
+        </button>
+
+      </nav>
+    </div>
+
+    <!-- BOTTOM SECTION (GOLDEN WAVE MESH BACKDROP + TEXT + CTA BUTTON) -->
+    <div class="relative pt-12 pb-2">
+      
+      <!-- GOLDEN WAVE SVG GRAPHIC -->
+      <div class="absolute bottom-[-20px] left-[-20px] right-[-20px] h-[360px] pointer-events-none overflow-hidden z-0">
+        <svg viewBox="0 0 296 360" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full object-cover">
+          <defs>
+            <linearGradient id="goldWave1" x1="0%" y1="0%" x2="100%" y2="80%">
+              <stop offset="0%" stop-color="#C8A870" stop-opacity="0.1"/>
+              <stop offset="25%" stop-color="#DFBA86" stop-opacity="0.8"/>
+              <stop offset="60%" stop-color="#F5E4CA" stop-opacity="0.95"/>
+              <stop offset="85%" stop-color="#D4B07B" stop-opacity="0.85"/>
+              <stop offset="100%" stop-color="#A6834A" stop-opacity="0.2"/>
+            </linearGradient>
+
+            <linearGradient id="goldWave2" x1="10%" y1="100%" x2="90%" y2="0%">
+              <stop offset="0%" stop-color="#9E7D46" stop-opacity="0"/>
+              <stop offset="35%" stop-color="#D4B07B" stop-opacity="0.75"/>
+              <stop offset="70%" stop-color="#FFF0D4" stop-opacity="0.92"/>
+              <stop offset="100%" stop-color="#B89358" stop-opacity="0.1"/>
+            </linearGradient>
+
+            <linearGradient id="goldWave3" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="#D4B07B" stop-opacity="0.2"/>
+              <stop offset="40%" stop-color="#F8EADB" stop-opacity="0.85"/>
+              <stop offset="80%" stop-color="#C8A870" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#9E7D46" stop-opacity="0.0"/>
+            </linearGradient>
+
+            <linearGradient id="darkDuneFill" x1="0%" y1="0%" x2="60%" y2="100%">
+              <stop offset="0%" stop-color="#0A3025" stop-opacity="0.9"/>
+              <stop offset="45%" stop-color="#072A26" stop-opacity="0.95"/>
+              <stop offset="100%" stop-color="#041810" stop-opacity="1.0"/>
+            </linearGradient>
+
+            <radialGradient id="waveAmbientAura" cx="65%" cy="60%" r="55%">
+              <stop offset="0%" stop-color="#DFBA86" stop-opacity="0.25"/>
+              <stop offset="50%" stop-color="#08281F" stop-opacity="0.12"/>
+              <stop offset="100%" stop-color="#07241A" stop-opacity="0"/>
+            </radialGradient>
+
+            <filter id="particleGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="1.5" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Ambient Glow Behind Waves -->
+          <rect x="0" y="0" width="296" height="360" fill="url(#waveAmbientAura)"/>
+
+          <!-- Back Golden Silk Splines -->
+          <path d="M -20,170 C 60,115 150,230 310,125" stroke="url(#goldWave1)" stroke-width="1.3" fill="none" opacity="0.65"/>
+          <path d="M -10,195 C 70,135 160,250 320,150" stroke="url(#goldWave2)" stroke-width="0.9" fill="none" opacity="0.5"/>
+          <path d="M -30,145 C 50,90 140,205 300,100" stroke="url(#goldWave3)" stroke-width="0.8" fill="none" opacity="0.4"/>
+
+          <!-- Deep 3D Emerald Wave Surface Dune -->
+          <path d="M -10,200 C 80,155 160,240 306,175 L 306,360 L -10,360 Z" fill="url(#darkDuneFill)"/>
+
+          <!-- Primary Foreground Golden Ribbon Splines -->
+          <path d="M -10,200 C 80,155 160,240 306,175" stroke="url(#goldWave1)" stroke-width="2.2" fill="none"/>
+          <path d="M -15,215 C 75,170 165,255 310,190" stroke="url(#goldWave2)" stroke-width="1.5" fill="none" opacity="0.88"/>
+          <path d="M -20,232 C 70,188 170,270 315,208" stroke="url(#goldWave3)" stroke-width="1" fill="none" opacity="0.7"/>
+          <path d="M -25,252 C 65,208 175,290 320,228" stroke="url(#goldWave1)" stroke-width="0.8" fill="none" opacity="0.5"/>
+
+          <!-- Secondary Lower Wave Crest -->
+          <path d="M -10,305 C 90,270 180,325 310,280" stroke="url(#goldWave2)" stroke-width="1.6" fill="none" opacity="0.75"/>
+          <path d="M -15,320 C 85,285 185,340 315,295" stroke="url(#goldWave1)" stroke-width="1" fill="none" opacity="0.5"/>
+
+          <!-- Luminous Golden Sparkle Particles -->
+          <circle cx="105" cy="182" r="1.6" fill="#FFF2DB" filter="url(#particleGlow)"/>
+          <circle cx="165" cy="238" r="2.2" fill="#FFFFFF" filter="url(#particleGlow)"/>
+          <circle cx="195" cy="220" r="1.3" fill="#FFF2DB"/>
+          <circle cx="240" cy="188" r="1.8" fill="#FFF6E5" filter="url(#particleGlow)"/>
+          <circle cx="70" cy="172" r="1.3" fill="#FFF2DB"/>
+          <circle cx="135" cy="218" r="1.2" fill="#DFBA86"/>
+          <circle cx="210" cy="258" r="1.5" fill="#FFF2DB"/>
+          <circle cx="145" cy="300" r="1.4" fill="#FFF2DB"/>
+        </svg>
+      </div>
+
+      <!-- TEXT OVER GOLD WAVES -->
+      <div class="relative z-10 px-2 mb-4">
+        <p class="text-[13.5px] font-bold text-white leading-snug tracking-tight">
+          Khám phá<br/>tiềm năng dữ liệu<br/>cùng NexusBI
+        </p>
+      </div>
+
+      <!-- CTA BUTTON (ROUNDED FULL PILL) -->
+      <div class="relative z-10 px-2">
+        <button onclick="goToStep(0)" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#F8E3C6] via-[#EFCFA7] to-[#E1BC88] hover:brightness-105 text-[#0A261D] font-bold text-xs shadow-lg shadow-[#E1BC88]/30 transition-all cursor-pointer">
+          <span>Bắt đầu ngay</span>
+          <span class="text-xs">→</span>
+        </button>
+      </div>
+
+    </div>
+
+  </aside>
+
+  <!-- ================= MAIN VIEW CANVAS ================= -->
+  <div class="flex-1 flex flex-col min-w-0 relative bg-[#FAF7F2] min-h-screen">
+    
+    <!-- ================= CRISP 4K AMBIENT SILK RIBBON BACKDROP (NOT BLURRED!) ================= -->
+    <div class="absolute top-0 right-0 w-[65vw] max-w-[950px] h-[480px] pointer-events-none overflow-hidden z-0 select-none hidden sm:block">
+      <svg viewBox="0 0 950 480" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full object-cover">
+        <defs>
+          <linearGradient id="silkEmeraldMain" x1="0%" y1="0%" x2="100%" y2="80%">
+            <stop offset="0%" stop-color="#061D14" stop-opacity="0.95"/>
+            <stop offset="35%" stop-color="#0B2B20" stop-opacity="0.88"/>
+            <stop offset="70%" stop-color="#144637" stop-opacity="0.65"/>
+            <stop offset="100%" stop-color="#1D5C49" stop-opacity="0.0"/>
+          </linearGradient>
+          <radialGradient id="silkEmeraldAura" cx="80%" cy="10%" r="70%">
+            <stop offset="0%" stop-color="#0E382A" stop-opacity="0.75"/>
+            <stop offset="45%" stop-color="#154B3A" stop-opacity="0.4"/>
+            <stop offset="85%" stop-color="#FAF7F2" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="goldThread1" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#C8A870" stop-opacity="0.1"/>
+            <stop offset="30%" stop-color="#D4B07B" stop-opacity="0.9"/>
+            <stop offset="70%" stop-color="#F2DEBE" stop-opacity="0.95"/>
+            <stop offset="100%" stop-color="#D4B07B" stop-opacity="0.2"/>
+          </linearGradient>
+          <linearGradient id="goldThread2" x1="0%" y1="80%" x2="100%" y2="20%">
+            <stop offset="0%" stop-color="#9E7D46" stop-opacity="0"/>
+            <stop offset="40%" stop-color="#D4B07B" stop-opacity="0.75"/>
+            <stop offset="80%" stop-color="#ECCF9E" stop-opacity="0.85"/>
+            <stop offset="100%" stop-color="#C8A870" stop-opacity="0.1"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Ambient Silk Aura -->
+        <rect x="0" y="0" width="950" height="480" fill="url(#silkEmeraldAura)"/>
+
+        <!-- Flowing Emerald Silk Ribbons -->
+        <path d="M 120,0 C 260,80 440,15 620,95 C 750,155 860,110 950,140 L 950,0 Z" fill="url(#silkEmeraldMain)"/>
+        <path d="M 220,0 C 350,120 520,40 700,145 C 800,200 890,160 950,220 L 950,0 Z" fill="url(#silkEmeraldMain)" opacity="0.8"/>
+        <path d="M 340,0 C 460,150 610,70 780,185 C 860,235 910,210 950,260 L 950,0 Z" fill="url(#silkEmeraldMain)" opacity="0.6"/>
+
+        <!-- Flowing Golden Undulating Waves (Image 5 Reference) -->
+        <path d="M 150,0 C 300,120 480,35 660,125 C 780,185 880,140 950,180" stroke="url(#goldThread1)" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <path d="M 190,0 C 330,135 510,50 690,140 C 805,198 895,155 950,200" stroke="url(#goldThread1)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M 235,0 C 365,150 540,65 720,155 C 830,210 910,170 950,220" stroke="url(#goldThread2)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <path d="M 285,0 C 405,165 575,80 750,170 C 855,222 925,185 950,240" stroke="url(#goldThread2)" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+        <path d="M 340,0 C 450,180 610,95 780,185 C 880,235 935,200 950,260" stroke="url(#goldThread2)" stroke-width="1.0" stroke-linecap="round" fill="none"/>
+        <path d="M 400,0 C 500,195 650,110 810,200 C 900,248 945,215 950,280" stroke="url(#goldThread2)" stroke-width="0.8" stroke-linecap="round" fill="none"/>
+      </svg>
+    </div>
+
+    <!-- MAIN PADDED CONTAINER -->
+    <div class="p-4 md:p-8 flex-1 flex flex-col max-w-7xl w-full mx-auto relative z-10">
+
+      <!-- ================= TOP HEADER (GREETING & USER PROFILE) ================= -->
+      <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 mb-6 gap-4 border-b border-[#ECE4D8]">
+        <div>
+          <div class="text-xs md:text-sm text-[#4A635A] font-medium mb-1">Xin chào,</div>
+          <h1 class="text-xl md:text-2xl lg:text-3xl font-black text-[#0A261D] tracking-tight">Khám phá giá trị từ dữ liệu</h1>
+          <p class="text-xs md:text-sm text-[#4A635A] font-medium mt-1">NexusBI giúp bạn phân tích, trực quan hóa và đưa ra quyết định thông minh hơn.</p>
+        </div>
+
+        <div class="flex items-center gap-3 self-end sm:self-auto">
+          <!-- QUICK TOGGLES -->
+          <button onclick="toggleDemoUnlock()" id="btn-demo-toggle" title="Mở khóa khám phá nhanh" class="px-3.5 py-1.5 rounded-full glass-pill text-[#0A261D] flex items-center gap-1.5 font-bold text-xs transition hover:border-[#0A261D]">
+            <svg class="w-3.5 h-3.5 text-[#C8A870]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <span id="txt-demo-toggle">Demo xem nhanh</span>
+          </button>
+
+          <button onclick="resetWorkflowProgression()" title="Bắt đầu lại từ Bước 1" class="p-2 rounded-full glass-pill text-[#4A635A] hover:text-[#DC2626] transition hover:border-[#DC2626]">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          </button>
+
+          <!-- AI ASSISTANT -->
+          <button onclick="openChatDrawer()" class="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#D4B07B] to-[#C8A870] hover:from-[#DFBE8A] hover:to-[#D4B07B] text-[#0A261D] font-bold text-xs shadow-md shadow-[#C8A870]/25 flex items-center gap-1.5 transition">
+            <svg class="w-3.5 h-3.5 text-[#0A261D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>Trợ Lý AI</span>
+          </button>
+
+          <!-- BELL NOTIFICATION -->
+          <button class="relative p-2 rounded-full glass-pill text-[#4A635A] hover:text-[#0A261D]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#EF4444] border-2 border-white"></span>
+          </button>
+
+          <!-- USER AVATAR -->
+          <div class="flex items-center gap-2 pl-2">
+            <div class="w-8 h-8 rounded-full bg-[#11382A] text-[#D4B07B] flex items-center justify-center font-bold text-xs border border-[#D4B07B]/40 shadow-sm">
+              NT
+            </div>
+            <span class="text-xs font-bold text-[#0A261D] hidden md:block">Nguyễn Văn A</span>
+            <svg class="w-3.5 h-3.5 text-[#4A635A] hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+        </div>
+      </header>
+
+      <!-- ================= 4 TOP FROSTED GLASS KPI CARDS (ALL METRICS ZERO INITIALLY) ================= -->
+      <section class="grid grid-cols-2 md:grid-cols-4 gap-3.5 md:gap-4 mb-6" id="top-kpi-cards-grid">
+        <!-- CARD 1: TỔNG DỮ LIỆU -->
+        <div class="glass-card p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <div class="w-8 h-8 rounded-xl bg-[#E8F2EE] flex items-center justify-center text-[#0D2B22]">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7c0-2-1.5-3-3.5-3h-9C5.5 4 4 5 4 7z"></path></svg>
+            </div>
+            <span id="kpi-trend-1" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F2EE] text-[#0D2B22]">Chờ nạp</span>
+          </div>
+          <div class="text-[11px] font-semibold text-[#4A635A]">Tổng dữ liệu</div>
+          <div id="kpi-value-data-size" class="text-xl md:text-2xl font-black text-[#0A261D] tracking-tight mt-0.5">0 MB</div>
+          <!-- Sparkline 1: Micro Sparkline Luminous Emerald -->
+          <div id="kpi-spark-1" class="mt-2.5 h-6 w-full relative overflow-hidden">
+            <svg class="w-full h-full" viewBox="0 0 100 24" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="microSparkGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#0D7A5F" stop-opacity="0.30"/>
+                  <stop offset="100%" stop-color="#0D7A5F" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path d="M 0,18 C 20,20 35,9 55,11 C 75,13 85,5 100,3 L 100,24 L 0,24 Z" fill="url(#microSparkGrad1)"/>
+              <path d="M 0,18 C 20,20 35,9 55,11 C 75,13 85,5 100,3" fill="none" stroke="#0D7A5F" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="100" cy="3" r="2.5" fill="#0D7A5F"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- CARD 2: TỔNG BÁO CÁO -->
+        <div class="glass-card p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <div class="w-8 h-8 rounded-xl bg-[#F5EFE6] flex items-center justify-center text-[#C8A870]">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            </div>
+            <span id="kpi-trend-2" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#4A635A]">0 báo cáo</span>
+          </div>
+          <div class="text-[11px] font-semibold text-[#4A635A]">Tổng báo cáo</div>
+          <div id="kpi-value-reports-count" class="text-xl md:text-2xl font-black text-[#0A261D] tracking-tight mt-0.5">0</div>
+          <!-- Sparkline 2: Micro Sparkline Luminous Gold -->
+          <div id="kpi-spark-2" class="mt-2.5 h-6 w-full relative overflow-hidden">
+            <svg class="w-full h-full" viewBox="0 0 100 24" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="microSparkGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#D4B07B" stop-opacity="0.35"/>
+                  <stop offset="100%" stop-color="#D4B07B" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path d="M 0,16 C 25,18 40,7 65,9 C 80,11 90,4 100,2 L 100,24 L 0,24 Z" fill="url(#microSparkGrad2)"/>
+              <path d="M 0,16 C 25,18 40,7 65,9 C 80,11 90,4 100,2" fill="none" stroke="#C8A870" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="100" cy="2" r="2.5" fill="#D4B07B"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- CARD 3: THỜI GIAN XỬ LÝ TB -->
+        <div class="glass-card p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <div class="w-8 h-8 rounded-xl bg-[#E8F2EE] flex items-center justify-center text-[#134232]">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <span id="kpi-trend-3" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F2EE] text-[#4A635A]">Chờ xử lý</span>
+          </div>
+          <div class="text-[11px] font-semibold text-[#4A635A]">Thời gian xử lý TB</div>
+          <div id="kpi-value-proc-time" class="text-xl md:text-2xl font-black text-[#0A261D] tracking-tight mt-0.5">0.0s</div>
+          <!-- Sparkline 3: Micro Sparkline Luminous Teal -->
+          <div id="kpi-spark-3" class="mt-2.5 h-6 w-full relative overflow-hidden">
+            <svg class="w-full h-full" viewBox="0 0 100 24" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="microSparkGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#134232" stop-opacity="0.30"/>
+                  <stop offset="100%" stop-color="#134232" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path d="M 0,8 C 20,6 35,16 55,14 C 75,12 85,18 100,10 L 100,24 L 0,24 Z" fill="url(#microSparkGrad3)"/>
+              <path d="M 0,8 C 20,6 35,16 55,14 C 75,12 85,18 100,10" fill="none" stroke="#134232" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="100" cy="10" r="2.5" fill="#134232"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- CARD 4: ĐỘ CHÍNH XÁC AI -->
+        <div class="glass-card p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <div class="w-8 h-8 rounded-xl bg-[#F5EFE6] flex items-center justify-center text-[#C8A870]">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            </div>
+            <span id="kpi-trend-4" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#4A635A]">Chờ tệp</span>
+          </div>
+          <div class="text-[11px] font-semibold text-[#4A635A]">Độ chính xác AI</div>
+          <div id="kpi-value-ai-accuracy" class="text-xl md:text-2xl font-black text-[#0A261D] tracking-tight mt-0.5">0% (Chờ tệp)</div>
+          <!-- Sparkline 4: Micro Sparkline Luminous Emerald Peak -->
+          <div id="kpi-spark-4" class="mt-2.5 h-6 w-full relative overflow-hidden">
+            <svg class="w-full h-full" viewBox="0 0 100 24" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="microSparkGrad4" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#10B981" stop-opacity="0.35"/>
+                  <stop offset="100%" stop-color="#10B981" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path d="M 0,17 C 20,14 40,7 60,9 C 80,5 90,3 100,2 L 100,24 L 0,24 Z" fill="url(#microSparkGrad4)"/>
+              <path d="M 0,17 C 20,14 40,7 60,9 C 80,5 90,3 100,2" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="100" cy="2" r="2.5" fill="#10B981"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4-STAGE PIPELINE STEPPER ("QUY TRÌNH PHÂN TÍCH") ================= -->
+      <section class="glass-card p-4 md:p-5 mb-6" id="pipeline-card-container">
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#ECE4D8]">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#D4B07B]"></span>
+            <h2 class="text-xs md:text-sm font-bold text-[#0A261D]">Quy trình phân tích 4 giai đoạn</h2>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span id="project-dataset-dot" class="w-2 h-2 rounded-full bg-[#A3B5AE]"></span>
+            <span class="text-[11px] font-bold text-[#4A635A]" id="project-dataset-name">Chờ nạp nguồn dữ liệu (Số liệu về 0)</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between" id="horizontal-pipeline-bar">
+          <!-- Dynamically populated by app.js -->
+        </div>
+      </section>
+
+      <!-- ================= MAIN WORKSPACE CANVAS (FROSTED GLASS DUAL-PANE) ================= -->
+      <main id="workspace-content" class="flex-1 mb-6">
+        <!-- Rendered dynamically by app.js -->
+      </main>
+
+      <!-- ================= FOOTER ================= -->
+      <footer class="py-4 border-t border-[#ECE4D8] flex flex-col sm:flex-row items-center justify-between text-xs text-[#4A635A] gap-2 mt-auto">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
+          <span class="text-[#0A261D] font-semibold">Hệ thống bảo toàn dữ liệu gốc 100% · Kiểm chứng công thức toán học MECE</span>
+        </div>
+        <div class="flex items-center gap-3 font-mono text-[11px]">
+          <span class="text-[#4A635A]">Kiến trúc: 4 Giai đoạn chuẩn</span>
+          <span class="text-[#D8CEBE]">|</span>
+          <span class="text-[#0A261D] font-bold" id="footer-wf-id">AI301 Final Project</span>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- ================= AI ASSISTANT DIALOG ================= -->
+  <dialog id="ai-chat-dialog" class="bg-transparent backdrop:bg-black/40 backdrop:backdrop-blur-sm p-0 m-auto rounded-3xl max-w-xl w-full border-0 shadow-2xl">
+    <div class="glass-card p-6 shadow-2xl flex flex-col space-y-3.5 bg-white border border-[#ECE4D8]">
+      <div class="flex items-center justify-between border-b border-[#ECE4D8] pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-[#0A261D] flex items-center justify-center font-bold text-[#D4B07B] text-xs shadow-sm border border-[#D4B07B]/40">AI</div>
+          <div>
+            <h3 class="text-sm font-bold text-[#0A261D]">Trợ Lý Phân Tích NexusBI</h3>
+            <p class="text-[11px] text-[#4A635A]">Hỏi đáp số liệu kinh doanh & kiểm chứng công thức tức thời</p>
+          </div>
+        </div>
+        <button onclick="closeChatDrawer()" class="text-[#4A635A] hover:text-[#0A261D] p-1 rounded-lg hover:bg-[#F5EFE6] transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div id="modal-chat-log" class="h-64 overflow-y-auto space-y-2 p-1 font-sans text-xs">
+        <div class="p-3.5 rounded-2xl glass-input text-[#0A261D] mr-8">
+          Xin chào! Tôi là Trợ lý Phân tích NexusBI. Bạn có thể hỏi về các chỉ số doanh thu, biên lợi nhuận, hiệu quả theo kênh bán, hoặc yêu cầu so sánh số liệu giữa các quý.
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 pt-2 border-t border-[#ECE4D8]">
+        <input type="text" id="modal-chat-input" placeholder="Ví dụ: Kênh nào có tỷ suất lợi nhuận cao nhất?" class="flex-1 px-4 py-2.5 text-xs rounded-xl glass-input text-[#0A261D] placeholder:text-[#7A8F87]" onkeydown="if(event.key==='Enter') sendModalChatMessage()">
+        <button onclick="sendModalChatMessage()" class="px-4 py-2.5 bg-[#0A261D] hover:bg-[#133A2D] text-white border border-[#D4B07B]/40 rounded-xl text-xs font-bold shadow-sm transition">
+          Gửi
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+</body>
+</html>

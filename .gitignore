@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.env
+
+# Editor & OS files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+
+# Temporary test and analysis scripts in tools
+tools/*.ps1
+tools/__pycache__/
+
+# Data uploads and temporary outputs
+data/uploads/*
+!data/uploads/NexusBI_BI_Test_Dataset.csv
+!data/uploads/DuLieu_GiaoDich_Sach_Cleaned.csv
+data/clean/*
+!data/clean/sales_transactions_cleaned.csv
+data/export/*

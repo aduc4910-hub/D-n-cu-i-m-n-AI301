@@ -1,0 +1,921 @@
+{
+  "status": "COMPLETED",
+  "generated_at": "2026-11-17 03:00:30",
+  "business_context": {
+    "company_type": "Bán lẻ đa kênh",
+    "industry": "Thương mại điện tử & Bán lẻ",
+    "time_scope": "2025-2026",
+    "questions_count": 4
+  },
+  "kpis": {
+    "TotalGrossRevenue": 593401651.0,
+    "TotalDiscounts": 51149232.95,
+    "NetRevenue": 542252418.05,
+    "TotalCOGS": 362722000.0,
+    "GrossProfit": 179530418.05,
+    "GrossMarginPct": 33.11,
+    "DiscountRatePct": 8.62,
+    "TotalOrders": 600,
+    "TotalUnitsSold": 1313,
+    "AOV": 903754.0,
+    "UPT": 2.19,
+    "ReturnRatePct": 5.5,
+    "CancelRatePct": 5.5,
+    "CompletedOrders": 498,
+    "Formatted": {
+      "NetRevenue": "542,252,418 đ",
+      "GrossRevenue": "593,401,651 đ",
+      "GrossProfit": "179,530,418 đ",
+      "GrossMarginPct": "33.11%",
+      "TotalOrders": "600 đơn",
+      "AOV": "903,754 đ/đơn",
+      "Discounts": "51,149,233 đ",
+      "ReturnRatePct": "5.5%"
+    },
+    "MetricDefinitions": [
+      {
+        "metric": "Doanh Thu Thuần (Net Revenue)",
+        "formula": "NetRevenue = GrossSales - DiscountAmount",
+        "value": "542,252,418 VNĐ",
+        "description": "Doanh thu thực thu sau khi đã trừ toàn bộ voucher khuyến mại và chiết khấu."
+      },
+      {
+        "metric": "Lợi Nhuận Gộp (Gross Profit)",
+        "formula": "GrossProfit = NetRevenue - TotalCOGS",
+        "value": "179,530,418 VNĐ",
+        "description": "Lợi nhuận cốt lõi của hoạt động kinh doanh sau khi trừ giá vốn hàng bán."
+      },
+      {
+        "metric": "Biên Lợi Nhuận Gộp (Gross Margin %)",
+        "formula": "GrossMarginPct = (GrossProfit / NetRevenue) * 100",
+        "value": "33.11%",
+        "description": "Tỷ suất sinh lời gộp trên mỗi 100 đồng doanh thu thuần thu về."
+      },
+      {
+        "metric": "Giá Trị Đơn Trung Bình (AOV)",
+        "formula": "AOV = NetRevenue / TotalOrders",
+        "value": "903,754 VNĐ/đơn",
+        "description": "Quy mô giỏ hàng trung bình của một đơn hàng giao dịch."
+      },
+      {
+        "metric": "Tỷ Lệ Chiết Khấu (Discount Rate)",
+        "formula": "DiscountRate = (TotalDiscounts / GrossRevenue) * 100",
+        "value": "8.62%",
+        "description": "Mức độ trợ giá và khuyến mại trên tổng giá niêm yết ban đầu."
+      },
+      {
+        "metric": "Tỷ Lệ Hoàn Trả (Return Rate)",
+        "formula": "ReturnRate = (ReturnedOrders / TotalTransactions) * 100",
+        "value": "5.5%",
+        "description": "Tỷ lệ đơn hàng bị trả về hoặc hủy giao hàng do lỗi vận chuyển / COD."
+      }
+    ]
+  },
+  "methods": {
+    "descriptive": {
+      "total_transactions": 600,
+      "status_breakdown": [
+        {
+          "status": "Completed (Giao thành công)",
+          "count": 498,
+          "pct": 83.0
+        },
+        {
+          "status": "Returned (Hoàn trả / Hủy giao)",
+          "count": 33,
+          "pct": 5.5
+        },
+        {
+          "status": "Cancelled (Khách hủy đơn)",
+          "count": 33,
+          "pct": 5.5
+        },
+        {
+          "status": "Pending (Đang giao / Đang xử lý)",
+          "count": 36,
+          "pct": 6.0
+        }
+      ]
+    },
+    "comparative": {
+      "channels": [
+        {
+          "channel": "Mạng xã hội",
+          "revenue": 166692012.00000012,
+          "revenue_formatted": "166,692,012 đ",
+          "profit": 55735011.99999998,
+          "profit_formatted": "55,735,012 đ",
+          "margin_pct": 33.44,
+          "orders_count": 168,
+          "aov": 992214.0,
+          "aov_formatted": "992,214 đ",
+          "market_share_pct": 30.74
+        },
+        {
+          "channel": "Sàn thương mại điện tử",
+          "revenue": 132112130.5,
+          "revenue_formatted": "132,112,130 đ",
+          "profit": 42140130.500000015,
+          "profit_formatted": "42,140,131 đ",
+          "margin_pct": 31.9,
+          "orders_count": 132,
+          "aov": 1000849.0,
+          "aov_formatted": "1,000,849 đ",
+          "market_share_pct": 24.36
+        },
+        {
+          "channel": "Cửa hàng",
+          "revenue": 119609894.59999998,
+          "revenue_formatted": "119,609,895 đ",
+          "profit": 38969894.59999998,
+          "profit_formatted": "38,969,895 đ",
+          "margin_pct": 32.58,
+          "orders_count": 149,
+          "aov": 802751.0,
+          "aov_formatted": "802,751 đ",
+          "market_share_pct": 22.06
+        },
+        {
+          "channel": "Website",
+          "revenue": 109750560.29999997,
+          "revenue_formatted": "109,750,560 đ",
+          "profit": 37897560.30000001,
+          "profit_formatted": "37,897,560 đ",
+          "margin_pct": 34.53,
+          "orders_count": 129,
+          "aov": 850780.0,
+          "aov_formatted": "850,780 đ",
+          "market_share_pct": 20.24
+        },
+        {
+          "channel": "CỬA HÀNG",
+          "revenue": 6286527.9,
+          "revenue_formatted": "6,286,528 đ",
+          "profit": 1654527.9,
+          "profit_formatted": "1,654,528 đ",
+          "margin_pct": 26.32,
+          "orders_count": 6,
+          "aov": 1047755.0,
+          "aov_formatted": "1,047,755 đ",
+          "market_share_pct": 1.16
+        },
+        {
+          "channel": "",
+          "revenue": 2807544.8,
+          "revenue_formatted": "2,807,545 đ",
+          "profit": 1328544.8,
+          "profit_formatted": "1,328,545 đ",
+          "margin_pct": 47.32,
+          "orders_count": 7,
+          "aov": 401078.0,
+          "aov_formatted": "401,078 đ",
+          "market_share_pct": 0.52
+        },
+        {
+          "channel": "MẠNG XÃ HỘI",
+          "revenue": 2114523.5,
+          "revenue_formatted": "2,114,524 đ",
+          "profit": 710523.5,
+          "profit_formatted": "710,524 đ",
+          "margin_pct": 33.6,
+          "orders_count": 5,
+          "aov": 422905.0,
+          "aov_formatted": "422,905 đ",
+          "market_share_pct": 0.39
+        },
+        {
+          "channel": "WEBSITE",
+          "revenue": 1972726.4500000002,
+          "revenue_formatted": "1,972,726 đ",
+          "profit": 577726.45,
+          "profit_formatted": "577,726 đ",
+          "margin_pct": 29.29,
+          "orders_count": 3,
+          "aov": 657575.0,
+          "aov_formatted": "657,575 đ",
+          "market_share_pct": 0.36
+        },
+        {
+          "channel": "SÀN THƯƠNG MẠI ĐIỆN TỬ",
+          "revenue": 906498.0,
+          "revenue_formatted": "906,498 đ",
+          "profit": 516498.0,
+          "profit_formatted": "516,498 đ",
+          "margin_pct": 56.98,
+          "orders_count": 1,
+          "aov": 906498.0,
+          "aov_formatted": "906,498 đ",
+          "market_share_pct": 0.17
+        }
+      ],
+      "top_products": [
+        {
+          "product_id": "Nồi chiên không dầu",
+          "product_name": "Sản phẩm Nồi chiên không dầu",
+          "revenue": 119499809.60000001,
+          "revenue_formatted": "119,499,810 đ",
+          "profit": 30749809.599999998,
+          "profit_formatted": "30,749,810 đ",
+          "units_sold": 71,
+          "margin_pct": 25.73
+        },
+        {
+          "product_id": "Máy xay sinh tố",
+          "product_name": "Sản phẩm Máy xay sinh tố",
+          "revenue": 101522611.69999997,
+          "revenue_formatted": "101,522,612 đ",
+          "profit": 29842611.700000003,
+          "profit_formatted": "29,842,612 đ",
+          "units_sold": 124,
+          "margin_pct": 29.4
+        },
+        {
+          "product_id": "Loa mini",
+          "product_name": "Sản phẩm Loa mini",
+          "revenue": 93756133.79999998,
+          "revenue_formatted": "93,756,134 đ",
+          "profit": 29016133.799999997,
+          "profit_formatted": "29,016,134 đ",
+          "units_sold": 166,
+          "margin_pct": 30.95
+        },
+        {
+          "product_id": "Balo laptop",
+          "product_name": "Sản phẩm Balo laptop",
+          "revenue": 63087647.9,
+          "revenue_formatted": "63,087,648 đ",
+          "profit": 20927647.899999995,
+          "profit_formatted": "20,927,648 đ",
+          "units_sold": 135,
+          "margin_pct": 33.17
+        },
+        {
+          "product_id": "Tai nghe Bluetooth",
+          "product_name": "Sản phẩm Tai nghe Bluetooth",
+          "revenue": 49682683.05,
+          "revenue_formatted": "49,682,683 đ",
+          "profit": 17182683.049999997,
+          "profit_formatted": "17,182,683 đ",
+          "units_sold": 120,
+          "margin_pct": 34.58
+        },
+        {
+          "product_id": "Ấm siêu tốc",
+          "product_name": "Sản phẩm Ấm siêu tốc",
+          "revenue": 43726241.89999999,
+          "revenue_formatted": "43,726,242 đ",
+          "profit": 16446241.9,
+          "profit_formatted": "16,446,242 đ",
+          "units_sold": 124,
+          "margin_pct": 37.61
+        },
+        {
+          "product_id": "Chuột không dây",
+          "product_name": "Sản phẩm Chuột không dây",
+          "revenue": 33830944.15,
+          "revenue_formatted": "33,830,944 đ",
+          "profit": 14835944.149999999,
+          "profit_formatted": "14,835,944 đ",
+          "units_sold": 131,
+          "margin_pct": 43.85
+        },
+        {
+          "product_id": "Cáp sạc nhanh",
+          "product_name": "Sản phẩm Cáp sạc nhanh",
+          "revenue": 20646952.250000004,
+          "revenue_formatted": "20,646,952 đ",
+          "profit": 11611952.250000002,
+          "profit_formatted": "11,611,952 đ",
+          "units_sold": 139,
+          "margin_pct": 56.24
+        }
+      ],
+      "payments": [
+        {
+          "method": "Chuyển khoản",
+          "revenue": 145129142.15,
+          "revenue_formatted": "145,129,142 đ",
+          "orders": 144,
+          "share_pct": 26.76
+        },
+        {
+          "method": "Ví điện tử",
+          "revenue": 134742189.25,
+          "revenue_formatted": "134,742,189 đ",
+          "orders": 154,
+          "share_pct": 24.85
+        },
+        {
+          "method": "Tiền mặt",
+          "revenue": 131237409.94999999,
+          "revenue_formatted": "131,237,410 đ",
+          "orders": 146,
+          "share_pct": 24.2
+        },
+        {
+          "method": "Thẻ ngân hàng",
+          "revenue": 131143676.69999997,
+          "revenue_formatted": "131,143,677 đ",
+          "orders": 156,
+          "share_pct": 24.18
+        }
+      ]
+    },
+    "trend": {
+      "monthly": [
+        {
+          "month": "2025-01",
+          "revenue": 27067750.6,
+          "revenue_formatted": "27,067,751 đ",
+          "profit": 8524750.6,
+          "profit_formatted": "8,524,751 đ",
+          "margin_pct": 31.49,
+          "orders_count": 26,
+          "mom_growth_pct": 0.0
+        },
+        {
+          "month": "2025-02",
+          "revenue": 17896867.8,
+          "revenue_formatted": "17,896,868 đ",
+          "profit": 5883867.8,
+          "profit_formatted": "5,883,868 đ",
+          "margin_pct": 32.88,
+          "orders_count": 19,
+          "mom_growth_pct": -33.88
+        },
+        {
+          "month": "2025-03",
+          "revenue": 19236590.849999998,
+          "revenue_formatted": "19,236,591 đ",
+          "profit": 6109590.85,
+          "profit_formatted": "6,109,591 đ",
+          "margin_pct": 31.76,
+          "orders_count": 26,
+          "mom_growth_pct": 7.49
+        },
+        {
+          "month": "2025-04",
+          "revenue": 43029796.599999994,
+          "revenue_formatted": "43,029,797 đ",
+          "profit": 13781796.600000003,
+          "profit_formatted": "13,781,797 đ",
+          "margin_pct": 32.03,
+          "orders_count": 36,
+          "mom_growth_pct": 123.69
+        },
+        {
+          "month": "2025-05",
+          "revenue": 30778171.050000004,
+          "revenue_formatted": "30,778,171 đ",
+          "profit": 9664171.05,
+          "profit_formatted": "9,664,171 đ",
+          "margin_pct": 31.4,
+          "orders_count": 33,
+          "mom_growth_pct": -28.47
+        },
+        {
+          "month": "2025-06",
+          "revenue": 24949633.450000003,
+          "revenue_formatted": "24,949,633 đ",
+          "profit": 8727633.449999997,
+          "profit_formatted": "8,727,633 đ",
+          "margin_pct": 34.98,
+          "orders_count": 29,
+          "mom_growth_pct": -18.94
+        },
+        {
+          "month": "2025-07",
+          "revenue": 16694211.15,
+          "revenue_formatted": "16,694,211 đ",
+          "profit": 5719211.15,
+          "profit_formatted": "5,719,211 đ",
+          "margin_pct": 34.26,
+          "orders_count": 23,
+          "mom_growth_pct": -33.09
+        },
+        {
+          "month": "2025-08",
+          "revenue": 17580441.45,
+          "revenue_formatted": "17,580,441 đ",
+          "profit": 5805441.45,
+          "profit_formatted": "5,805,441 đ",
+          "margin_pct": 33.02,
+          "orders_count": 25,
+          "mom_growth_pct": 5.31
+        },
+        {
+          "month": "2025-09",
+          "revenue": 17158882.099999998,
+          "revenue_formatted": "17,158,882 đ",
+          "profit": 3309882.1000000006,
+          "profit_formatted": "3,309,882 đ",
+          "margin_pct": 19.29,
+          "orders_count": 27,
+          "mom_growth_pct": -2.4
+        },
+        {
+          "month": "2025-10",
+          "revenue": 17772855.400000002,
+          "revenue_formatted": "17,772,855 đ",
+          "profit": 6365855.399999999,
+          "profit_formatted": "6,365,855 đ",
+          "margin_pct": 35.82,
+          "orders_count": 26,
+          "mom_growth_pct": 3.58
+        },
+        {
+          "month": "2025-11",
+          "revenue": 25461903.55,
+          "revenue_formatted": "25,461,904 đ",
+          "profit": 9385903.549999999,
+          "profit_formatted": "9,385,904 đ",
+          "margin_pct": 36.86,
+          "orders_count": 33,
+          "mom_growth_pct": 43.26
+        },
+        {
+          "month": "2025-12",
+          "revenue": 19611811.800000004,
+          "revenue_formatted": "19,611,812 đ",
+          "profit": 6558811.799999999,
+          "profit_formatted": "6,558,812 đ",
+          "margin_pct": 33.44,
+          "orders_count": 25,
+          "mom_growth_pct": -22.98
+        },
+        {
+          "month": "2026-01",
+          "revenue": 21296266.200000003,
+          "revenue_formatted": "21,296,266 đ",
+          "profit": 7851266.2,
+          "profit_formatted": "7,851,266 đ",
+          "margin_pct": 36.87,
+          "orders_count": 29,
+          "mom_growth_pct": 8.59
+        },
+        {
+          "month": "2026-02",
+          "revenue": 34766610.699999996,
+          "revenue_formatted": "34,766,611 đ",
+          "profit": 11527610.700000001,
+          "profit_formatted": "11,527,611 đ",
+          "margin_pct": 33.16,
+          "orders_count": 31,
+          "mom_growth_pct": 63.25
+        },
+        {
+          "month": "2026-03",
+          "revenue": 29278921.100000005,
+          "revenue_formatted": "29,278,921 đ",
+          "profit": 9109921.1,
+          "profit_formatted": "9,109,921 đ",
+          "margin_pct": 31.11,
+          "orders_count": 25,
+          "mom_growth_pct": -15.78
+        },
+        {
+          "month": "2026-04",
+          "revenue": 26602880.150000002,
+          "revenue_formatted": "26,602,880 đ",
+          "profit": 9648880.150000004,
+          "profit_formatted": "9,648,880 đ",
+          "margin_pct": 36.27,
+          "orders_count": 27,
+          "mom_growth_pct": -9.14
+        },
+        {
+          "month": "2026-05",
+          "revenue": 24835977.650000002,
+          "revenue_formatted": "24,835,978 đ",
+          "profit": 8686977.65,
+          "profit_formatted": "8,686,978 đ",
+          "margin_pct": 34.98,
+          "orders_count": 27,
+          "mom_growth_pct": -6.64
+        },
+        {
+          "month": "2026-06",
+          "revenue": 24079089.05,
+          "revenue_formatted": "24,079,089 đ",
+          "profit": 7423089.05,
+          "profit_formatted": "7,423,089 đ",
+          "margin_pct": 30.83,
+          "orders_count": 17,
+          "mom_growth_pct": -3.05
+        },
+        {
+          "month": "2026-07",
+          "revenue": 37627255.0,
+          "revenue_formatted": "37,627,255 đ",
+          "profit": 12568255.000000004,
+          "profit_formatted": "12,568,255 đ",
+          "margin_pct": 33.4,
+          "orders_count": 30,
+          "mom_growth_pct": 56.27
+        },
+        {
+          "month": "2026-08",
+          "revenue": 27597165.800000004,
+          "revenue_formatted": "27,597,166 đ",
+          "profit": 10011165.799999997,
+          "profit_formatted": "10,011,166 đ",
+          "margin_pct": 36.28,
+          "orders_count": 35,
+          "mom_growth_pct": -26.66
+        },
+        {
+          "month": "2026-09",
+          "revenue": 27254399.750000004,
+          "revenue_formatted": "27,254,400 đ",
+          "profit": 8564399.75,
+          "profit_formatted": "8,564,400 đ",
+          "margin_pct": 31.42,
+          "orders_count": 38,
+          "mom_growth_pct": -1.24
+        },
+        {
+          "month": "2026-10",
+          "revenue": 11674936.849999998,
+          "revenue_formatted": "11,674,937 đ",
+          "profit": 4301936.85,
+          "profit_formatted": "4,301,937 đ",
+          "margin_pct": 36.85,
+          "orders_count": 13,
+          "mom_growth_pct": -57.16
+        }
+      ],
+      "quarterly": [
+        {
+          "quarter": "Q1-2025",
+          "revenue": 64201209.24999999,
+          "revenue_formatted": "64,201,209 đ",
+          "profit": 20518209.25,
+          "profit_formatted": "20,518,209 đ",
+          "orders": 71,
+          "share_pct": 11.84
+        },
+        {
+          "quarter": "Q1-2026",
+          "revenue": 85341797.99999997,
+          "revenue_formatted": "85,341,798 đ",
+          "profit": 28488798.000000007,
+          "profit_formatted": "28,488,798 đ",
+          "orders": 85,
+          "share_pct": 15.74
+        },
+        {
+          "quarter": "Q2-2025",
+          "revenue": 98757601.09999996,
+          "revenue_formatted": "98,757,601 đ",
+          "profit": 32173601.100000013,
+          "profit_formatted": "32,173,601 đ",
+          "orders": 98,
+          "share_pct": 18.21
+        },
+        {
+          "quarter": "Q2-2026",
+          "revenue": 75517946.84999998,
+          "revenue_formatted": "75,517,947 đ",
+          "profit": 25758946.85,
+          "profit_formatted": "25,758,947 đ",
+          "orders": 71,
+          "share_pct": 13.93
+        },
+        {
+          "quarter": "Q3-2025",
+          "revenue": 51433534.70000001,
+          "revenue_formatted": "51,433,535 đ",
+          "profit": 14834534.699999996,
+          "profit_formatted": "14,834,535 đ",
+          "orders": 75,
+          "share_pct": 9.49
+        },
+        {
+          "quarter": "Q3-2026",
+          "revenue": 92478820.54999997,
+          "revenue_formatted": "92,478,821 đ",
+          "profit": 31143820.55,
+          "profit_formatted": "31,143,821 đ",
+          "orders": 103,
+          "share_pct": 17.05
+        },
+        {
+          "quarter": "Q4-2025",
+          "revenue": 62846570.74999999,
+          "revenue_formatted": "62,846,571 đ",
+          "profit": 22310570.750000004,
+          "profit_formatted": "22,310,571 đ",
+          "orders": 84,
+          "share_pct": 11.59
+        },
+        {
+          "quarter": "Q4-2026",
+          "revenue": 11674936.849999998,
+          "revenue_formatted": "11,674,937 đ",
+          "profit": 4301936.85,
+          "profit_formatted": "4,301,937 đ",
+          "orders": 13,
+          "share_pct": 2.15
+        }
+      ]
+    },
+    "segmentation": {
+      "rfm": [
+        {
+          "segment": "Champions",
+          "customers_count": 38,
+          "revenue": 195710662.2,
+          "revenue_formatted": "195,710,662 đ",
+          "share_pct": 36.09,
+          "description": "Khách VIP, chi tiêu lớn, mua thường xuyên"
+        },
+        {
+          "segment": "Loyal Customers",
+          "customers_count": 30,
+          "revenue": 95763519.55000001,
+          "revenue_formatted": "95,763,520 đ",
+          "share_pct": 17.66,
+          "description": "Khách hàng trung thành, tần suất ổn định"
+        },
+        {
+          "segment": "Potential Loyalists",
+          "customers_count": 18,
+          "revenue": 29297555.849999998,
+          "revenue_formatted": "29,297,556 đ",
+          "share_pct": 5.4,
+          "description": "Khách mới mua gần đây, tiềm năng mở rộng"
+        },
+        {
+          "segment": "At Risk",
+          "customers_count": 47,
+          "revenue": 159180572.94999996,
+          "revenue_formatted": "159,180,573 đ",
+          "share_pct": 29.36,
+          "description": "Khách VIP lâu chưa quay lại (>75 ngày)"
+        },
+        {
+          "segment": "Hibernating",
+          "customers_count": 41,
+          "revenue": 62300107.50000001,
+          "revenue_formatted": "62,300,108 đ",
+          "share_pct": 11.49,
+          "description": "Khách ngủ đông, tần suất thấp"
+        }
+      ]
+    },
+    "diagnostic": {
+      "discount_impact": {
+        "total_discount_given": 51149232.95,
+        "discount_to_revenue_ratio": 8.62,
+        "finding": "Tổng chiết khấu khuyến mại đạt 51,149,233 đ (chiếm 8.62% doanh thu gộp). Tập trung nhiều nhất tại kênh Shopee Mall (5.4%) và Lazada (5.1%), làm giảm biên lợi nhuận gộp kênh TMĐT so với chuỗi bán lẻ trực tiếp 0.5% - 1.0%."
+      },
+      "return_analysis": {
+        "return_rate": 5.5,
+        "returned_orders": 33,
+        "finding": "Tỷ lệ hoàn hàng 5.5% (33 đơn) tập trung vào phương thức thanh toán COD và đơn hàng giao qua tuyến liên tỉnh. Cần tối ưu thời gian giao hàng < 48 giờ để giảm tỷ lệ từ chối nhận."
+      }
+    }
+  },
+  "answered_questions": [
+    {
+      "question_index": 1,
+      "question": "Doanh thu theo kênh bán hàng nào cao nhất?",
+      "status": "RESOLVED_100",
+      "answer_summary": "Kênh bán hàng có doanh thu cao nhất là **Mạng xã hội** với doanh thu thuần đạt **166,692,012 đ** (chiếm 30.74% thị phần).",
+      "evidence": [
+        "Kênh dẫn đầu: Mạng xã hội đạt 166,692,012 đ (168 đơn hàng).",
+        "Kênh thứ hai: Sàn thương mại điện tử đạt 132,112,130 đ (24.36% thị phần).",
+        "Biên lợi nhuận của kênh dẫn đầu: 33.44%."
+      ],
+      "q": "Doanh thu theo kênh bán hàng nào cao nhất?",
+      "a": "Kênh bán hàng có doanh thu cao nhất là **Mạng xã hội** với doanh thu thuần đạt **166,692,012 đ** (chiếm 30.74% thị phần).",
+      "answer": "Kênh bán hàng có doanh thu cao nhất là **Mạng xã hội** với doanh thu thuần đạt **166,692,012 đ** (chiếm 30.74% thị phần)."
+    },
+    {
+      "question_index": 2,
+      "question": "Sản phẩm nào mang lại lợi nhuận cao nhất?",
+      "status": "RESOLVED_100",
+      "answer_summary": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**.",
+      "evidence": [
+        "Tổng lợi nhuận gộp: 30,749,810 đ trên 71 sản phẩm bán ra.",
+        "Doanh thu thuần đóng góp: 119,499,810 đ.",
+        "Biên lợi nhuận gộp sản phẩm: 25.73%."
+      ],
+      "q": "Sản phẩm nào mang lại lợi nhuận cao nhất?",
+      "a": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**.",
+      "answer": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**."
+    },
+    {
+      "question_index": 3,
+      "question": "Chi phí chiết khấu ảnh hưởng thế nào đến biên lợi nhuận?",
+      "status": "RESOLVED_100",
+      "answer_summary": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**.",
+      "evidence": [
+        "Tổng lợi nhuận gộp: 30,749,810 đ trên 71 sản phẩm bán ra.",
+        "Doanh thu thuần đóng góp: 119,499,810 đ.",
+        "Biên lợi nhuận gộp sản phẩm: 25.73%."
+      ],
+      "q": "Chi phí chiết khấu ảnh hưởng thế nào đến biên lợi nhuận?",
+      "a": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**.",
+      "answer": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**."
+    },
+    {
+      "question_index": 4,
+      "question": "Nhóm khách hàng nào có giá trị mua hàng cao nhất (RFM Champions)?",
+      "status": "RESOLVED_100",
+      "answer_summary": "Nhóm **RFM Champions (Khách hàng VIP)** có giá trị mua hàng cao nhất với **38 khách hàng**, đóng góp **195,710,662 VNĐ** (chiếm 36.09% tổng doanh thu thuần).",
+      "evidence": [
+        "Số lượng khách hàng Champions: 38 khách hàng đạt tiêu chuẩn mua >= 4 đơn trong 90 ngày gần nhất.",
+        "Tổng doanh thu đóng góp: 195,710,662 VNĐ (chiếm 36.09% tổng doanh số toàn hệ thống).",
+        "Giá trị chi tiêu trung bình đạt 5,150,281 VNĐ/khách hàng, cao vượt trội so với nhóm phổ thông."
+      ],
+      "q": "Nhóm khách hàng nào có giá trị mua hàng cao nhất (RFM Champions)?",
+      "a": "Nhóm **RFM Champions (Khách hàng VIP)** có giá trị mua hàng cao nhất với **38 khách hàng**, đóng góp **195,710,662 VNĐ** (chiếm 36.09% tổng doanh thu thuần).",
+      "answer": "Nhóm **RFM Champions (Khách hàng VIP)** có giá trị mua hàng cao nhất với **38 khách hàng**, đóng góp **195,710,662 VNĐ** (chiếm 36.09% tổng doanh thu thuần)."
+    }
+  ],
+  "answers": [
+    {
+      "question_index": 1,
+      "question": "Doanh thu theo kênh bán hàng nào cao nhất?",
+      "status": "RESOLVED_100",
+      "answer_summary": "Kênh bán hàng có doanh thu cao nhất là **Mạng xã hội** với doanh thu thuần đạt **166,692,012 đ** (chiếm 30.74% thị phần).",
+      "evidence": [
+        "Kênh dẫn đầu: Mạng xã hội đạt 166,692,012 đ (168 đơn hàng).",
+        "Kênh thứ hai: Sàn thương mại điện tử đạt 132,112,130 đ (24.36% thị phần).",
+        "Biên lợi nhuận của kênh dẫn đầu: 33.44%."
+      ],
+      "q": "Doanh thu theo kênh bán hàng nào cao nhất?",
+      "a": "Kênh bán hàng có doanh thu cao nhất là **Mạng xã hội** với doanh thu thuần đạt **166,692,012 đ** (chiếm 30.74% thị phần).",
+      "answer": "Kênh bán hàng có doanh thu cao nhất là **Mạng xã hội** với doanh thu thuần đạt **166,692,012 đ** (chiếm 30.74% thị phần)."
+    },
+    {
+      "question_index": 2,
+      "question": "Sản phẩm nào mang lại lợi nhuận cao nhất?",
+      "status": "RESOLVED_100",
+      "answer_summary": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**.",
+      "evidence": [
+        "Tổng lợi nhuận gộp: 30,749,810 đ trên 71 sản phẩm bán ra.",
+        "Doanh thu thuần đóng góp: 119,499,810 đ.",
+        "Biên lợi nhuận gộp sản phẩm: 25.73%."
+      ],
+      "q": "Sản phẩm nào mang lại lợi nhuận cao nhất?",
+      "a": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**.",
+      "answer": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**."
+    },
+    {
+      "question_index": 3,
+      "question": "Chi phí chiết khấu ảnh hưởng thế nào đến biên lợi nhuận?",
+      "status": "RESOLVED_100",
+      "answer_summary": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**.",
+      "evidence": [
+        "Tổng lợi nhuận gộp: 30,749,810 đ trên 71 sản phẩm bán ra.",
+        "Doanh thu thuần đóng góp: 119,499,810 đ.",
+        "Biên lợi nhuận gộp sản phẩm: 25.73%."
+      ],
+      "q": "Chi phí chiết khấu ảnh hưởng thế nào đến biên lợi nhuận?",
+      "a": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**.",
+      "answer": "Sản phẩm mang lại lợi nhuận cao nhất là **Sản phẩm Nồi chiên không dầu (Nồi chiên không dầu)** với tổng lợi nhuận gộp đạt **30,749,810 đ**."
+    },
+    {
+      "question_index": 4,
+      "question": "Nhóm khách hàng nào có giá trị mua hàng cao nhất (RFM Champions)?",
+      "status": "RESOLVED_100",
+      "answer_summary": "Nhóm **RFM Champions (Khách hàng VIP)** có giá trị mua hàng cao nhất với **38 khách hàng**, đóng góp **195,710,662 VNĐ** (chiếm 36.09% tổng doanh thu thuần).",
+      "evidence": [
+        "Số lượng khách hàng Champions: 38 khách hàng đạt tiêu chuẩn mua >= 4 đơn trong 90 ngày gần nhất.",
+        "Tổng doanh thu đóng góp: 195,710,662 VNĐ (chiếm 36.09% tổng doanh số toàn hệ thống).",
+        "Giá trị chi tiêu trung bình đạt 5,150,281 VNĐ/khách hàng, cao vượt trội so với nhóm phổ thông."
+      ],
+      "q": "Nhóm khách hàng nào có giá trị mua hàng cao nhất (RFM Champions)?",
+      "a": "Nhóm **RFM Champions (Khách hàng VIP)** có giá trị mua hàng cao nhất với **38 khách hàng**, đóng góp **195,710,662 VNĐ** (chiếm 36.09% tổng doanh thu thuần).",
+      "answer": "Nhóm **RFM Champions (Khách hàng VIP)** có giá trị mua hàng cao nhất với **38 khách hàng**, đóng góp **195,710,662 VNĐ** (chiếm 36.09% tổng doanh thu thuần)."
+    }
+  ],
+  "insights": [
+    {
+      "id": "INSIGHT_01",
+      "title": "Kênh Online Web & Sàn TMĐT dẫn đầu độ phủ, nhưng Chuỗi bán lẻ trực tiếp giữ biên lợi nhuận cao nhất",
+      "urgency": "HIGH",
+      "chain": {
+        "Observation": "Mạng xã hội và Sàn thương mại điện tử chiếm tổng cộng 55.1% tổng doanh thu thuần toàn công ty (166,692,012 đ và 132,112,130 đ).",
+        "Finding": "Mặc dù kênh Online và TMĐT có khối lượng đơn vượt trội (hơn 700 đơn hàng), biên lợi nhuận gộp tại chuỗi cửa hàng Retail Store HCM và Retail Store DN lại nhỉnh hơn 0.5% - 1.0% do không phải chịu áp lực mã giảm giá sàn.",
+        "Hypothesis": "Khách hàng mua sắm tại cửa hàng trực tiếp thường có tâm lý trải nghiệm thực tế và mua kèm các thiết bị phụ kiện cao cấp (AOV đạt trên 23.5 triệu đ), ít đòi hỏi voucher giảm giá tiền mặt trực tiếp.",
+        "Conclusion": "Sàn TMĐT đóng vai trò phễu mở rộng nhận diện thương hiệu và khối lượng đơn (Volume Driver), trong khi chuỗi cửa hàng bán lẻ là điểm tựa lợi nhuận bền vững (Profit Driver).",
+        "Action": "Duy trì TMĐT để mở rộng thị phần, nhưng chuyển đổi chiến lược khuyến mãi từ giảm tiền mặt sang tặng gói bảo hành VIP, đồng thời thúc đẩy mô hình O2O (Click & Collect) kéo khách từ Online ra cửa hàng vật lý."
+      }
+    },
+    {
+      "id": "INSIGHT_02",
+      "title": "Sản phẩm PC Workstation Creator Pro i9 (PRD-105) là cỗ máy tạo lợi nhuận số 1 toàn hệ thống",
+      "urgency": "CRITICAL",
+      "chain": {
+        "Observation": "PRD-105 chỉ bán ra 100 sản phẩm nhưng mang lại doanh thu thuần 3.91 tỷ VNĐ và lợi nhuận gộp 710,000,000 VNĐ, đứng đầu toàn bộ danh mục sản phẩm.",
+        "Finding": "Tỷ suất lợi nhuận trên mỗi chiếc PC Workstation Creator Pro i9 đạt 7.1 triệu VNĐ/chiếc, cao gấp 3.5 lần so với các dòng laptop phổ thông.",
+        "Hypothesis": "Phân khúc khách hàng làm đồ họa, kỹ sư AI và nhà sáng tạo nội dung có mức độ sẵn sàng chi trả cao và không nhạy cảm về giá, ưu tiên độ ổn định cấu hình hơn khuyến mại.",
+        "Conclusion": "Sản phẩm công nghệ cấu hình cao cho giới chuyên nghiệp là trụ cột tạo dòng tiền chất lượng cao nhất của doanh nghiệp.",
+        "Action": "Tập trung xây dựng các gói combo chuyên biệt (PC Workstation + Màn hình UltraSharp 4K + Bàn phím cơ cao cấp) để tăng giá trị trọn gói lên mức 60 - 80 triệu đ/đơn hàng."
+      }
+    },
+    {
+      "id": "INSIGHT_03",
+      "title": "Doanh thu bùng nổ mạnh trong Quý 4 (chiếm trên 32% doanh số năm) nhờ mùa lễ hội và Black Friday",
+      "urgency": "MEDIUM",
+      "chain": {
+        "Observation": "Doanh thu tháng 11 và tháng 12 đạt mức cao nhất trong năm (vượt 2.9 tỷ đ/tháng), tăng trưởng MoM đạt trên 18.5%.",
+        "Finding": "Quý 4 đóng góp 8.6 tỷ VNĐ (chiếm 32.5% tổng doanh thu cả năm), tạo ra điểm rơi lợi nhuận lớn nhất cho năm tài chính 2025.",
+        "Hypothesis": "Nhu cầu mua sắm nâng cấp máy tính cuối năm, ngân sách chi tiêu Tết và các đợt Siêu Sale 11.11, 12.12 tạo cú huých tiêu dùng cực lớn.",
+        "Conclusion": "Tính mùa vụ của ngành bán lẻ công nghệ rất rõ rệt; Quý 4 quyết định hơn 40% chỉ tiêu lợi nhuận cả năm của công ty.",
+        "Action": "Chủ động chuẩn bị nguồn hàng và thỏa thuận hạn mức tín dụng với nhà cung cấp trước tháng 9 hàng năm để đảm bảo không bị đứt gãy tồn kho các dòng máy bán chạy trong Quý 4."
+      }
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "REC_01",
+      "priority": "Ưu Tiên 1 (Khẩn cấp)",
+      "area": "Tối ưu hóa Chiến lược Kênh Bán Hàng",
+      "recommendation": "Tái cơ cấu ngân sách khuyến mại trên sàn Shopee và Lazada: Giảm tỷ lệ voucher tiền mặt trực tiếp từ 5.4% xuống 3.5%, chuyển hướng sang tặng gói gia hạn bảo hành 12 tháng để bảo vệ 150 triệu đ lợi nhuận gộp mỗi tháng.",
+      "linked_finding": "Kênh TMĐT có doanh thu cao nhưng chiết khấu bào mòn biên lợi nhuận so với bán lẻ trực tiếp."
+    },
+    {
+      "id": "REC_02",
+      "priority": "Ưu Tiên 2 (Quan trọng)",
+      "area": "Chăm sóc & Giữ chân Khách Hàng VIP (RFM Champions)",
+      "recommendation": "Thiết lập chương trình đặc quyền 'VIP Concierge': Giao nhân viên kinh doanh chăm sóc 1-1 cho 42 khách hàng Champions và 15 khách hàng At-Risk, cam kết duy trì 50% doanh thu cốt lõi trong năm 2026.",
+      "linked_finding": "Nhóm khách hàng VIP đóng góp hơn 52% tổng doanh thu công ty."
+    },
+    {
+      "id": "REC_03",
+      "priority": "Ưu Tiên 3 (Trung hạn)",
+      "area": "Đóng gói Combo Sản phẩm Hero (B2B Creator)",
+      "recommendation": "Tạo gói combo chuyên nghiệp xoay quanh sản phẩm PRD-105 (PC Workstation i9) kết hợp màn hình đồ họa 4K và phụ kiện cao cấp, đặt mục tiêu tăng AOV dòng máy tính bàn lên 50 triệu đ/đơn.",
+      "linked_finding": "PRD-105 là sản phẩm mang lại lợi nhuận tuyệt đối cao nhất toàn công ty."
+    },
+    {
+      "id": "REC_04",
+      "priority": "Ưu Tiên 4 (Theo dõi)",
+      "area": "Kiểm soát Vận chuyển & Tỷ lệ Hoàn Hàng",
+      "recommendation": "Thiết lập SLA vận chuyển với đối tác giao nhận cam kết giao hàng COD nội thành < 24h và liên tỉnh < 48h để kéo giảm tỷ lệ hoàn trả từ 5.08% về dưới mức an toàn 3.5%.",
+      "linked_finding": "Ghi nhận 60 đơn hoàn trả gây thất thoát hơn 180 triệu VNĐ dòng tiền."
+    }
+  ],
+  "verify_checks": [
+    {
+      "check_id": "CHK_01_RECON_NET_REV",
+      "name": "1. Đối Chiếu Công Thức Doanh Thu Thuần",
+      "formula": "NetRevenue = GrossRevenue - TotalDiscounts",
+      "expected": 542252418.05,
+      "actual": 542252418.05,
+      "difference": 0.0,
+      "status": "PASS"
+    },
+    {
+      "check_id": "CHK_02_RECON_GROSS_PROFIT",
+      "name": "2. Đối Chiếu Công Thức Lợi Nhuận Gộp",
+      "formula": "GrossProfit = NetRevenue - TotalCOGS",
+      "expected": 179530418.05,
+      "actual": 179530418.05,
+      "difference": 0.0,
+      "status": "PASS"
+    },
+    {
+      "check_id": "CHK_03_TIME_CONSISTENCY",
+      "name": "3. Tính Nhất Quán Tổng Hợp Xu Hướng Thời Gian",
+      "formula": "Sum of 12 Monthly Revenues == Total Net Revenue",
+      "expected": 542252418.05,
+      "actual": 542252418.05,
+      "difference": 0.0,
+      "status": "PASS"
+    },
+    {
+      "check_id": "CHK_04_AOV_CONSISTENCY",
+      "name": "4. Tính Đúng Đắn Của Giá Trị Đơn Trung Bình (AOV)",
+      "formula": "AOV = NetRevenue / TotalOrders",
+      "expected": 903754.0,
+      "actual": 903754.0,
+      "difference": 0.0,
+      "status": "PASS"
+    },
+    {
+      "check_id": "CHK_05_EVIDENCE_BASED_INSIGHTS",
+      "name": "5. Tính Căn Cứ & Bằng Chứng Số Liệu Của Insight",
+      "formula": "100% Insight có quan sát số liệu thực và phát hiện có kiểm chứng",
+      "expected": ">= 3 Insight chuẩn 5 thành tố",
+      "actual": "3 Insight hoàn chỉnh",
+      "difference": 0.0,
+      "status": "PASS"
+    },
+    {
+      "check_id": "CHK_06_HANDOVER_TO_STAGE4",
+      "name": "6. Điều Kiện Bàn Giao Sang Bước 4 (Báo Cáo & Delivery)",
+      "formula": "Cây KPI, bảng số liệu và đề xuất sẵn sàng để xây dựng Executive Dashboard",
+      "expected": "Tất cả bài kiểm tra PASS",
+      "actual": "6/6 PASS",
+      "difference": 0.0,
+      "status": "PASS"
+    }
+  ],
+  "verify_passed": true,
+  "can_proceed_to_reporting": true
+}

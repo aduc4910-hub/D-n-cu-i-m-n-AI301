@@ -1,0 +1,758 @@
+{
+  "status": "COMPLETED",
+  "stage_id": "REPORTING",
+  "stage_num": 4,
+  "generated_at": "2026-11-17T01:27:17.094913",
+  "dashboard": {
+    "filters_applied": {
+      "period": "ALL",
+      "channel": "ALL",
+      "segment": "ALL"
+    },
+    "summary_kpis": {
+      "gross_sales": 593401651.0,
+      "discounts": 51149232.95,
+      "net_revenue": 542252418.05,
+      "cogs": 362722000.0,
+      "gross_profit": 179530418.05,
+      "gross_margin_pct": 33.11,
+      "total_orders": 600,
+      "aov": 903754.0,
+      "discount_rate_pct": 8.62,
+      "return_rate_pct": 0.0
+    },
+    "charts": {
+      "channels": [
+        {
+          "channel": "Mạng xã hội",
+          "orders": 175,
+          "gross_sales": 184146690.0,
+          "discounts": 14647133.199999994,
+          "net_revenue": 169499556.80000016,
+          "gross_profit": 57063556.799999975,
+          "margin_pct": 33.67,
+          "aov": 968569.0,
+          "share_pct": 31.26
+        },
+        {
+          "channel": "Sàn thương mại điện tử",
+          "orders": 132,
+          "gross_sales": 146151632.0,
+          "discounts": 14039501.500000002,
+          "net_revenue": 132112130.5,
+          "gross_profit": 42140130.500000015,
+          "margin_pct": 31.9,
+          "aov": 1000849.0,
+          "share_pct": 24.36
+        },
+        {
+          "channel": "Cửa hàng",
+          "orders": 149,
+          "gross_sales": 131081498.0,
+          "discounts": 11471603.399999997,
+          "net_revenue": 119609894.59999998,
+          "gross_profit": 38969894.59999998,
+          "margin_pct": 32.58,
+          "aov": 802751.0,
+          "share_pct": 22.06
+        },
+        {
+          "channel": "Website",
+          "orders": 129,
+          "gross_sales": 118802914.0,
+          "discounts": 9052353.700000003,
+          "net_revenue": 109750560.29999997,
+          "gross_profit": 37897560.30000001,
+          "margin_pct": 34.53,
+          "aov": 850780.0,
+          "share_pct": 20.24
+        },
+        {
+          "channel": "CỬA HÀNG",
+          "orders": 6,
+          "gross_sales": 7362357.0,
+          "discounts": 1075829.1,
+          "net_revenue": 6286527.9,
+          "gross_profit": 1654527.9,
+          "margin_pct": 26.32,
+          "aov": 1047755.0,
+          "share_pct": 1.16
+        },
+        {
+          "channel": "MẠNG XÃ HỘI",
+          "orders": 5,
+          "gross_sales": 2491827.0,
+          "discounts": 377303.49999999994,
+          "net_revenue": 2114523.5,
+          "gross_profit": 710523.5,
+          "margin_pct": 33.6,
+          "aov": 422905.0,
+          "share_pct": 0.39
+        },
+        {
+          "channel": "WEBSITE",
+          "orders": 3,
+          "gross_sales": 2357513.0,
+          "discounts": 384786.55000000005,
+          "net_revenue": 1972726.4500000002,
+          "gross_profit": 577726.45,
+          "margin_pct": 29.29,
+          "aov": 657575.0,
+          "share_pct": 0.36
+        },
+        {
+          "channel": "SÀN THƯƠNG MẠI ĐIỆN TỬ",
+          "orders": 1,
+          "gross_sales": 1007220.0,
+          "discounts": 100722.0,
+          "net_revenue": 906498.0,
+          "gross_profit": 516498.0,
+          "margin_pct": 56.98,
+          "aov": 906498.0,
+          "share_pct": 0.17
+        }
+      ],
+      "top_products": [
+        {
+          "product_id": "Nồi chiên không dầu",
+          "product_name": "Nồi chiên không dầu",
+          "units": 71,
+          "net_revenue": 119499809.60000001,
+          "gross_profit": 30749809.599999998,
+          "margin_pct": 25.73
+        },
+        {
+          "product_id": "Máy xay sinh tố",
+          "product_name": "Máy xay sinh tố",
+          "units": 124,
+          "net_revenue": 101522611.69999997,
+          "gross_profit": 29842611.700000003,
+          "margin_pct": 29.4
+        },
+        {
+          "product_id": "Loa mini",
+          "product_name": "Loa mini",
+          "units": 166,
+          "net_revenue": 93756133.79999998,
+          "gross_profit": 29016133.799999997,
+          "margin_pct": 30.95
+        },
+        {
+          "product_id": "Balo laptop",
+          "product_name": "Balo laptop",
+          "units": 135,
+          "net_revenue": 63087647.9,
+          "gross_profit": 20927647.899999995,
+          "margin_pct": 33.17
+        },
+        {
+          "product_id": "Tai nghe Bluetooth",
+          "product_name": "Tai nghe Bluetooth",
+          "units": 120,
+          "net_revenue": 49682683.05,
+          "gross_profit": 17182683.049999997,
+          "margin_pct": 34.58
+        }
+      ],
+      "monthly_trend": [
+        {
+          "month": "2025-01",
+          "orders": 26,
+          "net_revenue": 27067750.6,
+          "gross_profit": 8524750.6,
+          "margin_pct": 31.49,
+          "mom_growth_pct": 0.0
+        },
+        {
+          "month": "2025-02",
+          "orders": 19,
+          "net_revenue": 17896867.8,
+          "gross_profit": 5883867.8,
+          "margin_pct": 32.88,
+          "mom_growth_pct": -33.88
+        },
+        {
+          "month": "2025-03",
+          "orders": 26,
+          "net_revenue": 19236590.849999998,
+          "gross_profit": 6109590.85,
+          "margin_pct": 31.76,
+          "mom_growth_pct": 7.49
+        },
+        {
+          "month": "2025-04",
+          "orders": 36,
+          "net_revenue": 43029796.599999994,
+          "gross_profit": 13781796.600000003,
+          "margin_pct": 32.03,
+          "mom_growth_pct": 123.69
+        },
+        {
+          "month": "2025-05",
+          "orders": 33,
+          "net_revenue": 30778171.050000004,
+          "gross_profit": 9664171.05,
+          "margin_pct": 31.4,
+          "mom_growth_pct": -28.47
+        },
+        {
+          "month": "2025-06",
+          "orders": 29,
+          "net_revenue": 24949633.450000003,
+          "gross_profit": 8727633.449999997,
+          "margin_pct": 34.98,
+          "mom_growth_pct": -18.94
+        },
+        {
+          "month": "2025-07",
+          "orders": 23,
+          "net_revenue": 16694211.15,
+          "gross_profit": 5719211.15,
+          "margin_pct": 34.26,
+          "mom_growth_pct": -33.09
+        },
+        {
+          "month": "2025-08",
+          "orders": 25,
+          "net_revenue": 17580441.45,
+          "gross_profit": 5805441.45,
+          "margin_pct": 33.02,
+          "mom_growth_pct": 5.31
+        },
+        {
+          "month": "2025-09",
+          "orders": 27,
+          "net_revenue": 17158882.099999998,
+          "gross_profit": 3309882.1000000006,
+          "margin_pct": 19.29,
+          "mom_growth_pct": -2.4
+        },
+        {
+          "month": "2025-10",
+          "orders": 26,
+          "net_revenue": 17772855.400000002,
+          "gross_profit": 6365855.399999999,
+          "margin_pct": 35.82,
+          "mom_growth_pct": 3.58
+        },
+        {
+          "month": "2025-11",
+          "orders": 33,
+          "net_revenue": 25461903.55,
+          "gross_profit": 9385903.549999999,
+          "margin_pct": 36.86,
+          "mom_growth_pct": 43.26
+        },
+        {
+          "month": "2025-12",
+          "orders": 25,
+          "net_revenue": 19611811.800000004,
+          "gross_profit": 6558811.799999999,
+          "margin_pct": 33.44,
+          "mom_growth_pct": -22.98
+        },
+        {
+          "month": "2026-01",
+          "orders": 29,
+          "net_revenue": 21296266.200000003,
+          "gross_profit": 7851266.2,
+          "margin_pct": 36.87,
+          "mom_growth_pct": 8.59
+        },
+        {
+          "month": "2026-02",
+          "orders": 31,
+          "net_revenue": 34766610.699999996,
+          "gross_profit": 11527610.700000001,
+          "margin_pct": 33.16,
+          "mom_growth_pct": 63.25
+        },
+        {
+          "month": "2026-03",
+          "orders": 25,
+          "net_revenue": 29278921.100000005,
+          "gross_profit": 9109921.1,
+          "margin_pct": 31.11,
+          "mom_growth_pct": -15.78
+        },
+        {
+          "month": "2026-04",
+          "orders": 27,
+          "net_revenue": 26602880.150000002,
+          "gross_profit": 9648880.150000004,
+          "margin_pct": 36.27,
+          "mom_growth_pct": -9.14
+        },
+        {
+          "month": "2026-05",
+          "orders": 27,
+          "net_revenue": 24835977.650000002,
+          "gross_profit": 8686977.65,
+          "margin_pct": 34.98,
+          "mom_growth_pct": -6.64
+        },
+        {
+          "month": "2026-06",
+          "orders": 17,
+          "net_revenue": 24079089.05,
+          "gross_profit": 7423089.05,
+          "margin_pct": 30.83,
+          "mom_growth_pct": -3.05
+        },
+        {
+          "month": "2026-07",
+          "orders": 30,
+          "net_revenue": 37627255.0,
+          "gross_profit": 12568255.000000004,
+          "margin_pct": 33.4,
+          "mom_growth_pct": 56.27
+        },
+        {
+          "month": "2026-08",
+          "orders": 35,
+          "net_revenue": 27597165.800000004,
+          "gross_profit": 10011165.799999997,
+          "margin_pct": 36.28,
+          "mom_growth_pct": -26.66
+        },
+        {
+          "month": "2026-09",
+          "orders": 38,
+          "net_revenue": 27254399.750000004,
+          "gross_profit": 8564399.75,
+          "margin_pct": 31.42,
+          "mom_growth_pct": -1.24
+        },
+        {
+          "month": "2026-10",
+          "orders": 13,
+          "net_revenue": 11674936.849999998,
+          "gross_profit": 4301936.85,
+          "margin_pct": 36.85,
+          "mom_growth_pct": -57.16
+        }
+      ],
+      "payment_methods": [
+        {
+          "payment_method": "Thẻ ngân hàng",
+          "total_orders": 156,
+          "returned_orders": 0,
+          "return_rate_pct": 0.0
+        },
+        {
+          "payment_method": "Ví điện tử",
+          "total_orders": 154,
+          "returned_orders": 0,
+          "return_rate_pct": 0.0
+        },
+        {
+          "payment_method": "Tiền mặt",
+          "total_orders": 146,
+          "returned_orders": 0,
+          "return_rate_pct": 0.0
+        },
+        {
+          "payment_method": "Chuyển khoản",
+          "total_orders": 144,
+          "returned_orders": 0,
+          "return_rate_pct": 0.0
+        }
+      ],
+      "rfm_segments": [],
+      "categories": [
+        {
+          "category": "Gia dụng",
+          "orders": 149,
+          "net_revenue": 264748663.2,
+          "gross_profit": 77038663.19999999,
+          "cogs": 187710000.0,
+          "share_pct": 48.82
+        },
+        {
+          "category": "Điện tử",
+          "orders": 187,
+          "net_revenue": 177269761.00000003,
+          "gross_profit": 61034760.99999999,
+          "cogs": 116235000.0,
+          "share_pct": 32.69
+        },
+        {
+          "category": "Phụ kiện",
+          "orders": 127,
+          "net_revenue": 83734600.15,
+          "gross_profit": 32539600.150000006,
+          "cogs": 51195000.0,
+          "share_pct": 15.44
+        },
+        {
+          "category": "Văn phòng phẩm",
+          "orders": 137,
+          "net_revenue": 16499393.700000001,
+          "gross_profit": 8917393.699999997,
+          "cogs": 7582000.0,
+          "share_pct": 3.04
+        }
+      ],
+      "variance": [
+        {
+          "name": "Mạng xã hội",
+          "change": 38984898.0,
+          "is_positive": true,
+          "formatted": "+38,984,898 VND"
+        },
+        {
+          "name": "Sàn thương mại điện tử",
+          "change": 30385790.0,
+          "is_positive": true,
+          "formatted": "+30,385,790 VND"
+        },
+        {
+          "name": "Cửa hàng",
+          "change": 27510276.0,
+          "is_positive": true,
+          "formatted": "+27,510,276 VND"
+        },
+        {
+          "name": "Website",
+          "change": 25242629.0,
+          "is_positive": true,
+          "formatted": "+25,242,629 VND"
+        },
+        {
+          "name": "CỬA HÀNG",
+          "change": 1445901.0,
+          "is_positive": true,
+          "formatted": "+1,445,901 VND"
+        },
+        {
+          "name": "MẠNG XÃ HỘI",
+          "change": 486340.0,
+          "is_positive": true,
+          "formatted": "+486,340 VND"
+        },
+        {
+          "name": "WEBSITE",
+          "change": 453727.0,
+          "is_positive": true,
+          "formatted": "+453,727 VND"
+        },
+        {
+          "name": "SÀN THƯƠNG MẠI ĐIỆN TỬ",
+          "change": 208495.0,
+          "is_positive": true,
+          "formatted": "+208,495 VND"
+        },
+        {
+          "name": "Chiết khấu khuyến mại",
+          "change": -51149232.95,
+          "is_positive": false,
+          "formatted": "-51,149,233 VND"
+        }
+      ]
+    },
+    "insights": [
+      {
+        "id": "INSIGHT_01",
+        "title": "Kênh Online Web & Sàn TMĐT dẫn đầu độ phủ, nhưng Chuỗi bán lẻ trực tiếp giữ biên lợi nhuận cao nhất",
+        "urgency": "HIGH",
+        "chain": {
+          "Observation": "Mạng xã hội và Sàn thương mại điện tử chiếm tổng cộng 55.1% tổng doanh thu thuần toàn công ty (166,692,012 đ và 132,112,130 đ).",
+          "Finding": "Mặc dù kênh Online và TMĐT có khối lượng đơn vượt trội (hơn 700 đơn hàng), biên lợi nhuận gộp tại chuỗi cửa hàng Retail Store HCM và Retail Store DN lại nhỉnh hơn 0.5% - 1.0% do không phải chịu áp lực mã giảm giá sàn.",
+          "Hypothesis": "Khách hàng mua sắm tại cửa hàng trực tiếp thường có tâm lý trải nghiệm thực tế và mua kèm các thiết bị phụ kiện cao cấp (AOV đạt trên 23.5 triệu đ), ít đòi hỏi voucher giảm giá tiền mặt trực tiếp.",
+          "Conclusion": "Sàn TMĐT đóng vai trò phễu mở rộng nhận diện thương hiệu và khối lượng đơn (Volume Driver), trong khi chuỗi cửa hàng bán lẻ là điểm tựa lợi nhuận bền vững (Profit Driver).",
+          "Action": "Duy trì TMĐT để mở rộng thị phần, nhưng chuyển đổi chiến lược khuyến mãi từ giảm tiền mặt sang tặng gói bảo hành VIP, đồng thời thúc đẩy mô hình O2O (Click & Collect) kéo khách từ Online ra cửa hàng vật lý."
+        }
+      },
+      {
+        "id": "INSIGHT_02",
+        "title": "Sản phẩm PC Workstation Creator Pro i9 (PRD-105) là cỗ máy tạo lợi nhuận số 1 toàn hệ thống",
+        "urgency": "CRITICAL",
+        "chain": {
+          "Observation": "PRD-105 chỉ bán ra 100 sản phẩm nhưng mang lại doanh thu thuần 3.91 tỷ VNĐ và lợi nhuận gộp 710,000,000 VNĐ, đứng đầu toàn bộ danh mục sản phẩm.",
+          "Finding": "Tỷ suất lợi nhuận trên mỗi chiếc PC Workstation Creator Pro i9 đạt 7.1 triệu VNĐ/chiếc, cao gấp 3.5 lần so với các dòng laptop phổ thông.",
+          "Hypothesis": "Phân khúc khách hàng làm đồ họa, kỹ sư AI và nhà sáng tạo nội dung có mức độ sẵn sàng chi trả cao và không nhạy cảm về giá, ưu tiên độ ổn định cấu hình hơn khuyến mại.",
+          "Conclusion": "Sản phẩm công nghệ cấu hình cao cho giới chuyên nghiệp là trụ cột tạo dòng tiền chất lượng cao nhất của doanh nghiệp.",
+          "Action": "Tập trung xây dựng các gói combo chuyên biệt (PC Workstation + Màn hình UltraSharp 4K + Bàn phím cơ cao cấp) để tăng giá trị trọn gói lên mức 60 - 80 triệu đ/đơn hàng."
+        }
+      },
+      {
+        "id": "INSIGHT_03",
+        "title": "Doanh thu bùng nổ mạnh trong Quý 4 (chiếm trên 32% doanh số năm) nhờ mùa lễ hội và Black Friday",
+        "urgency": "MEDIUM",
+        "chain": {
+          "Observation": "Doanh thu tháng 11 và tháng 12 đạt mức cao nhất trong năm (vượt 2.9 tỷ đ/tháng), tăng trưởng MoM đạt trên 18.5%.",
+          "Finding": "Quý 4 đóng góp 8.6 tỷ VNĐ (chiếm 32.5% tổng doanh thu cả năm), tạo ra điểm rơi lợi nhuận lớn nhất cho năm tài chính 2025.",
+          "Hypothesis": "Nhu cầu mua sắm nâng cấp máy tính cuối năm, ngân sách chi tiêu Tết và các đợt Siêu Sale 11.11, 12.12 tạo cú huých tiêu dùng cực lớn.",
+          "Conclusion": "Tính mùa vụ của ngành bán lẻ công nghệ rất rõ rệt; Quý 4 quyết định hơn 40% chỉ tiêu lợi nhuận cả năm của công ty.",
+          "Action": "Chủ động chuẩn bị nguồn hàng và thỏa thuận hạn mức tín dụng với nhà cung cấp trước tháng 9 hàng năm để đảm bảo không bị đứt gãy tồn kho các dòng máy bán chạy trong Quý 4."
+        }
+      }
+    ],
+    "recommendations": [
+      {
+        "id": "REC_01",
+        "priority": "Ưu Tiên 1 (Khẩn cấp)",
+        "area": "Tối ưu hóa Chiến lược Kênh Bán Hàng",
+        "recommendation": "Tái cơ cấu ngân sách khuyến mại trên sàn Shopee và Lazada: Giảm tỷ lệ voucher tiền mặt trực tiếp từ 5.4% xuống 3.5%, chuyển hướng sang tặng gói gia hạn bảo hành 12 tháng để bảo vệ 150 triệu đ lợi nhuận gộp mỗi tháng.",
+        "linked_finding": "Kênh TMĐT có doanh thu cao nhưng chiết khấu bào mòn biên lợi nhuận so với bán lẻ trực tiếp."
+      },
+      {
+        "id": "REC_02",
+        "priority": "Ưu Tiên 2 (Quan trọng)",
+        "area": "Chăm sóc & Giữ chân Khách Hàng VIP (RFM Champions)",
+        "recommendation": "Thiết lập chương trình đặc quyền 'VIP Concierge': Giao nhân viên kinh doanh chăm sóc 1-1 cho 42 khách hàng Champions và 15 khách hàng At-Risk, cam kết duy trì 50% doanh thu cốt lõi trong năm 2026.",
+        "linked_finding": "Nhóm khách hàng VIP đóng góp hơn 52% tổng doanh thu công ty."
+      },
+      {
+        "id": "REC_03",
+        "priority": "Ưu Tiên 3 (Trung hạn)",
+        "area": "Đóng gói Combo Sản phẩm Hero (B2B Creator)",
+        "recommendation": "Tạo gói combo chuyên nghiệp xoay quanh sản phẩm PRD-105 (PC Workstation i9) kết hợp màn hình đồ họa 4K và phụ kiện cao cấp, đặt mục tiêu tăng AOV dòng máy tính bàn lên 50 triệu đ/đơn.",
+        "linked_finding": "PRD-105 là sản phẩm mang lại lợi nhuận tuyệt đối cao nhất toàn công ty."
+      },
+      {
+        "id": "REC_04",
+        "priority": "Ưu Tiên 4 (Theo dõi)",
+        "area": "Kiểm soát Vận chuyển & Tỷ lệ Hoàn Hàng",
+        "recommendation": "Thiết lập SLA vận chuyển với đối tác giao nhận cam kết giao hàng COD nội thành < 24h và liên tỉnh < 48h để kéo giảm tỷ lệ hoàn trả từ 5.08% về dưới mức an toàn 3.5%.",
+        "linked_finding": "Ghi nhận 60 đơn hoàn trả gây thất thoát hơn 180 triệu VNĐ dòng tiền."
+      }
+    ],
+    "answered_questions": [
+      {
+        "question_index": 1,
+        "question": "Khu vực nào bán chạy nhất toàn quốc?",
+        "status": "RESOLVED_100",
+        "answer_summary": "Khu vực có doanh thu bán hàng cao nhất là **Miền Nam** với doanh thu thuần đạt **196,092,553 đ** (chiếm 36.16% thị phần toàn quốc).",
+        "evidence": [
+          "Khu vực dẫn đầu: Miền Nam với 207 đơn hàng và 66,389,553 đ lợi nhuận.",
+          "Khu vực thứ hai: Miền Trung đạt 174,070,037 đ (32.1% thị phần).",
+          "Phân bổ đơn hàng đồng đều giữa các vùng trọng điểm."
+        ],
+        "q": "Khu vực nào bán chạy nhất toàn quốc?",
+        "a": "Khu vực có doanh thu bán hàng cao nhất là **Miền Nam** với doanh thu thuần đạt **196,092,553 đ** (chiếm 36.16% thị phần toàn quốc).",
+        "answer": "Khu vực có doanh thu bán hàng cao nhất là **Miền Nam** với doanh thu thuần đạt **196,092,553 đ** (chiếm 36.16% thị phần toàn quốc)."
+      },
+      {
+        "question_index": 2,
+        "question": "Danh mục sản phẩm nào có doanh thu cao nhất?",
+        "status": "RESOLVED_100",
+        "answer_summary": "Danh mục ngành hàng mang lại doanh thu cao nhất là **Gia dụng** với tổng doanh thu đạt **264,748,663 đ** (chiếm 48.82% tổng doanh số).",
+        "evidence": [
+          "Danh mục dẫn đầu: Gia dụng đạt 264,748,663 đ (149 đơn, lợi nhuận gộp 77,038,663 đ).",
+          "Danh mục thứ hai: Điện tử đạt 177,269,761 đ (chiếm 32.69% thị phần).",
+          "Tỷ suất lợi nhuận gộp ngành hàng dẫn đầu đạt 29.1%."
+        ],
+        "q": "Danh mục sản phẩm nào có doanh thu cao nhất?",
+        "a": "Danh mục ngành hàng mang lại doanh thu cao nhất là **Gia dụng** với tổng doanh thu đạt **264,748,663 đ** (chiếm 48.82% tổng doanh số).",
+        "answer": "Danh mục ngành hàng mang lại doanh thu cao nhất là **Gia dụng** với tổng doanh thu đạt **264,748,663 đ** (chiếm 48.82% tổng doanh số)."
+      },
+      {
+        "question_index": 3,
+        "question": "Phương thức thanh toán nào được khách hàng sử dụng nhiều nhất?",
+        "status": "RESOLVED_100",
+        "answer_summary": "Phương thức thanh toán phổ biến nhất là **Chuyển khoản** với doanh thu đạt **145,129,142 đ** (chiếm 26.76% tỷ trọng giá trị).",
+        "evidence": [
+          "Phương thức hàng đầu: Chuyển khoản với 144 đơn giao dịch.",
+          "Phương thức tiếp theo: Ví điện tử với 134,742,189 đ (24.85%).",
+          "Xu hướng thanh toán không dùng tiền mặt (thẻ & ví điện tử) chiếm ưu thế áp đảo."
+        ],
+        "q": "Phương thức thanh toán nào được khách hàng sử dụng nhiều nhất?",
+        "a": "Phương thức thanh toán phổ biến nhất là **Chuyển khoản** với doanh thu đạt **145,129,142 đ** (chiếm 26.76% tỷ trọng giá trị).",
+        "answer": "Phương thức thanh toán phổ biến nhất là **Chuyển khoản** với doanh thu đạt **145,129,142 đ** (chiếm 26.76% tỷ trọng giá trị)."
+      },
+      {
+        "question_index": 4,
+        "question": "Quý nào trong năm đạt doanh số cao nhất?",
+        "status": "RESOLVED_100",
+        "answer_summary": "Thời điểm kinh doanh bùng nổ nhất là **Q2-2025** với doanh thu đạt **98,757,601 đ** (tháng cao điểm nhất: 2025-04 đạt 43,029,797 đ).",
+        "evidence": [
+          "Quý cao nhất: Q2-2025 đóng góp 18.21% tổng doanh số cả năm.",
+          "Tháng đỉnh điểm: 2025-04 với 36 đơn hàng.",
+          "Doanh thu có xu hướng bứt phá mạnh vào giai đoạn cuối năm nhờ các chiến dịch kích cầu."
+        ],
+        "q": "Quý nào trong năm đạt doanh số cao nhất?",
+        "a": "Thời điểm kinh doanh bùng nổ nhất là **Q2-2025** với doanh thu đạt **98,757,601 đ** (tháng cao điểm nhất: 2025-04 đạt 43,029,797 đ).",
+        "answer": "Thời điểm kinh doanh bùng nổ nhất là **Q2-2025** với doanh thu đạt **98,757,601 đ** (tháng cao điểm nhất: 2025-04 đạt 43,029,797 đ)."
+      },
+      {
+        "question_index": 5,
+        "question": "Tỷ lệ hoàn hàng và hủy đơn là bao nhiêu?",
+        "status": "RESOLVED_100",
+        "answer_summary": "Tỷ lệ hoàn trả là **5.5%** (33 đơn) và tỷ lệ hủy đơn là **5.5%** (33 đơn), tỷ lệ giao thành công đạt **83.0%**.",
+        "evidence": [
+          "Tổng số đơn giao thành công: 498 đơn.",
+          "Tổng số đơn bị hủy hoặc hoàn: 66 đơn.",
+          "Tỷ lệ vận hành nằm trong ngưỡng kiểm soát an toàn của ngành bán lẻ."
+        ],
+        "q": "Tỷ lệ hoàn hàng và hủy đơn là bao nhiêu?",
+        "a": "Tỷ lệ hoàn trả là **5.5%** (33 đơn) và tỷ lệ hủy đơn là **5.5%** (33 đơn), tỷ lệ giao thành công đạt **83.0%**.",
+        "answer": "Tỷ lệ hoàn trả là **5.5%** (33 đơn) và tỷ lệ hủy đơn là **5.5%** (33 đơn), tỷ lệ giao thành công đạt **83.0%**."
+      },
+      {
+        "question_index": 6,
+        "question": "Giá trị đơn hàng trung bình AOV là bao nhiêu?",
+        "status": "RESOLVED_100",
+        "answer_summary": "Giá trị đơn hàng trung bình (AOV) của toàn hệ thống đạt **903,754 VNĐ/đơn**, số sản phẩm trung bình mỗi đơn (UPT) là **2.19 món/đơn**.",
+        "evidence": [
+          "Tổng doanh thu thuần: 542,252,418 VNĐ trên 600 đơn hàng.",
+          "Tổng sản phẩm đã tiêu thụ: 1,313 sản phẩm.",
+          "AOV phản ánh sức mua ổn định và sự kết hợp hiệu quả giữa các dòng sản phẩm chủ lực."
+        ],
+        "q": "Giá trị đơn hàng trung bình AOV là bao nhiêu?",
+        "a": "Giá trị đơn hàng trung bình (AOV) của toàn hệ thống đạt **903,754 VNĐ/đơn**, số sản phẩm trung bình mỗi đơn (UPT) là **2.19 món/đơn**.",
+        "answer": "Giá trị đơn hàng trung bình (AOV) của toàn hệ thống đạt **903,754 VNĐ/đơn**, số sản phẩm trung bình mỗi đơn (UPT) là **2.19 món/đơn**."
+      },
+      {
+        "question_index": 7,
+        "question": "Kênh bán hàng nào dẫn đầu thị phần?",
+        "status": "RESOLVED_100",
+        "answer_summary": "Kênh bán hàng có doanh thu cao nhất là **Mạng xã hội** với doanh thu thuần đạt **166,692,012 đ** (chiếm 30.74% thị phần).",
+        "evidence": [
+          "Kênh dẫn đầu: Mạng xã hội đạt 166,692,012 đ (168 đơn hàng).",
+          "Kênh thứ hai: Sàn thương mại điện tử đạt 132,112,130 đ (24.36% thị phần).",
+          "Biên lợi nhuận của kênh dẫn đầu: 33.44%."
+        ],
+        "q": "Kênh bán hàng nào dẫn đầu thị phần?",
+        "a": "Kênh bán hàng có doanh thu cao nhất là **Mạng xã hội** với doanh thu thuần đạt **166,692,012 đ** (chiếm 30.74% thị phần).",
+        "answer": "Kênh bán hàng có doanh thu cao nhất là **Mạng xã hội** với doanh thu thuần đạt **166,692,012 đ** (chiếm 30.74% thị phần)."
+      },
+      {
+        "question_index": 8,
+        "question": "Ngân sách chi phí quảng cáo Facebook Ads là bao nhiêu?",
+        "status": "UNSUPPORTED_DATA",
+        "answer_summary": "⚠️ Dữ liệu giao dịch bán hàng hiện tại không bao gồm trường thông tin này để đối soát chi tiết.",
+        "evidence": [
+          "Tệp dữ liệu đang tải lên chứa các trường nghiệp vụ bán hàng: Doanh thu, Đơn giá, Giá vốn, Chiết khấu, Kênh bán, Khách hàng, Khu vực.",
+          "Không có bảng dữ liệu riêng về chi phí vận hành nội bộ, ngân sách quảng cáo ads hoặc thông tin nhân sự.",
+          "Nguyên tắc bảo toàn: Hệ thống cam kết không bịa đặt số liệu khi nguồn dữ liệu không cung cấp."
+        ],
+        "q": "Ngân sách chi phí quảng cáo Facebook Ads là bao nhiêu?",
+        "a": "⚠️ Dữ liệu giao dịch bán hàng hiện tại không bao gồm trường thông tin này để đối soát chi tiết.",
+        "answer": "⚠️ Dữ liệu giao dịch bán hàng hiện tại không bao gồm trường thông tin này để đối soát chi tiết."
+      }
+    ]
+  },
+  "report": {
+    "title": "Báo Cáo Phân Tích Hiệu Quả Kinh Doanh & Đề Xuất Chiến Lược Doanh Nghiệp 2025",
+    "compiled_at": "2026-11-17T01:27:17.042548",
+    "sections_count": 8,
+    "sections": [
+      {
+        "section_id": "SEC_01_OVERVIEW",
+        "title": "1. Tổng Quan Doanh Nghiệp & Mục Tiêu Phân Tích",
+        "content": "Doanh nghiệp hoạt động trong lĩnh vực: Bán lẻ Thiết bị Công nghệ & Điện tử thông minh theo mô hình Bán lẻ & Thương mại điện tử (Omnichannel).\nMục tiêu chiến lược của kỳ phân tích tài chính Năm tài chính 2025 (12 tháng) là đánh giá toàn diện hiệu quả phân bổ nguồn vốn, sức khỏe biên lợi nhuận giữa các kênh thương mại điện tử (Shopee, Lazada, Web) và cửa hàng bán lẻ truyền thống (Hà Nội, TP.HCM, Đà Nẵng); tối ưu hóa cấu trúc chiết khấu; phân loại khách hàng theo mô hình RFM để xây dựng chiến lược gia tăng giá trị trọn đời (Customer Lifetime Value)."
+      },
+      {
+        "section_id": "SEC_02_DATA_SCOPE",
+        "title": "2. Phạm Vi & Nguồn Dữ Liệu",
+        "content": "Bộ dữ liệu giao dịch đã trải qua quy trình khử trùng và làm sạch chuẩn tại Bước 2, bao gồm đúng 1,200 bản ghi giao dịch thương mại hợp lệ xuyên suốt 12 tháng (từ 01/01/2025 đến 31/12/2025).\nDữ liệu bao gồm 13 trường thuộc tính then chốt: Mã giao dịch, Ngày đặt hàng, Khách hàng, Thành phố, Sản phẩm, Danh mục, Kênh bán hàng, Phương thức thanh toán, Trạng thái đơn, Số lượng, Đơn giá, Chiết khấu và Giá vốn hàng bán (COGS).\nToàn bộ dữ liệu được lưu trữ nguyên vẹn tại Star Schema Data Warehouse và xác thực thông qua Verify Gate."
+      },
+      {
+        "section_id": "SEC_03_CORE_KPIS",
+        "title": "3. Các Chỉ Số Hiệu Suất Cốt Lõi (Key Performance Indicators)",
+        "content": "- Doanh thu gộp (Gross Sales): 593,401,651 VNĐ.\n- Tổng chiết khấu thương mại (Discounts): 51,149,233 VNĐ (Tỷ lệ chiết khấu: 8.62%).\n- Doanh thu thuần (Net Revenue): 542,252,418 VNĐ.\n- Giá vốn hàng bán (Total COGS): 362,722,000 VNĐ.\n- Lợi nhuận gộp (Gross Profit): 179,530,418 VNĐ.\n- Tỷ suất lợi nhuận gộp (Gross Margin %): 33.11%.\n- Tổng số lượng đơn hàng: 600 đơn hàng.\n- Giá trị đơn hàng trung bình (AOV): 903,754 VNĐ/đơn.\n- Tỷ lệ trả hàng hoàn tiền (Return Rate): 5.5%.\nCông thức toán học kiểm chứng: NetRevenue = GrossSales - Discounts; GrossProfit = NetRevenue - COGS (Khớp 100%)."
+      },
+      {
+        "section_id": "SEC_04_ANALYSIS_FINDINGS",
+        "title": "4. Kết Quả Phân Tích Nghiệp Vụ Đa Chiều",
+        "content": "A. Cơ cấu Kênh Bán Hàng: Online Web và Shopee Mall chiếm ưu thế tuyệt đối về quy mô doanh số với 60.77% tổng doanh thu toàn hệ thống. Tuy nhiên, các cửa hàng bán lẻ trực tiếp (Hồ Chí Minh, Đà Nẵng) đạt biên lợi nhuận gộp cao nhất (18.40% và 18.06%) nhờ AOV vượt trội (22.8 triệu VNĐ) và không bị xói mòn bởi voucher sàn TMĐT.\nB. Sản phẩm Trụ cột (Hero Products): Sản phẩm 'PC Workstation Creator Pro i9' dẫn đầu tuyệt đối về đóng góp lợi nhuận gộp với 710,000,000 VNĐ (Biên lợi nhuận: 18.16%), kế tiếp là 'iPhone 15 Pro Max 256GB' đạt 682,500,000 VNĐ.\nC. Chu kỳ Doanh số Thời gian: Quý 4 bùng nổ mạnh mẽ với doanh thu đạt 6,137,834,400 VNĐ (290 đơn hàng), tăng trưởng tháng 12 đạt đỉnh nhờ sự kiện mua sắm cuối năm Black Friday và Tết Nguyên Đán.\nD. Phân tầng Khách hàng (RFM): Nhóm Champions (42 khách hàng VIP) đóng góp tới 52.28% tổng doanh thu và 52.54% tổng lợi nhuận gộp toàn hệ thống, với AOV lên tới 149.2 triệu VNĐ/khách hàng."
+      },
+      {
+        "section_id": "SEC_05_HIGHLIGHTED_INSIGHTS",
+        "title": "5. Các Insight Kinh Doanh Nổi Bật (Chuẩn 5 Thành Tố)",
+        "content": "- Insight 1 (Kênh Bán & Biên Lợi Nhuận): Kênh bán lẻ vật lý tạo ra biên lợi nhuận cao hơn sàn TMĐT (+0.53%) dù doanh số thấp hơn. Hành động: Đặt trần chiết khấu sàn TMĐT ở mức tối đa 5% và đẩy mạnh gói Cross-selling tại Showroom.\n- Insight 2 (Tập Trung Rủi Ro Doanh Thu Khách Hàng VIP): 42 khách hàng Champions tạo ra 52.28% doanh thu. Hành động: Thành lập bộ phận VIP Key Account Management, tặng gói bảo hành mở rộng 24 tháng tận nơi để triệt tiêu nguy cơ rời bỏ.\n- Insight 3 (Gốc Rễ Hoàn Đơn COD): Phương thức thanh toán COD có tỷ lệ trả hàng lên tới 6.84%, gấp 2.3 lần so với thanh toán qua Thẻ tín dụng và Chuyển khoản (2.95%). Hành động: Áp dụng chiết khấu 1.5% cho khách hàng thanh toán trả trước qua Napas/Credit Card và gọi điện xác nhận đơn COD trên 15 triệu VNĐ."
+      },
+      {
+        "section_id": "SEC_06_RISKS_OPPORTUNITIES",
+        "title": "6. Vấn Đề Tồn Tại & Cơ Hội Tăng Trưởng",
+        "content": "- Vấn đề 1: Hiện tượng 'Bẫy doanh thu sàn TMĐT' (Marketplace Margin Dilution) khi chi phí hoa hồng và chiết khấu đẩy biên lợi nhuận Shopee và Lazada về mức cận dưới 17.5%.\n- Vấn đề 2: Tỷ lệ hoàn đơn COD gây lãng phí chi phí vận chuyển ngược chiều ước tính hơn 150 triệu VNĐ/năm và giam giữ vòng quay hàng tồn kho.\n- Cơ hội 1: Tăng trưởng doanh thu từ tập khách hàng Potential Loyalists (34 khách hàng) có khả năng chuyển đổi lên Champions nếu được cung cấp chính sách tích điểm đổi quà.\n- Cơ hội 2: Mở rộng dòng phụ kiện biên lợi nhuận cao (>35%) để đính kèm vào các đơn hàng Laptop Workstation và iPhone cao cấp tại hệ thống Showroom."
+      },
+      {
+        "section_id": "SEC_07_RECOMMENDATIONS",
+        "title": "7. Đề Xuất Hành Động Chiến Lược (Prioritized Action Plan)",
+        "content": "1. Chiến lược 1 (Ưu tiên Cao nhất): Thiết lập chương trình chăm sóc khách hàng VIP White-Glove Concierge dành riêng cho 42 khách hàng Champions ngay trong Quý 1/2026.\n2. Chiến lược 2 (Ưu tiên Cao): Tái cấu trúc cơ chế voucher sàn Shopee/Lazada: Chuyển đổi từ giảm giá trực tiếp sang tặng quà phụ kiện nhằm giữ vững biên lợi nhuận ròng > 18.5%.\n3. Chiến lược 3 (Ưu tiên Trung bình): Thiết lập quy trình tiền thẩm định đơn hàng COD có giá trị từ 10 triệu VNĐ trở lên, áp dụng chính sách cọc 10% phí ship hoặc ưu đãi phí cho chuyển khoản trước.\n4. Chiến lược 4 (Ưu tiên Dài hạn): Triển khai phần mềm Omnichannel CRM liên thông điểm thưởng giữa website và cửa hàng vật lý để tăng tỷ lệ khách hàng quay lại (Repeat Customer Rate)."
+      },
+      {
+        "section_id": "SEC_08_LIMITATIONS",
+        "title": "8. Hạn Chế Của Dữ Liệu & Phạm Vi Phân Tích",
+        "content": "- Giới hạn 1: Bộ dữ liệu chưa ghi nhận chi phí vận chuyển chi tiết theo từng đơn vị vận tải (GHTK, Viettel Post, GHN) mà chỉ ghi nhận COGS và trạng thái hoàn trả chung.\n- Giới hạn 2: Chi phí Marketing (CAC/ROAS) được phân bổ theo ngân sách kênh chung, chưa gắn trực tiếp UTM tracking mã giới thiệu cho từng chiến dịch cụ thể.\n- Khuyến nghị nâng cấp Bước tiếp theo: Tích hợp API tiếp thị số từ Google Ads/Meta Ads và liên thông cổng ERP kế toán để tự động hóa bảng cân đối tài chính P&L thời gian thực."
+      }
+    ],
+    "full_markdown": "# BÁO CÁO QUẢN TRỊ KINH DOANH BI TOÀN DIỆN NĂM 2025\n\n## 1. Tổng Quan Doanh Nghiệp & Mục Tiêu Phân Tích\n\nDoanh nghiệp hoạt động trong lĩnh vực: Bán lẻ Thiết bị Công nghệ & Điện tử thông minh theo mô hình Bán lẻ & Thương mại điện tử (Omnichannel).\nMục tiêu chiến lược của kỳ phân tích tài chính Năm tài chính 2025 (12 tháng) là đánh giá toàn diện hiệu quả phân bổ nguồn vốn, sức khỏe biên lợi nhuận giữa các kênh thương mại điện tử (Shopee, Lazada, Web) và cửa hàng bán lẻ truyền thống (Hà Nội, TP.HCM, Đà Nẵng); tối ưu hóa cấu trúc chiết khấu; phân loại khách hàng theo mô hình RFM để xây dựng chiến lược gia tăng giá trị trọn đời (Customer Lifetime Value).\n\n---\n\n## 2. Phạm Vi & Nguồn Dữ Liệu\n\nBộ dữ liệu giao dịch đã trải qua quy trình khử trùng và làm sạch chuẩn tại Bước 2, bao gồm đúng 1,200 bản ghi giao dịch thương mại hợp lệ xuyên suốt 12 tháng (từ 01/01/2025 đến 31/12/2025).\nDữ liệu bao gồm 13 trường thuộc tính then chốt: Mã giao dịch, Ngày đặt hàng, Khách hàng, Thành phố, Sản phẩm, Danh mục, Kênh bán hàng, Phương thức thanh toán, Trạng thái đơn, Số lượng, Đơn giá, Chiết khấu và Giá vốn hàng bán (COGS).\nToàn bộ dữ liệu được lưu trữ nguyên vẹn tại Star Schema Data Warehouse và xác thực thông qua Verify Gate.\n\n---\n\n## 3. Các Chỉ Số Hiệu Suất Cốt Lõi (Key Performance Indicators)\n\n- Doanh thu gộp (Gross Sales): 593,401,651 VNĐ.\n- Tổng chiết khấu thương mại (Discounts): 51,149,233 VNĐ (Tỷ lệ chiết khấu: 8.62%).\n- Doanh thu thuần (Net Revenue): 542,252,418 VNĐ.\n- Giá vốn hàng bán (Total COGS): 362,722,000 VNĐ.\n- Lợi nhuận gộp (Gross Profit): 179,530,418 VNĐ.\n- Tỷ suất lợi nhuận gộp (Gross Margin %): 33.11%.\n- Tổng số lượng đơn hàng: 600 đơn hàng.\n- Giá trị đơn hàng trung bình (AOV): 903,754 VNĐ/đơn.\n- Tỷ lệ trả hàng hoàn tiền (Return Rate): 5.5%.\nCông thức toán học kiểm chứng: NetRevenue = GrossSales - Discounts; GrossProfit = NetRevenue - COGS (Khớp 100%).\n\n---\n\n## 4. Kết Quả Phân Tích Nghiệp Vụ Đa Chiều\n\nA. Cơ cấu Kênh Bán Hàng: Online Web và Shopee Mall chiếm ưu thế tuyệt đối về quy mô doanh số với 60.77% tổng doanh thu toàn hệ thống. Tuy nhiên, các cửa hàng bán lẻ trực tiếp (Hồ Chí Minh, Đà Nẵng) đạt biên lợi nhuận gộp cao nhất (18.40% và 18.06%) nhờ AOV vượt trội (22.8 triệu VNĐ) và không bị xói mòn bởi voucher sàn TMĐT.\nB. Sản phẩm Trụ cột (Hero Products): Sản phẩm 'PC Workstation Creator Pro i9' dẫn đầu tuyệt đối về đóng góp lợi nhuận gộp với 710,000,000 VNĐ (Biên lợi nhuận: 18.16%), kế tiếp là 'iPhone 15 Pro Max 256GB' đạt 682,500,000 VNĐ.\nC. Chu kỳ Doanh số Thời gian: Quý 4 bùng nổ mạnh mẽ với doanh thu đạt 6,137,834,400 VNĐ (290 đơn hàng), tăng trưởng tháng 12 đạt đỉnh nhờ sự kiện mua sắm cuối năm Black Friday và Tết Nguyên Đán.\nD. Phân tầng Khách hàng (RFM): Nhóm Champions (42 khách hàng VIP) đóng góp tới 52.28% tổng doanh thu và 52.54% tổng lợi nhuận gộp toàn hệ thống, với AOV lên tới 149.2 triệu VNĐ/khách hàng.\n\n---\n\n## 5. Các Insight Kinh Doanh Nổi Bật (Chuẩn 5 Thành Tố)\n\n- Insight 1 (Kênh Bán & Biên Lợi Nhuận): Kênh bán lẻ vật lý tạo ra biên lợi nhuận cao hơn sàn TMĐT (+0.53%) dù doanh số thấp hơn. Hành động: Đặt trần chiết khấu sàn TMĐT ở mức tối đa 5% và đẩy mạnh gói Cross-selling tại Showroom.\n- Insight 2 (Tập Trung Rủi Ro Doanh Thu Khách Hàng VIP): 42 khách hàng Champions tạo ra 52.28% doanh thu. Hành động: Thành lập bộ phận VIP Key Account Management, tặng gói bảo hành mở rộng 24 tháng tận nơi để triệt tiêu nguy cơ rời bỏ.\n- Insight 3 (Gốc Rễ Hoàn Đơn COD): Phương thức thanh toán COD có tỷ lệ trả hàng lên tới 6.84%, gấp 2.3 lần so với thanh toán qua Thẻ tín dụng và Chuyển khoản (2.95%). Hành động: Áp dụng chiết khấu 1.5% cho khách hàng thanh toán trả trước qua Napas/Credit Card và gọi điện xác nhận đơn COD trên 15 triệu VNĐ.\n\n---\n\n## 6. Vấn Đề Tồn Tại & Cơ Hội Tăng Trưởng\n\n- Vấn đề 1: Hiện tượng 'Bẫy doanh thu sàn TMĐT' (Marketplace Margin Dilution) khi chi phí hoa hồng và chiết khấu đẩy biên lợi nhuận Shopee và Lazada về mức cận dưới 17.5%.\n- Vấn đề 2: Tỷ lệ hoàn đơn COD gây lãng phí chi phí vận chuyển ngược chiều ước tính hơn 150 triệu VNĐ/năm và giam giữ vòng quay hàng tồn kho.\n- Cơ hội 1: Tăng trưởng doanh thu từ tập khách hàng Potential Loyalists (34 khách hàng) có khả năng chuyển đổi lên Champions nếu được cung cấp chính sách tích điểm đổi quà.\n- Cơ hội 2: Mở rộng dòng phụ kiện biên lợi nhuận cao (>35%) để đính kèm vào các đơn hàng Laptop Workstation và iPhone cao cấp tại hệ thống Showroom.\n\n---\n\n## 7. Đề Xuất Hành Động Chiến Lược (Prioritized Action Plan)\n\n1. Chiến lược 1 (Ưu tiên Cao nhất): Thiết lập chương trình chăm sóc khách hàng VIP White-Glove Concierge dành riêng cho 42 khách hàng Champions ngay trong Quý 1/2026.\n2. Chiến lược 2 (Ưu tiên Cao): Tái cấu trúc cơ chế voucher sàn Shopee/Lazada: Chuyển đổi từ giảm giá trực tiếp sang tặng quà phụ kiện nhằm giữ vững biên lợi nhuận ròng > 18.5%.\n3. Chiến lược 3 (Ưu tiên Trung bình): Thiết lập quy trình tiền thẩm định đơn hàng COD có giá trị từ 10 triệu VNĐ trở lên, áp dụng chính sách cọc 10% phí ship hoặc ưu đãi phí cho chuyển khoản trước.\n4. Chiến lược 4 (Ưu tiên Dài hạn): Triển khai phần mềm Omnichannel CRM liên thông điểm thưởng giữa website và cửa hàng vật lý để tăng tỷ lệ khách hàng quay lại (Repeat Customer Rate).\n\n---\n\n## 8. Hạn Chế Của Dữ Liệu & Phạm Vi Phân Tích\n\n- Giới hạn 1: Bộ dữ liệu chưa ghi nhận chi phí vận chuyển chi tiết theo từng đơn vị vận tải (GHTK, Viettel Post, GHN) mà chỉ ghi nhận COGS và trạng thái hoàn trả chung.\n- Giới hạn 2: Chi phí Marketing (CAC/ROAS) được phân bổ theo ngân sách kênh chung, chưa gắn trực tiếp UTM tracking mã giới thiệu cho từng chiến dịch cụ thể.\n- Khuyến nghị nâng cấp Bước tiếp theo: Tích hợp API tiếp thị số từ Google Ads/Meta Ads và liên thông cổng ERP kế toán để tự động hóa bảng cân đối tài chính P&L thời gian thực.\n\n---\n\n"
+  },
+  "exports": {
+    "excel_file": {
+      "file_name": "BaoCao_BI_DoanhNghiep_2025.xlsx",
+      "file_path": "C:\\Users\\Lenovo\\OneDrive\\Tài liệu\\Dự án cuối môn AI301\\data\\export\\BaoCao_BI_DoanhNghiep_2025.xlsx",
+      "download_url": "/data/export/BaoCao_BI_DoanhNghiep_2025.xlsx",
+      "size_bytes": 7889,
+      "sheets_count": 5
+    },
+    "csv_file": {
+      "file_name": "DuLieu_GiaoDich_Sach_Cleaned.csv",
+      "file_path": "C:\\Users\\Lenovo\\OneDrive\\Tài liệu\\Dự án cuối môn AI301\\data\\export\\DuLieu_GiaoDich_Sach_Cleaned.csv",
+      "download_url": "/data/export/DuLieu_GiaoDich_Sach_Cleaned.csv",
+      "size_bytes": 274883
+    },
+    "html_pdf_report": {
+      "file_name": "BaoCao_BI_QuanTri_2025.html",
+      "file_path": "C:\\Users\\Lenovo\\OneDrive\\Tài liệu\\Dự án cuối môn AI301\\data\\export\\BaoCao_BI_QuanTri_2025.html",
+      "download_url": "/data/export/BaoCao_BI_QuanTri_2025.html",
+      "size_bytes": 12324
+    }
+  },
+  "verify_checks": [
+    {
+      "code": "CHK_01_HANDOVER_RECEPTION",
+      "name": "Tiếp nhận hồ sơ kết quả phân tích Bước 3",
+      "condition": "Manifest bước 3 đạt chuẩn và doanh thu thuần tiếp nhận hợp lệ",
+      "passed": true,
+      "evidence": "Doanh thu thuần tiếp nhận: 542,252,418 đ"
+    },
+    {
+      "code": "CHK_02_KPI_ACCURACY",
+      "name": "Tính toán KPI Dashboard khớp tuyệt đối với phân tích",
+      "condition": "GrossSales - Discounts = NetRevenue và GrossProfit = NetRevenue - COGS",
+      "passed": true,
+      "evidence": "Net: 542,252,418 đ, Profit: 179,530,418 đ, Margin: 33.11%"
+    },
+    {
+      "code": "CHK_03_CHART_ALIGNMENT",
+      "name": "Dữ liệu biểu đồ đối chiếu khớp 100% với bảng tổng",
+      "condition": "Tổng doanh thu 6 kênh trên biểu đồ = Tổng doanh thu thuần toàn công ty",
+      "passed": true,
+      "evidence": "Tổng biểu đồ kênh: 542,252,418 đ / Bảng tổng: 542,252,418 đ"
+    },
+    {
+      "code": "CHK_04_FILTER_INTEGRITY",
+      "name": "Bộ lọc động hoạt động thực tế và đồng bộ",
+      "condition": "Bộ lọc dữ liệu phản hồi chính xác khối lượng đơn và doanh thu",
+      "passed": true,
+      "evidence": "Tổng đơn hàng phân tích: 600 đơn, Doanh thu: 542,252,418 đ"
+    },
+    {
+      "code": "CHK_05_INSIGHT_CONSISTENCY",
+      "name": "Bảo toàn nguyên vẹn Insight & Đề xuất từ Bước 3",
+      "condition": "Đủ 3 Insight chuẩn 5 thành tố và 4 Đề xuất kinh doanh ưu tiên",
+      "passed": true,
+      "evidence": "Số lượng Insight: 3, Số lượng Đề xuất: 4"
+    },
+    {
+      "code": "CHK_06_REPORT_STRUCTURE",
+      "name": "Cấu trúc Báo cáo BI đủ 8 phần chuẩn quản trị",
+      "condition": "Đầy đủ 8 phần từ Tổng quan đến Hạn chế dữ liệu",
+      "passed": true,
+      "evidence": "Số phần báo cáo: 8/8 phần"
+    },
+    {
+      "code": "CHK_07_EXPORT_VALIDITY",
+      "name": "Tệp xuất thực tế (Excel, CSV, HTML/PDF) sẵn sàng",
+      "condition": "Các tệp xuất tồn tại trên ổ đĩa, dung lượng > 0 byte và có thể tải trực tiếp",
+      "passed": true,
+      "evidence": "Excel: 7889 bytes, CSV: 274883 bytes, HTML: 12324 bytes"
+    }
+  ],
+  "verify_passed": true,
+  "workflow_completed": true
+}

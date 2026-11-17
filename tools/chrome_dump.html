@@ -1,0 +1,686 @@
+﻿<!DOCTYPE html>
+<html lang="vi" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiStudio · AI-Powered Business Intelligence Platform</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --bg-desk: #060814;
+      --card-bg: rgba(12, 16, 34, 0.75);
+      --border-line: rgba(255, 255, 255, 0.08);
+      --accent-purple: #8b5cf6;
+      --accent-indigo: #6366f1;
+      --accent-cyan: #06b6d4;
+    }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e243d; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #333d66; }
+    
+    body {
+      background: radial-gradient(ellipse at 18% 12%, rgba(99, 102, 241, 0.16) 0%, transparent 45%),
+                  radial-gradient(ellipse at 82% 28%, rgba(139, 92, 246, 0.14) 0%, transparent 42%),
+                  radial-gradient(ellipse at 50% 88%, rgba(6, 182, 212, 0.09) 0%, transparent 50%),
+                  #070814;
+      background-attachment: fixed;
+    }
+    .grid-pattern {
+      background-image: linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .glass-panel {
+      background: rgba(10, 14, 28, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+    }
+    .pulse-dot {
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.9);
+    }
+
+    /* ============================================================
+       COLLAPSIBLE HOVER SIDEBAR (THU GỌN VÀ DI CHUỘT MỞ RỘNG)
+       ============================================================ */
+    .sidebar-rail-wrapper {
+      position: relative;
+      width: 4rem; /* 64px collapsed default */
+      flex-shrink: 0;
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 40;
+    }
+    .sidebar-rail-wrapper.is-pinned {
+      width: 18rem; /* 288px pinned */
+    }
+    .sidebar-collapsible {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 4rem;
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+      background: rgba(8, 11, 24, 0.97);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+    }
+    .sidebar-rail-wrapper:hover .sidebar-collapsible,
+    .sidebar-collapsible.is-hovered,
+    .sidebar-rail-wrapper.is-pinned .sidebar-collapsible {
+      width: 18rem; /* 288px when hovered or pinned */
+      box-shadow: 14px 0 40px -5px rgba(0, 0, 0, 0.85), 0 0 25px -2px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Content visible only when sidebar is expanded */
+    .sidebar-expand-content {
+      opacity: 0;
+      max-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: opacity 0.25s ease 0.05s, max-width 0.3s ease;
+      pointer-events: none;
+    }
+    .sidebar-rail-wrapper:hover .sidebar-expand-content,
+    .sidebar-collapsible.is-hovered .sidebar-expand-content,
+    .sidebar-rail-wrapper.is-pinned .sidebar-expand-content {
+      opacity: 1;
+      max-width: 240px;
+      pointer-events: auto;
+    }
+
+    /* Step buttons styling */
+    .step-btn {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .step-btn.current {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(6, 182, 212, 0.15));
+      border-color: rgba(99, 102, 241, 0.65);
+      box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.3), inset 0 0 12px rgba(99, 102, 241, 0.15);
+    }
+    .step-btn.done {
+      border-color: rgba(16, 185, 129, 0.35);
+      background: rgba(16, 185, 129, 0.06);
+    }
+    .step-btn.locked {
+      opacity: 0.38;
+      cursor: not-allowed;
+      filter: grayscale(0.7);
+    }
+
+    /* Top navigation items */
+    .nav-link {
+      transition: all 0.2s ease;
+      color: #94a3b8;
+    }
+    .nav-link:hover {
+      color: #f8fafc;
+    }
+  </style>
+  <script src="payload.js"></script>
+  <script src="app.js"></script>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.absolute{position:absolute}.relative{position:relative}.-right-1{right:-0.25rem}.-top-1{top:-0.25rem}.m-auto{margin:auto}.mx-auto{margin-left:auto;margin-right:auto}.mb-2{margin-bottom:0.5rem}.ml-1{margin-left:0.25rem}.ml-6{margin-left:1.5rem}.mr-2{margin-right:0.5rem}.mb-1{margin-bottom:0.25rem}.mt-0\.5{margin-top:0.125rem}.mt-8{margin-top:2rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:0.375rem}.h-10{height:2.5rem}.h-12{height:3rem}.h-2{height:0.5rem}.h-3{height:0.75rem}.h-3\.5{height:0.875rem}.h-4{height:1rem}.h-6{height:1.5rem}.h-7{height:1.75rem}.h-72{height:18rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-full{height:100%}.min-h-\[640px\]{min-height:640px}.min-h-screen{min-height:100vh}.w-16{width:4rem}.w-2{width:0.5rem}.w-3{width:0.75rem}.w-3\.5{width:0.875rem}.w-4{width:1rem}.w-6{width:1.5rem}.w-7{width:1.75rem}.w-8{width:2rem}.w-full{width:100%}.w-12{width:3rem}.w-9{width:2.25rem}.min-w-0{min-width:0px}.max-w-2xl{max-width:42rem}.max-w-7xl{max-width:80rem}.max-w-xl{max-width:36rem}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-not-allowed{cursor:not-allowed}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;user-select:none}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-6{gap:1.5rem}.gap-3\.5{gap:0.875rem}.space-y-0\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.125rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.125rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-3\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.875rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.875rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-0{border-width:0px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-emerald-500\/40{border-color:rgb(16 185 129 / 0.4)}.border-indigo-800\/50{border-color:rgb(55 48 163 / 0.5)}.border-indigo-800\/60{border-color:rgb(55 48 163 / 0.6)}.border-purple-500\/40{border-color:rgb(168 85 247 / 0.4)}.border-slate-800{--tw-border-opacity:1;border-color:rgb(30 41 59 / var(--tw-border-opacity, 1))}.border-slate-800\/80{border-color:rgb(30 41 59 / 0.8)}.border-white\/10{border-color:rgb(255 255 255 / 0.1)}.border-cyan-500\/40{border-color:rgb(6 182 212 / 0.4)}.border-cyan-800\/50{border-color:rgb(21 94 117 / 0.5)}.border-cyan-800\/60{border-color:rgb(21 94 117 / 0.6)}.border-indigo-400\/30{border-color:rgb(129 140 248 / 0.3)}.border-indigo-400\/50{border-color:rgb(129 140 248 / 0.5)}.border-indigo-500\/40{border-color:rgb(99 102 241 / 0.4)}.border-indigo-800\/40{border-color:rgb(55 48 163 / 0.4)}.border-rose-800\/50{border-color:rgb(159 18 57 / 0.5)}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-700\/60{border-color:rgb(51 65 85 / 0.6)}.border-slate-800\/30{border-color:rgb(30 41 59 / 0.3)}.border-slate-800\/90{border-color:rgb(30 41 59 / 0.9)}.bg-\[\#080b18\]\/70{background-color:rgb(8 11 24 / 0.7)}.bg-\[\#0c1222\]{--tw-bg-opacity:1;background-color:rgb(12 18 34 / var(--tw-bg-opacity, 1))}.bg-amber-500\/70{background-color:rgb(245 158 11 / 0.7)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153 / var(--tw-bg-opacity, 1))}.bg-emerald-500\/70{background-color:rgb(16 185 129 / 0.7)}.bg-emerald-950\/60{background-color:rgb(2 44 34 / 0.6)}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-indigo-950{--tw-bg-opacity:1;background-color:rgb(30 27 75 / var(--tw-bg-opacity, 1))}.bg-rose-500\/70{background-color:rgb(244 63 94 / 0.7)}.bg-slate-600{--tw-bg-opacity:1;background-color:rgb(71 85 105 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-slate-900\/80{background-color:rgb(15 23 42 / 0.8)}.bg-slate-950{--tw-bg-opacity:1;background-color:rgb(2 6 23 / var(--tw-bg-opacity, 1))}.bg-slate-950\/60{background-color:rgb(2 6 23 / 0.6)}.bg-slate-950\/70{background-color:rgb(2 6 23 / 0.7)}.bg-slate-950\/80{background-color:rgb(2 6 23 / 0.8)}.bg-transparent{background-color:transparent}.bg-cyan-400{--tw-bg-opacity:1;background-color:rgb(34 211 238 / var(--tw-bg-opacity, 1))}.bg-cyan-600\/20{background-color:rgb(8 145 178 / 0.2)}.bg-cyan-950{--tw-bg-opacity:1;background-color:rgb(8 51 68 / var(--tw-bg-opacity, 1))}.bg-cyan-950\/60{background-color:rgb(8 51 68 / 0.6)}.bg-emerald-600\/20{background-color:rgb(5 150 105 / 0.2)}.bg-indigo-600\/20{background-color:rgb(79 70 229 / 0.2)}.bg-purple-600\/20{background-color:rgb(147 51 234 / 0.2)}.bg-rose-950\/60{background-color:rgb(76 5 25 / 0.6)}.bg-slate-500{--tw-bg-opacity:1;background-color:rgb(100 116 139 / var(--tw-bg-opacity, 1))}.bg-slate-800\/80{background-color:rgb(30 41 59 / 0.8)}.bg-slate-950\/30{background-color:rgb(2 6 23 / 0.3)}.bg-slate-950\/40{background-color:rgb(2 6 23 / 0.4)}.bg-slate-950\/90{background-color:rgb(2 6 23 / 0.9)}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.bg-gradient-to-tr{background-image:linear-gradient(to top right, var(--tw-gradient-stops))}.from-indigo-500{--tw-gradient-from:#6366f1 var(--tw-gradient-from-position);--tw-gradient-to:rgb(99 102 241 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-indigo-600{--tw-gradient-from:#4f46e5 var(--tw-gradient-from-position);--tw-gradient-to:rgb(79 70 229 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-indigo-600\/40{--tw-gradient-from:rgb(79 70 229 / 0.4) var(--tw-gradient-from-position);--tw-gradient-to:rgb(79 70 229 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-purple-600{--tw-gradient-from:#9333ea var(--tw-gradient-from-position);--tw-gradient-to:rgb(147 51 234 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-slate-900\/90{--tw-gradient-from:rgb(15 23 42 / 0.9) var(--tw-gradient-from-position);--tw-gradient-to:rgb(15 23 42 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-purple-600{--tw-gradient-to:rgb(147 51 234 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #9333ea var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-purple-600\/40{--tw-gradient-to:rgb(147 51 234 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), rgb(147 51 234 / 0.4) var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-indigo-950\/30{--tw-gradient-to:rgb(30 27 75 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), rgb(30 27 75 / 0.3) var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-cyan-400{--tw-gradient-to:#22d3ee var(--tw-gradient-to-position)}.to-pink-600\/30{--tw-gradient-to:rgb(219 39 119 / 0.3) var(--tw-gradient-to-position)}.to-purple-600{--tw-gradient-to:#9333ea var(--tw-gradient-to-position)}.to-cyan-500{--tw-gradient-to:#06b6d4 var(--tw-gradient-to-position)}.to-indigo-600{--tw-gradient-to:#4f46e5 var(--tw-gradient-to-position)}.to-purple-950\/30{--tw-gradient-to:rgb(59 7 100 / 0.3) var(--tw-gradient-to-position)}.p-0{padding:0px}.p-1{padding:0.25rem}.p-1\.5{padding:0.375rem}.p-2{padding:0.5rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-10{padding:2.5rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.pb-3{padding-bottom:0.75rem}.pb-2{padding-bottom:0.5rem}.pb-2\.5{padding-bottom:0.625rem}.pb-4{padding-bottom:1rem}.pr-1{padding-right:0.25rem}.pt-1{padding-top:0.25rem}.pt-4{padding-top:1rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-sans{font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-base{font-size:1rem;line-height:1.5rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-relaxed{line-height:1.625}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-cyan-300{--tw-text-opacity:1;color:rgb(103 232 249 / var(--tw-text-opacity, 1))}.text-cyan-400{--tw-text-opacity:1;color:rgb(34 211 238 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-indigo-300{--tw-text-opacity:1;color:rgb(165 180 252 / var(--tw-text-opacity, 1))}.text-indigo-400{--tw-text-opacity:1;color:rgb(129 140 248 / var(--tw-text-opacity, 1))}.text-purple-200{--tw-text-opacity:1;color:rgb(233 213 255 / var(--tw-text-opacity, 1))}.text-purple-300{--tw-text-opacity:1;color:rgb(216 180 254 / var(--tw-text-opacity, 1))}.text-rose-300{--tw-text-opacity:1;color:rgb(253 164 175 / var(--tw-text-opacity, 1))}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-black{--tw-text-opacity:1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.text-blue-400{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.text-purple-400{--tw-text-opacity:1;color:rgb(192 132 252 / var(--tw-text-opacity, 1))}.text-rose-400{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.opacity-60{opacity:0.6}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-emerald-500\/10{--tw-shadow-color:rgb(16 185 129 / 0.1);--tw-shadow:var(--tw-shadow-colored)}.shadow-indigo-500\/20{--tw-shadow-color:rgb(99 102 241 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-indigo-500\/25{--tw-shadow-color:rgb(99 102 241 / 0.25);--tw-shadow:var(--tw-shadow-colored)}.shadow-indigo-600\/20{--tw-shadow-color:rgb(79 70 229 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-purple-500\/10{--tw-shadow-color:rgb(168 85 247 / 0.1);--tw-shadow:var(--tw-shadow-colored)}.shadow-indigo-500\/30{--tw-shadow-color:rgb(99 102 241 / 0.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-indigo-600\/25{--tw-shadow-color:rgb(79 70 229 / 0.25);--tw-shadow:var(--tw-shadow-colored)}.shadow-purple-600\/20{--tw-shadow-color:rgb(147 51 234 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.outline-none{outline:2px solid transparent;outline-offset:2px}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.selection\:bg-indigo-500 *::selection{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity, 1))}.selection\:text-white *::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.selection\:bg-indigo-500::selection{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity, 1))}.selection\:text-white::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.backdrop\:bg-black\/60::backdrop{background-color:rgb(0 0 0 / 0.6)}.hover\:border-cyan-600:hover{--tw-border-opacity:1;border-color:rgb(8 145 178 / var(--tw-border-opacity, 1))}.hover\:border-emerald-600:hover{--tw-border-opacity:1;border-color:rgb(5 150 105 / var(--tw-border-opacity, 1))}.hover\:border-indigo-600:hover{--tw-border-opacity:1;border-color:rgb(79 70 229 / var(--tw-border-opacity, 1))}.hover\:border-purple-600:hover{--tw-border-opacity:1;border-color:rgb(147 51 234 / var(--tw-border-opacity, 1))}.hover\:border-slate-700:hover{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.hover\:bg-slate-800:hover{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-800\/80:hover{background-color:rgb(30 41 59 / 0.8)}.hover\:from-indigo-500:hover{--tw-gradient-from:#6366f1 var(--tw-gradient-from-position);--tw-gradient-to:rgb(99 102 241 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-indigo-600\/60:hover{--tw-gradient-from:rgb(79 70 229 / 0.6) var(--tw-gradient-from-position);--tw-gradient-to:rgb(79 70 229 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-purple-500:hover{--tw-gradient-from:#a855f7 var(--tw-gradient-from-position);--tw-gradient-to:rgb(168 85 247 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-purple-500:hover{--tw-gradient-to:#a855f7 var(--tw-gradient-to-position)}.hover\:to-purple-600\/60:hover{--tw-gradient-to:rgb(147 51 234 / 0.6) var(--tw-gradient-to-position)}.hover\:to-indigo-500:hover{--tw-gradient-to:#6366f1 var(--tw-gradient-to-position)}.hover\:text-rose-400:hover{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:text-slate-200:hover{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.focus\:ring-1:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-indigo-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(99 102 241 / var(--tw-ring-opacity, 1))}@media (min-width: 640px){.sm\:inline{display:inline}.sm\:flex{display:flex}.sm\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.sm\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:p-3{padding:0.75rem}.md\:p-6{padding:1.5rem}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-2xl{font-size:1.5rem;line-height:2rem}}@media (min-width: 1024px){.lg\:flex{display:flex}.lg\:grid-cols-6{grid-template-columns:repeat(6, minmax(0, 1fr))}}</style></head>
+<body class="text-slate-100 font-sans antialiased min-h-screen flex flex-col p-2 md:p-3 selection:bg-indigo-500 selection:text-white grid-pattern">
+
+  <!-- ================= TOP LUXURY NAVBAR (BISTUDIO STYLE) ================= -->
+  <header class="max-w-7xl w-full mx-auto flex items-center justify-between py-2 px-2 text-xs">
+    
+    <!-- LEFT LOGO & BRAND -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 font-bold tracking-tight text-white text-base">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 border border-white/10">
+          <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+        </div>
+        <span class="tracking-tight font-extrabold text-sm md:text-base">Bi<span class="text-indigo-400">Studio</span></span>
+      </div>
+      
+      <!-- NAV LINKS (BISTUDIO STYLE) -->
+      <nav class="hidden lg:flex items-center gap-6 ml-6 text-slate-400 font-medium text-xs">
+        <a href="#features" onclick="goToStep(0)" class="nav-link flex items-center gap-1.5 hover:text-white">
+          <span>Quy Trình 4 Bước</span>
+        </a>
+        <a href="#warehouse" onclick="goToStep(2); switchProcessTab('modeling')" class="nav-link flex items-center gap-1.5 hover:text-white">
+          <span>Kho Dữ Liệu</span>
+        </a>
+        <a href="#verify" onclick="goToStep(1)" class="nav-link flex items-center gap-1.5 hover:text-white">
+          <span>Verify Gate</span>
+        </a>
+        <a href="#reports" onclick="goToStep(3)" class="nav-link flex items-center gap-1.5 hover:text-white">
+          <span>Báo Cáo Minto</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- RIGHT STATUS BADGES & CONTROLS -->
+    <div class="flex items-center gap-2.5">
+      
+      <!-- LIVE DATA BADGE (AS IN BISTUDIO IMAGE) -->
+      <div class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-medium bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 shadow-sm shadow-emerald-500/10">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse pulse-dot"></span>
+        <span>Live data</span>
+      </div>
+
+      <!-- AI ASSISTANT PILL (DRAFT IN SECONDS STYLE) -->
+      <button onclick="openChatDrawer()" class="px-3 py-1 rounded-full text-[11px] font-semibold bg-gradient-to-r from-indigo-600/40 via-purple-600/40 to-pink-600/30 hover:from-indigo-600/60 hover:to-purple-600/60 text-purple-200 border border-purple-500/40 shadow-sm shadow-purple-500/10 flex items-center gap-1.5 transition">
+        <span class="text-purple-300">✨</span>
+        <span class="hidden sm:inline">Trợ Lý AI</span>
+      </button>
+
+      <!-- DEMO UNLOCK TOGGLE -->
+      <button onclick="toggleDemoUnlock()" id="btn-demo-toggle" title="Mở khóa tất cả các bước để khám phá nhanh" class="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 flex items-center gap-1.5 transition">
+        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>
+        <span id="txt-demo-toggle" class="hidden sm:inline">Demo</span>
+      </button>
+
+      <!-- RESET BUTTON -->
+      <button onclick="resetWorkflowProgression()" title="Bắt đầu lại quy trình từ đầu" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 border border-slate-800 transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN WORKBENCH WINDOW ================= -->
+  <div class="max-w-7xl w-full mx-auto flex-1 flex flex-col rounded-2xl glass-panel overflow-hidden relative mb-2">
+    
+    <!-- WINDOW TITLEBAR (MACOS LIGHTS & WORKSPACE STATUS) -->
+    <div class="h-10 px-4 border-b border-slate-800/80 bg-slate-950/60 flex items-center justify-between shrink-0 select-none">
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 mr-2">
+          <span class="w-3 h-3 rounded-full bg-rose-500/70 inline-block"></span>
+          <span class="w-3 h-3 rounded-full bg-amber-500/70 inline-block"></span>
+          <span class="w-3 h-3 rounded-full bg-emerald-500/70 inline-block"></span>
+        </div>
+        <span class="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          <strong class="text-slate-200">Không Gian Phân Tích</strong> • <span id="project-dataset-name" class="text-slate-400 font-sans">Đang chờ tiếp nhận dữ liệu (Số liệu về 0)</span>
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3 text-[11px]">
+        <!-- PROGRESS PILL -->
+        <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900/80 border border-slate-800 text-slate-300 font-mono">
+          <span class="text-indigo-400 font-bold" id="progress-text">Giai đoạn 1/4</span>
+          <div class="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden ml-1">
+            <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-300" style="width: 25%;"></div>
+          </div>
+        </div>
+
+        <!-- GATE BADGE -->
+        <div class="hidden sm:flex items-center gap-1.5 text-slate-400 font-mono text-[10px]" id="top-gate-badge">
+          <span class="w-2 h-2 rounded-full bg-slate-500" id="top-gate-dot"></span>
+          <span id="top-gate-label" class="text-slate-400 font-mono">VERIFY GATE: ĐANG CHỜ DỮ LIỆU</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKBENCH BODY: COLLAPSIBLE HOVER SIDEBAR + MAIN WORKSPACE -->
+    <div class="flex-1 flex overflow-hidden relative min-h-[640px]">
+      
+      <!-- LEFT SIDEBAR WRAPPER (COLLAPSED 64px, EXPANDS TO 288px ON HOVER) -->
+      <div id="sidebar-wrapper" class="sidebar-rail-wrapper">
+        <aside id="hover-sidebar" class="sidebar-collapsible" onmouseenter="handleSidebarHover(true)" onmouseleave="handleSidebarHover(false)">
+          
+          <!-- SIDEBAR HEADER (Icon + Expandable Title + Pin Button) -->
+          <div class="h-12 px-3 border-b border-slate-800/80 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-md shadow-indigo-500/20">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+              </div>
+              <div class="sidebar-expand-content flex items-center justify-between gap-2 min-w-0">
+                <span class="text-[11px] font-black uppercase tracking-wider text-slate-200">QUY TRÌNH BI</span>
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50">4 BƯỚC</span>
+              </div>
+            </div>
+            <!-- PIN TOGGLE BUTTON (GHIM / BỎ GHIM) -->
+            <button onclick="togglePinSidebar(event)" id="btn-pin-sidebar" title="Ghim / Bỏ ghim thanh bên" class="sidebar-expand-content p-1 rounded-md hover:bg-slate-800 text-slate-400 hover:text-white transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+            </button>
+          </div>
+
+          <!-- STEP BUTTONS CONTAINER (DYNAMICALLY RENDERED BY APP.JS) -->
+          <nav id="step-navigation" class="flex-1 p-2 space-y-2 overflow-y-auto text-xs" aria-label="Các bước quy trình BI"><button title="Giai đoạn 1: 1. Kết Nối Dữ Liệu (Đang thực hiện)" class="step-btn w-full p-1.5 rounded-xl border text-left flex items-center gap-2.5 transition-all current text-white font-medium">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-mono font-bold text-xs relative transition-all bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7c0-2-1.5-3-3.5-3h-9C5.5 4 4 5 4 7zm0 5h16M9 4v16"></path></svg>
+        <span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full text-[9px] font-bold flex items-center justify-center bg-cyan-400 text-black shadow-sm">1</span>
+      </div>
+      <div class="sidebar-expand-content flex items-center justify-between flex-1 min-w-0 pr-1">
+        <div class="truncate pr-1">
+          <div class="font-bold text-xs truncate text-white">1. Kết Nối Dữ Liệu</div>
+          <div class="text-[10px] text-slate-500 truncate font-sans">Tiếp nhận tệp + Bối cảnh + 3 Câu hỏi kinh doanh</div>
+        </div>
+        <div class="shrink-0"><span class="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800/60 font-bold">Đang xem</span></div>
+      </div>
+    </button><button disabled="" title="Giai đoạn 2: 2. Làm Sạch Dữ Liệu (Đang bị khóa)" class="step-btn w-full p-1.5 rounded-xl border text-left flex items-center gap-2.5 transition-all locked border-slate-800/30 bg-slate-950/30 text-slate-600">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-mono font-bold text-xs relative transition-all bg-slate-900/80 text-slate-500 border border-slate-800">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+        <span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full text-[9px] font-bold flex items-center justify-center bg-slate-800 text-slate-400 border border-slate-700">2</span>
+      </div>
+      <div class="sidebar-expand-content flex items-center justify-between flex-1 min-w-0 pr-1">
+        <div class="truncate pr-1">
+          <div class="font-bold text-xs truncate text-slate-500">2. Làm Sạch Dữ Liệu</div>
+          <div class="text-[10px] text-slate-500 truncate font-sans">Khử trùng, xử lý thiếu &amp; Thẩm định Verify Gate</div>
+        </div>
+        <div class="shrink-0"><span class="text-slate-600 text-[10px] px-1" title="Cần hoàn thành bước trước">🔒</span></div>
+      </div>
+    </button><button disabled="" title="Giai đoạn 3: 3. Phân Tích Dữ Liệu (Đang bị khóa)" class="step-btn w-full p-1.5 rounded-xl border text-left flex items-center gap-2.5 transition-all locked border-slate-800/30 bg-slate-950/30 text-slate-600">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-mono font-bold text-xs relative transition-all bg-slate-900/80 text-slate-500 border border-slate-800">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        <span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full text-[9px] font-bold flex items-center justify-center bg-slate-800 text-slate-400 border border-slate-700">3</span>
+      </div>
+      <div class="sidebar-expand-content flex items-center justify-between flex-1 min-w-0 pr-1">
+        <div class="truncate pr-1">
+          <div class="font-bold text-xs truncate text-slate-500">3. Phân Tích Dữ Liệu</div>
+          <div class="text-[10px] text-slate-500 truncate font-sans">Cây KPI MECE + Phân tích đa chiều + Insight</div>
+        </div>
+        <div class="shrink-0"><span class="text-slate-600 text-[10px] px-1" title="Cần hoàn thành bước trước">🔒</span></div>
+      </div>
+    </button><button disabled="" title="Giai đoạn 4: 4. Báo Cáo &amp; Phản Hồi (Đang bị khóa)" class="step-btn w-full p-1.5 rounded-xl border text-left flex items-center gap-2.5 transition-all locked border-slate-800/30 bg-slate-950/30 text-slate-600">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-mono font-bold text-xs relative transition-all bg-slate-900/80 text-slate-500 border border-slate-800">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full text-[9px] font-bold flex items-center justify-center bg-slate-800 text-slate-400 border border-slate-700">4</span>
+      </div>
+      <div class="sidebar-expand-content flex items-center justify-between flex-1 min-w-0 pr-1">
+        <div class="truncate pr-1">
+          <div class="font-bold text-xs truncate text-slate-500">4. Báo Cáo &amp; Phản Hồi</div>
+          <div class="text-[10px] text-slate-500 truncate font-sans">Executive Dashboard + Báo cáo Minto + Xuất tệp &amp; Feedback</div>
+        </div>
+        <div class="shrink-0"><span class="text-slate-600 text-[10px] px-1" title="Cần hoàn thành bước trước">🔒</span></div>
+      </div>
+    </button></nav>
+
+          <!-- WAREHOUSE STATUS WIDGET AT BOTTOM -->
+          <div class="p-2.5 bg-slate-950/70 border-t border-slate-800/80 text-[11px] text-slate-400 shrink-0">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7c0-2-1.5-3-3.5-3h-9C5.5 4 4 5 4 7zm0 5h16M9 4v16"></path></svg>
+              </div>
+              <div class="sidebar-expand-content space-y-0.5 min-w-0">
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-xs font-bold text-slate-300">Kho Star Schema</span>
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse pulse-dot shrink-0" title="Trực tuyến SQLite"></span>
+                </div>
+                <div class="text-slate-500" id="sidebar-warehouse-stat">Chưa nạp dữ liệu</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- RIGHT MAIN WORKSPACE: ACTIVE STEP INTERACTIVE CONTENT -->
+      <main id="workspace-content" class="flex-1 bg-[#080b18]/70 overflow-y-auto p-4 md:p-6 flex flex-col space-y-5">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/60 uppercase">GIAI ĐOẠN 1 / 4 • DATA CONNECTION</span>
+          <span class="text-xs text-slate-400">Tiếp nhận tệp + Bối cảnh + 3 Câu hỏi kinh doanh</span>
+        </div>
+        <h1 class="text-xl md:text-2xl font-black text-white tracking-tight">1. Kết Nối Dữ Liệu</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        
+        
+      <button onclick="confirmConnectionAndAdvance()" class="px-4 py-1.5 rounded-xl font-bold text-xs shadow-lg transition flex items-center gap-1.5 bg-slate-800 text-slate-500 cursor-not-allowed opacity-60" disabled="">
+        <span>Xác Nhận &amp; Mở Khóa Giai Đoạn 2</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </button>
+    
+      </div>
+    </div>
+  
+    <div class="space-y-5">
+      
+      <!-- ================= 2.1 KẾT NỐI NGUỒN DỮ LIỆU ================= -->
+      <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 space-y-3 shadow-lg">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white uppercase tracking-wider">Bước 1: Kết Nối Nguồn Dữ Liệu</span>
+              <span class="px-2.5 py-1 rounded-full bg-slate-900 text-slate-400 font-mono text-[11px] font-bold border border-slate-700 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-500"></span> PENDING (Chưa tiếp nhận dữ liệu - Số liệu về 0)</span>
+            </div>
+            <p class="text-xs text-slate-400">Tiếp nhận file Excel (.xlsx, .xls) và CSV. Tự động kiểm tra tính hợp lệ và cấu trúc bảng.</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <label class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/25 border border-indigo-400/30 transition flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+              <span>Tải File Lên (.xlsx, .csv)</span>
+              <input type="file" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleCustomFileUpload(event)">
+            </label>
+          </div>
+        </div>
+
+        <!-- QUICK SAMPLE DATASET BUTTONS -->
+        <div class="space-y-1.5 pt-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+              Hoặc Chọn Nhanh Tệp Dữ Liệu Mẫu Từ Hệ Thống:
+            </span>
+            <span class="text-[10px] text-slate-500 font-mono">Bảo toàn 100% dữ liệu gốc</span>
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs font-mono">
+            <button onclick="inspectSheetFile('raw_sales_transactions.csv')" class="px-3 py-1.5 rounded-lg border transition bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200">
+              📊 raw_sales_transactions.csv <span class="text-[10px] text-emerald-400">(1,200 dòng)</span>
+            </button>
+            <button onclick="inspectSheetFile('sample_business_multisheet.xlsx')" class="px-3 py-1.5 rounded-lg border transition bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200">
+              📑 sample_business_multisheet.xlsx <span class="text-[10px] text-purple-400">(Excel 2 Sheet)</span>
+            </button>
+            <button onclick="inspectSheetFile('raw_customers.csv')" class="px-3 py-1.5 rounded-lg border transition bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200">
+              👥 raw_customers.csv <span class="text-[10px] text-blue-400">(250 KH)</span>
+            </button>
+            <button onclick="inspectSheetFile('raw_products.csv')" class="px-3 py-1.5 rounded-lg border transition bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200">
+              📦 raw_products.csv <span class="text-[10px] text-cyan-400">(20 SP)</span>
+            </button>
+            <button onclick="inspectSheetFile('raw_marketing_campaigns.csv')" class="px-3 py-1.5 rounded-lg border transition bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200">
+              🎯 raw_marketing_campaigns.csv <span class="text-[10px] text-amber-400">(60 CD)</span>
+            </button>
+          </div>
+        </div>
+
+        
+
+        <!-- 6 METRIC CHIPS -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-1">
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1">
+            <span class="text-[10px] text-slate-400 uppercase font-sans">Định Dạng &amp; Size</span>
+            <div class="text-base font-bold text-indigo-400 font-mono">--</div>
+            <span class="text-[10px] text-slate-500 font-mono">0 KB</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1">
+            <span class="text-[10px] text-slate-400 uppercase font-sans">Tổng Số Dòng</span>
+            <div class="text-base font-bold text-white font-mono">0</div>
+            <span class="text-[10px] text-slate-500 font-mono">Chưa có bản ghi</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1">
+            <span class="text-[10px] text-slate-400 uppercase font-sans">Tổng Số Cột</span>
+            <div class="text-base font-bold text-white font-mono">0</div>
+            <span class="text-[10px] text-slate-500 font-mono">0 trường</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1">
+            <span class="text-[10px] text-slate-400 uppercase font-sans">Ô Có Dữ Liệu</span>
+            <div class="text-base font-bold text-slate-400 font-mono">0</div>
+            <span class="text-[10px] text-slate-500 font-mono">0% điền đầy</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1">
+            <span class="text-[10px] text-slate-400 uppercase font-sans">Ô Trống (Null)</span>
+            <div class="text-base font-bold text-slate-400 font-mono">0</div>
+            <span class="text-[10px] text-slate-500 font-mono">0 cảnh báo</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1">
+            <span class="text-[10px] text-slate-400 uppercase font-sans">Dòng Hoàn Toàn Trống</span>
+            <div class="text-base font-bold text-slate-400 font-mono">0</div>
+            <span class="text-[10px] text-slate-500 font-mono">0 dòng</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 2.2 THU THẬP BỐI CẢNH DOANH NGHIỆP ================= -->
+      <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 space-y-3.5 shadow-lg">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/40 flex items-center justify-center font-bold text-xs">🏢</span>
+            <div>
+              <h3 class="font-bold text-white text-sm">Bước 2.2: Thu Thập Bối Cảnh Doanh Nghiệp</h3>
+              <p class="text-[11px] text-slate-400">Cung cấp bối cảnh giúp AI hiểu đúng mô hình kinh doanh và chuẩn hóa phân tích</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-mono font-bold text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded border border-rose-800/50">* Có trường bắt buộc</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs font-sans">
+          <!-- 1. LOẠI HÌNH DOANH NGHIỆP (BẮT BUỘC) -->
+          <div class="space-y-1.5">
+            <label class="block font-bold text-slate-200">
+              1. Loại Hình Doanh Nghiệp: <span class="text-rose-400 font-bold">* Bắt buộc</span>
+            </label>
+            <select id="ctx-company-type" onchange="currentBusinessContext.company_type = this.value" class="w-full bg-slate-950 border border-indigo-800/50 rounded-xl p-2.5 text-slate-100 text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              <option value="Bán lẻ &amp; Thương mại điện tử (Omnichannel)" selected="">🛒 Bán lẻ &amp; Thương mại điện tử (Omnichannel / E-commerce)</option>
+              <option value="Sản xuất &amp; Gia công chế biến">🏭 Sản xuất, Gia công &amp; Chế biến (Manufacturing)</option>
+              <option value="Dịch vụ Công nghệ &amp; SaaS B2B">💻 Doanh nghiệp Công nghệ, Phần mềm &amp; SaaS B2B</option>
+              <option value="Dịch vụ Tài chính, Ngân hàng &amp; Bảo hiểm">💳 Tài chính, Ngân hàng, Chứng khoán &amp; FinTech</option>
+              <option value="F&amp;B / Chuỗi Nhà hàng, Quán ăn &amp; Đồ uống">☕ Chuỗi Nhà hàng, Ẩm thực &amp; Đồ uống (F&amp;B)</option>
+              <option value="Vận tải, Giao vận &amp; Kho bãi (Logistics)">🚚 Vận tải, Kho bãi &amp; Chuỗi cung ứng (Logistics)</option>
+              <option value="Dịch vụ Chăm sóc Sức khỏe, Y tế &amp; Dược phẩm">🏥 Y tế, Phòng khám, Bệnh viện &amp; Dược phẩm</option>
+              <option value="Khác (Mô hình kinh doanh đặc thù)">🏢 Loại hình kinh doanh khác</option>
+            </select>
+          </div>
+
+          <!-- 2. LĨNH VỰC HOẠT ĐỘNG -->
+          <div class="space-y-1.5">
+            <label class="block font-medium text-slate-300">
+              2. Lĩnh Vực Hoạt Động Kinh Doanh (Domain / Industry):
+            </label>
+            <input type="text" id="ctx-industry-input" value="Bán lẻ Thiết bị Công nghệ &amp; Điện tử thông minh" oninput="currentBusinessContext.industry = this.value" placeholder="vd: Bán lẻ Thiết bị Công nghệ &amp; Điện tử thông minh" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+          </div>
+
+          <!-- 3. PHẠM VI DỮ LIỆU / THỜI GIAN -->
+          <div class="space-y-1.5">
+            <label class="block font-medium text-slate-300">
+              3. Phạm Vi Dữ Liệu Hoặc Thời Gian Cần Phân Tích:
+            </label>
+            <input type="text" id="ctx-time-scope" value="Năm tài chính 2025 (12 tháng)" oninput="currentBusinessContext.time_scope = this.value" placeholder="vd: Năm tài chính 2025 (12 tháng), Toàn quốc" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+          </div>
+
+          <!-- 4. THÔNG TIN BỔ SUNG -->
+          <div class="space-y-1.5">
+            <label class="block font-medium text-slate-300">
+              4. Thông Tin Bổ Sung (Không bắt buộc):
+            </label>
+            <input type="text" id="ctx-notes-input" value="Kinh doanh đa kênh kết hợp sàn TMĐT Shopee, Lazada và cửa hàng trực tiếp." oninput="currentBusinessContext.additional_notes = this.value" placeholder="vd: Kênh bán gồm Website, Shopee Mall, Lazada và cửa hàng trực tiếp." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 2.3 XÁC ĐỊNH VẤN ĐỀ CẦN PHÂN TÍCH (MAX 8 CÂU HỎI) ================= -->
+      <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 space-y-3.5 shadow-lg">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-purple-600/20 text-purple-400 border border-purple-500/40 flex items-center justify-center font-bold text-xs">❓</span>
+            <div>
+              <h3 class="font-bold text-white text-sm">Bước 2.3: Xác Định Vấn Đề Cần Phân Tích (Tối Đa 8 Câu Hỏi Kinh Doanh)</h3>
+              <p class="text-[11px] text-slate-400">Nhập các câu hỏi người dùng cần trả lời. AI sẽ phân tích và đối chiếu với dữ liệu hiện có.</p>
+            </div>
+          </div>
+          
+          <!-- QUICK TEMPLATES -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[10px] text-slate-500 font-mono">Mẫu gợi ý:</span>
+            <button onclick="loadQuickQuestionTemplate('sales')" class="px-2 py-0.5 rounded text-[11px] bg-slate-950 border border-slate-800 text-indigo-300 hover:border-indigo-600 transition">🛒 Doanh Thu &amp; Lợi Nhuận</button>
+            <button onclick="loadQuickQuestionTemplate('finance')" class="px-2 py-0.5 rounded text-[11px] bg-slate-950 border border-slate-800 text-purple-300 hover:border-purple-600 transition">💰 Tài Chính &amp; COGS</button>
+            <button onclick="loadQuickQuestionTemplate('channel')" class="px-2 py-0.5 rounded text-[11px] bg-slate-950 border border-slate-800 text-cyan-300 hover:border-cyan-600 transition">📦 Kênh &amp; Vận Chuyển</button>
+            <button onclick="loadQuickQuestionTemplate('customer')" class="px-2 py-0.5 rounded text-[11px] bg-slate-950 border border-slate-800 text-emerald-300 hover:border-emerald-600 transition">👥 Khách Hàng VIP (RFM)</button>
+          </div>
+        </div>
+
+        <!-- TEXTAREA NHẬP CÂU HỎI -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <label class="text-slate-300 font-medium">Nhập danh sách câu hỏi (Mỗi câu một dòng, tối đa 8 câu):</label>
+            <span class="text-[11px] font-mono text-indigo-400">4 / 8 câu hỏi đã thiết lập</span>
+          </div>
+          <textarea id="ctx-questions-input" rows="4" onblur="currentBusinessContext.questions = this.value.split('\n').map(l =&gt; l.trim()).filter(l =&gt; l.length &gt; 0).slice(0, 8)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 text-xs font-sans focus:ring-1 focus:ring-indigo-500 outline-none leading-relaxed">Doanh thu theo kênh bán hàng nào cao nhất?
+Sản phẩm nào mang lại lợi nhuận cao nhất?
+Chi phí chiết khấu ảnh hưởng thế nào đến biên lợi nhuận?
+Nhóm khách hàng nào có giá trị mua hàng cao nhất (RFM Champions)?</textarea>
+          
+          <div class="flex items-center justify-between pt-1">
+            <p class="text-[11px] text-slate-400 font-sans italic">* AI sẽ tự động phân tích mục tiêu câu hỏi và đánh giá dữ liệu hiện có có thể trả lời được hay không.</p>
+            <button onclick="analyzeQuestionsFeasibility()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-purple-600/20 transition flex items-center gap-1.5">
+              <span>🤖 AI Thẩm Định Câu Hỏi &amp; Ánh Xạ Cột</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- HIỂN THỊ KẾT QUẢ ĐÁNH GIÁ TÍNH KHẢ THI (AI QUESTION FEASIBILITY ASSESSMENT) -->
+        
+      </div>
+
+      <!-- ================= 2.4 KIỂM TRA NGUỒN DỮ LIỆU & PHÂN LOẠI CẤU TRÚC ================= -->
+      <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 space-y-3.5 shadow-lg">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-cyan-600/20 text-cyan-400 border border-cyan-500/40 flex items-center justify-center font-bold text-xs">🛡️</span>
+            <div>
+              <h3 class="font-bold text-white text-sm">Bước 2.4: Kiểm Tra Nguồn Dữ Liệu &amp; Phân Loại Cột (Data Usability)</h3>
+              <p class="text-[11px] text-slate-400">Tự động phát hiện lỗi cấu trúc, phân tách Measures vs Dimensions. Chỉ phát hiện &amp; ghi nhận, không sửa dữ liệu gốc.</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-mono font-bold text-cyan-400 bg-cyan-950/60 px-2.5 py-0.5 rounded border border-cyan-800/50">ĐIỂM KHẢ DỤNG: 0/100</span>
+        </div>
+
+        <!-- CẢNH BÁO & LỖI -->
+        
+
+        <!-- PHÂN LOẠI MEASURES VS DIMENSIONS -->
+        
+      </div>
+
+      <!-- ================= 2.5 BẢN XEM TRƯỚC DỮ LIỆU GỐC ================= -->
+      <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 space-y-3 shadow-lg">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="font-bold text-white text-xs flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            Bản Xem Trước Dữ Liệu Gốc (15 Dòng Đầu):
+          </span>
+          <span class="text-[10px] text-slate-400 font-mono">0 dòng</span>
+        </div>
+
+        
+          <div class="p-10 text-center border-2 border-dashed border-slate-800 rounded-xl bg-slate-950/40 space-y-3">
+            <div class="w-12 h-12 mx-auto rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400">
+              <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            </div>
+            <div class="space-y-1">
+              <h4 class="text-sm font-bold text-slate-200">Chưa Tiếp Nhận Dữ Liệu (Trạng Thái 0)</h4>
+              <p class="text-xs text-slate-400 max-w-md mx-auto">Vui lòng tải tệp Excel (.xlsx, .csv) lên hoặc chọn một tệp mẫu để hệ thống nhận diện và hiển thị dữ liệu thực tế.</p>
+            </div>
+            <label class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/25 transition">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+              <span>Tải Lên File Dữ Liệu Ngay</span>
+              <input type="file" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleCustomFileUpload(event)">
+            </label>
+          </div>
+        
+      </div>
+
+      <!-- ================= 2.6 TỔNG HỢP KẾT QUẢ KẾT NỐI & XÁC NHẬN BÀN GIAO SANG BƯỚC 2 ================= -->
+      <div class="p-4 rounded-2xl bg-gradient-to-r from-slate-900/90 via-indigo-950/30 to-purple-950/30 border border-indigo-800/40 space-y-3.5 shadow-xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center font-bold text-xs">📋</span>
+            <h3 class="font-bold text-white text-sm">Bản Tổng Hợp Kết Quả Kết Nối (Handover Manifest Bước 1)</h3>
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50 font-bold">CHUẨN BỊ BÀN GIAO</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-sans">
+          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 block font-mono">Loại Hình Doanh Nghiệp:</span>
+            <span class="font-bold text-slate-100 truncate block mt-0.5">Bán lẻ &amp; Thương mại điện tử (Omnichannel)</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 block font-mono">Nguồn Dữ Liệu &amp; Sheet:</span>
+            <span class="font-bold text-indigo-300 truncate block mt-0.5">Chưa nạp</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 block font-mono">Quy Mô Dữ Liệu:</span>
+            <span class="font-bold text-emerald-300 font-mono block mt-0.5">0 dòng</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 block font-mono">Câu Hỏi &amp; Usability:</span>
+            <span class="font-bold text-purple-300 font-mono block mt-0.5">4 câu hỏi • 0/100</span>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-950/90 border border-slate-800/90 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div class="space-y-0.5">
+            <span class="text-slate-200 font-medium">Điều kiện mở khóa Bước 2:</span>
+            <p class="text-[11px] text-slate-400 font-sans">
+              🔒 Cần có tệp dữ liệu hợp lệ, chọn loại hình doanh nghiệp bắt buộc và có ít nhất 1 câu hỏi kinh doanh.
+            </p>
+          </div>
+          <button onclick="confirmConnectionAndAdvance()" class="px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg transition flex items-center gap-2 shrink-0 bg-slate-800 text-slate-500 cursor-not-allowed opacity-60 border border-slate-700">
+            <span>Xác Nhận Kết Nối &amp; Bàn Giao Sang Bước 2 (Làm Sạch)</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  
+    <div class="mt-8 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+      <div class="flex items-center gap-1.5 font-mono text-[11px]">
+        <span class="text-cyan-400 font-bold">● Vị trí hiện tại:</span> Giai đoạn 1/4 (1. Kết Nối Dữ Liệu)
+      </div>
+      <div class="flex items-center gap-2">
+        
+        
+          <button onclick="confirmConnectionAndAdvance()" class="px-4 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 bg-slate-800/80 text-slate-500 cursor-not-allowed border border-slate-700/60 opacity-60" disabled="">
+            <span>🔒 Chưa Có Dữ Liệu Để Bàn Giao</span>
+          </button>
+        
+      </div>
+    </div>
+  </main>
+
+    </div>
+
+    <!-- WORKBENCH FOOTER (SYSTEM INTEGRITY & NOTICE) -->
+    <footer class="h-9 px-4 border-t border-slate-800/80 bg-slate-950/80 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+      <div class="flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+        <span>Toàn bộ dữ liệu được bảo toàn nguyên vẹn &amp; kiểm chứng công thức toán học 100%</span>
+      </div>
+      <div class="flex items-center gap-2 font-mono text-[10px]">
+        <span class="text-slate-500">Mã Quy Trình:</span>
+        <span class="text-indigo-400 font-bold" id="footer-wf-id">WF-20261116-100932</span>
+        <span class="text-slate-600">|</span>
+        <span class="text-slate-400">AI301 Final Project</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ================= AI ASSISTANT MODAL DRAWER ================= -->
+  <dialog id="ai-chat-dialog" class="bg-transparent backdrop:bg-black/60 p-0 m-auto rounded-2xl max-w-2xl w-full border-0">
+    <div class="bg-[#0c1222] border border-indigo-800/60 rounded-2xl p-5 shadow-2xl flex flex-col text-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white text-xs shadow-md shadow-indigo-500/20">AI</div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Trợ Lý AI BI Thông Minh</h3>
+            <p class="text-[11px] text-slate-400">Hỏi đáp số liệu kinh doanh &amp; suy luận nguyên nhân tức thời</p>
+          </div>
+        </div>
+        <button onclick="closeChatDrawer()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 text-sm">✕</button>
+      </div>
+
+      <div class="flex flex-wrap gap-1.5 text-xs">
+        <button onclick="askQuestionModal('Tại sao doanh thu quý 4 tăng đột biến?')" class="bg-slate-900 hover:bg-slate-800 text-cyan-300 px-2.5 py-1 rounded-full border border-slate-800 transition text-[11px]">💡 Doanh thu Q4 tăng đột biến?</button>
+        <button onclick="askQuestionModal('Phân tích nhóm khách hàng Champions và rủi ro rời bỏ?')" class="bg-slate-900 hover:bg-slate-800 text-indigo-300 px-2.5 py-1 rounded-full border border-slate-800 transition text-[11px]">👥 Khách hàng Champions &amp; rủi ro?</button>
+        <button onclick="askQuestionModal('Kênh Marketing nào có ROAS cao nhất và kênh nào đang lỗ?')" class="bg-slate-900 hover:bg-slate-800 text-purple-300 px-2.5 py-1 rounded-full border border-slate-800 transition text-[11px]">🎯 Đánh giá ROAS &amp; CAC kênh?</button>
+        <button onclick="askQuestionModal('Nguyên nhân tỷ lệ trả hàng 5.08% và giải pháp xử lý?')" class="bg-slate-900 hover:bg-slate-800 text-rose-300 px-2.5 py-1 rounded-full border border-slate-800 transition text-[11px]">📦 Nguyên nhân trả hàng 5.08%?</button>
+      </div>
+
+      <div id="modal-chat-history" class="h-72 overflow-y-auto space-y-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs">
+        <div class="flex gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white text-[10px] shrink-0">AI</div>
+          <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-800 text-slate-200 text-xs max-w-xl">
+            Xin chào! Tôi là Trợ lý AI BI chuyên gia. Hãy đặt bất kỳ câu hỏi nào về doanh thu, chi phí CAC, tỷ lệ trả hàng, khách hàng VIP RFM hoặc khuyến nghị hành động!
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <input type="text" id="modal-chat-input" placeholder="Nhập câu hỏi phân tích kinh doanh..." class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2 text-xs focus:ring-1 focus:ring-indigo-500 outline-none text-slate-100">
+        <button onclick="sendModalChatMessage()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition shadow-md shadow-indigo-600/20">Gửi</button>
+      </div>
+    </div>
+  </dialog>
+
+
+
+</body></html>
