@@ -27,6 +27,7 @@ import math
 import re
 from datetime import datetime
 from typing import Dict, Any, List, Optional, Tuple
+from .state import BIWorkflowState, StageStatus
 
 WORKSPACE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -133,6 +134,39 @@ class CleaningStage:
     def __init__(self):
         self.stage_name = "CLEANING"
         self.version = "2.0.0"
+
+    def execute(self, state: BIWorkflowState) -> BIWorkflowState:
+        """
+        Thực thi giai đoạn 2: CLEANING – LÀM SẠCH VÀ CHUẨN HÓA DỮ LIỆU
+        """
+        state.update_stage_status("CLEANING", StageStatus.IN_PROGRESS)
+
+        # 1. Tìm bảng sales trong raw_data
+        raw_sales = state.raw_data.get("sales") or state.raw_data.get("raw_sales_transactions") or []
+        if raw_sales:
+            cols = list(raw_sales[0].keys())
+            manifest = self.execute_cleaning(
+                raw_records=raw_sales,
+                columns=cols,
+                schema={},
+                enabled_strategies=["STRAT_DEDUP", "STRAT_WHITESPACE", "STRAT_CAST", "STRAT_DATE", "STRAT_OUTLIERS"],
+                business_context=state.business_context
+            )
+            # Lưu dữ liệu sạch
+            cleaned_rows = manifest.get("preview_cleaned_rows", raw_sales)
+            state.cleaned_data["sales"] = cleaned_rows
+            state.cleaning_audit_log = manifest.get("audit_log", [])
+            state.quality_scorecard = manifest.get("cleaned_stats", {})
+            state.verification_passed = manifest.get("verify_passed", True)
+
+        # Đồng bộ các bảng phụ trợ
+        for k in ["customers", "raw_customers", "products", "raw_products", "campaigns", "raw_marketing_campaigns", "logistics", "raw_operations_logistics"]:
+            std_k = k.replace("raw_", "")
+            if k in state.raw_data and std_k not in state.cleaned_data:
+                state.cleaned_data[std_k] = state.raw_data[k]
+
+        state.update_stage_status("CLEANING", StageStatus.SUCCESS)
+        return state
 
     def profile_data_quality(
         self,

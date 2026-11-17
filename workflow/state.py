@@ -9,7 +9,7 @@ Cấu trúc dữ liệu trạng thái thống nhất trao đổi xuyên suốt 4
 
 import json
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 class StageStatus:
     PENDING = "PENDING"
@@ -24,7 +24,7 @@ class StageStatus:
     NEEDS_REVISION = "NEEDS_REVISION"
 
 class BIWorkflowState:
-    def __init__(self, workflow_id: str = None):
+    def __init__(self, workflow_id: Optional[str] = None):
         self.workflow_id = workflow_id or f"WF-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         self.created_at = datetime.now().isoformat()
         self.updated_at = datetime.now().isoformat()

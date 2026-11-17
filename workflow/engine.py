@@ -8,7 +8,7 @@ Hỗ trợ vòng lặp "Điều chỉnh & Tái phân tích" (Loopback from Feedb
 
 import os
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from .state import BIWorkflowState, StageStatus
 from .stage_1_sheet import SheetStage
 from .stage_2_cleaning import CleaningStage
@@ -19,7 +19,7 @@ from .stage_6_export import ExportStage
 from .stage_7_report import ReportStage
 
 class BIWorkflowEngine:
-    def __init__(self, workspace_root: str = None):
+    def __init__(self, workspace_root: Optional[str] = None):
         self.workspace_root = workspace_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.sheet_stage = SheetStage()
         self.cleaning_stage = CleaningStage()
@@ -29,7 +29,7 @@ class BIWorkflowEngine:
         self.export_stage = ExportStage(os.path.join(self.workspace_root, "data", "export"))
         self.report_stage = ReportStage()
 
-    def run_workflow(self, input_files: List[str] = None, user_feedback_decision: str = "APPROVE", feedback_adjustments: Dict[str, Any] = None) -> BIWorkflowState:
+    def run_workflow(self, input_files: Optional[List[str]] = None, user_feedback_decision: str = "APPROVE", feedback_adjustments: Optional[Dict[str, Any]] = None) -> BIWorkflowState:
         """
         Thực thi toàn bộ quy trình BI qua 7 giai đoạn.
         """

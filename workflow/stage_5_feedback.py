@@ -8,14 +8,14 @@ Nếu phê duyệt (Approved), mở khóa giai đoạn EXPORT và REPORT.
 """
 
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from .state import BIWorkflowState, StageStatus
 
 class FeedbackStage:
     def __init__(self):
         self.stage_name = "FEEDBACK"
 
-    def submit_feedback(self, state: BIWorkflowState, user_decision: str, adjustments: Dict[str, Any] = None, notes: str = None) -> BIWorkflowState:
+    def submit_feedback(self, state: BIWorkflowState, user_decision: str, adjustments: Optional[Dict[str, Any]] = None, notes: Optional[str] = None) -> BIWorkflowState:
         """
         Xử lý phản hồi từ người dùng.
         - user_decision: 'APPROVE' hoặc 'REVISE'

@@ -22,11 +22,32 @@ import os
 import csv
 import json
 import math
+import re
+import unicodedata
 from datetime import datetime
 from collections import defaultdict
 from typing import Dict, Any, List, Optional
 
 WORKSPACE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+PROD_NAMES: Dict[str, str] = {
+    "PRD-101": "Laptop Gaming Asus ROG Strix G16",
+    "PRD-102": "MacBook Air M2 13.6 inch 256GB",
+    "PRD-103": "Dell XPS 13 9315 Core i7",
+    "PRD-104": "Lenovo ThinkPad E14 Gen 5",
+    "PRD-105": "PC Workstation Creator Pro i9",
+    "PRD-201": "Samsung Galaxy S24 Ultra 512GB",
+    "PRD-202": "iPhone 15 Pro Max 256GB Natural",
+    "PRD-203": "iPad Pro M4 11 inch 128GB Wi-Fi",
+    "PRD-204": "Xiaomi 14 Ultra 5G 512GB",
+    "PRD-205": "Sony WH-1000XM5 Noise Canceling",
+    "PRD-301": "Màn hình Dell UltraSharp 27 4K",
+    "PRD-302": "Bàn phím cơ Filco Majestouch 3",
+    "PRD-303": "Chuột không dây Logitech MX Master 3S",
+    "PRD-304": "Loa Bluetooth Marshall Stanmore III",
+    "PRD-305": "Ổ cứng SSD di động SanDisk Extreme 1TB"
+}
+prod_names: Dict[str, str] = PROD_NAMES
 
 
 def normalize_key(k: str) -> str:
@@ -159,19 +180,18 @@ class AnalysisStage:
             return {"status": "ERROR", "error": "Không tìm thấy dữ liệu sạch từ Bước 2 để phân tích."}
 
         # 2. Tải bối cảnh doanh nghiệp và câu hỏi từ Bước 1
-        if not business_context:
+        b_ctx: Dict[str, Any] = dict(business_context) if business_context is not None else {}
+        if not b_ctx:
             step1_manifest_path = os.path.join(WORKSPACE_ROOT, "data", "sheet_handover_manifest.json")
             if os.path.exists(step1_manifest_path):
                 with open(step1_manifest_path, "r", encoding="utf-8") as f:
                     m1 = json.load(f)
-                business_context = m1.get("business_context", {})
-            else:
-                business_context = {}
+                b_ctx = m1.get("business_context", {}) or {}
 
-        company_type = business_context.get("company_type") or "Bán lẻ & Thương mại điện tử (Omnichannel)"
-        industry = business_context.get("industry") or "Bán lẻ Thiết bị Công nghệ & Điện tử thông minh"
-        time_scope = business_context.get("time_scope") or "Năm tài chính 2025 (12 tháng)"
-        questions = business_context.get("questions") or [
+        company_type = b_ctx.get("company_type") or "Bán lẻ & Thương mại điện tử (Omnichannel)"
+        industry = b_ctx.get("industry") or "Bán lẻ Thiết bị Công nghệ & Điện tử thông minh"
+        time_scope = b_ctx.get("time_scope") or "Năm tài chính 2025 (12 tháng)"
+        questions = b_ctx.get("questions") or [
             "Doanh thu theo kênh bán hàng nào cao nhất?",
             "Sản phẩm nào mang lại lợi nhuận cao nhất?",
             "Chi phí chiết khấu ảnh hưởng thế nào đến biên lợi nhuận?",
@@ -344,7 +364,7 @@ class AnalysisStage:
             p_id = get_str(r, ["ProductID", "Product_ID", "MaSanPham", "MaSP"], "UNKNOWN")
             p_name = get_str(r, ["ProductName", "Product_Name", "TenSanPham", "ProductLine"], "")
             if not p_name:
-                p_name = prod_names.get(p_id, f"Sản phẩm {p_id}")
+                p_name = PROD_NAMES.get(p_id, f"Sản phẩm {p_id}")
             p_cat = get_str(r, ["ProductCategory", "Product_Category", "Category", "DanhMuc", "NganhHang"], "Chung")
             p_net = get_val(r, ["NetRevenue", "NetSales", "NETSALES", "DoanhThuThuan", "Revenue_VND"], 0.0)
             p_prof = get_val(r, ["GrossProfit", "GROSSPROFIT", "Gross_Profit", "LoiNhuanGop", "Profit_VND"], 0.0)
@@ -523,7 +543,7 @@ class AnalysisStage:
         except Exception:
             ref_date = datetime(2025, 12, 31)
 
-        rfm_segments = {
+        rfm_segments: Dict[str, Dict[str, Any]] = {
             "Champions": {"count": 0, "revenue": 0.0, "desc": "Khách VIP, chi tiêu lớn, mua thường xuyên"},
             "Loyal Customers": {"count": 0, "revenue": 0.0, "desc": "Khách hàng trung thành, tần suất ổn định"},
             "Potential Loyalists": {"count": 0, "revenue": 0.0, "desc": "Khách mới mua gần đây, tiềm năng mở rộng"},
@@ -537,8 +557,8 @@ class AnalysisStage:
                 r_days = max(0, (ref_date - dt).days)
             except Exception:
                 r_days = 90
-            freq = stats["orders"]
-            mon = stats["revenue"]
+            freq = int(stats.get("orders", 1))
+            mon = float(stats.get("revenue", 0.0))
 
             if r_days <= 90 and freq >= 4:
                 rfm_segments["Champions"]["count"] += 1
@@ -558,14 +578,16 @@ class AnalysisStage:
 
         rfm_display = []
         for seg, v in rfm_segments.items():
-            seg_rev = v["revenue"]
+            seg_rev: float = float(v.get("revenue", 0.0) or 0.0)
+            seg_cnt: int = int(v.get("count", 0) or 0)
+            seg_desc: str = str(v.get("desc", ""))
             rfm_display.append({
                 "segment": seg,
-                "customers_count": v["count"],
+                "customers_count": seg_cnt,
                 "revenue": seg_rev,
                 "revenue_formatted": f"{seg_rev:,.0f} đ",
                 "share_pct": round(seg_rev / net_rev * 100, 2) if net_rev > 0 else 0.0,
-                "description": v["desc"]
+                "description": seg_desc
             })
 
         # E. DIAGNOSTIC ANALYSIS (Chẩn đoán nguyên nhân)
@@ -894,9 +916,10 @@ class AnalysisStage:
                     }
                 else:
                     champ = rfm_segments.get("Champions", {})
-                    c_cnt = champ.get("count", 0)
-                    c_rev = champ.get("revenue", 0.0)
-                    c_share = round((c_rev / net_rev * 100), 2) if net_rev > 0 else 0.0
+                    c_cnt: int = int(champ.get("count", 0) or 0)
+                    c_rev: float = float(champ.get("revenue", 0.0) or 0.0)
+                    c_share: float = round((c_rev / net_rev * 100), 2) if net_rev > 0 else 0.0
+                    avg_spend: float = round(c_rev / c_cnt, 0) if c_cnt > 0 else 0.0
                     ans = {
                         "question_index": idx + 1,
                         "question": q_text,
@@ -905,7 +928,7 @@ class AnalysisStage:
                         "evidence": [
                             f"Số lượng khách hàng Champions: {c_cnt} khách hàng đạt tiêu chuẩn mua >= 4 đơn trong 90 ngày gần nhất.",
                             f"Tổng doanh thu đóng góp: {c_rev:,.0f} VNĐ (chiếm {c_share}% tổng doanh số toàn hệ thống).",
-                            f"Giá trị chi tiêu trung bình đạt {round(c_rev / c_cnt, 0):,.0f} VNĐ/khách hàng, cao vượt trội so với nhóm phổ thông."
+                            f"Giá trị chi tiêu trung bình đạt {avg_spend:,.0f} VNĐ/khách hàng, cao vượt trội so với nhóm phổ thông."
                         ]
                     }
             elif any(k in q_lower for k in ["quý", "tháng", "mùa vụ", "xu hướng", "trend", "tăng trưởng"]):
