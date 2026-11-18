@@ -462,50 +462,34 @@ class AnalysisStage:
 
         # C. TREND ANALYSIS (Phân tích xu hướng 12 Tháng & 4 Quý)
         monthly_map = defaultdict(lambda: {"revenue": 0.0, "profit": 0.0, "orders": set(), "discounts": 0.0})
-        for r in cleaned_records:
-            ym = get_str(r, ["YearMonth"])
-            if not ym or len(ym) < 7:
-                od = get_str(r, ["OrderDate", "Order_Date", "Date"])
-                ym = od[:7] if len(od) >= 7 else "2025-01"
-            monthly_map[ym]["revenue"] += get_val(r, ["NetRevenue", "NetSales", "NETSALES", "DoanhThuThuan", "Revenue_VND"], 0.0)
-            monthly_map[ym]["profit"] += get_val(r, ["GrossProfit", "GROSSPROFIT", "Gross_Profit"], 0.0)
-            monthly_map[ym]["discounts"] += get_val(r, ["DiscountAmount", "DISCOUNT_AMOUNT", "ChietKhau"], 0.0)
-            monthly_map[ym]["orders"].add(get_str(r, ["OrderID", "Order_ID", "TransactionID"]) or "ORD")
-        for r in cleaned_records:
-            ym = r.get("YearMonth", "2025-01")
-            monthly_map[ym]["revenue"] += float(r.get("NetSales", 0))
-            monthly_map[ym]["profit"] += float(r.get("GrossProfit", 0))
-            monthly_map[ym]["discounts"] += float(r.get("DiscountAmount", 0))
-            monthly_map[ym]["orders"].add(r.get("OrderID", r.get("TransactionID")))
-
-        monthly_trend = []
-        prev_rev = None
-        for ym in sorted(monthly_map.keys()):
-            v = monthly_map[ym]
-            m_rev = v["revenue"]
-            m_prof = v["profit"]
-            m_orders = len(v["orders"])
-            m_margin = round(m_prof / m_rev * 100, 2) if m_rev > 0 else 0.0
-            mom_growth = round(((m_rev - prev_rev) / prev_rev * 100.0), 2) if prev_rev else 0.0
-            prev_rev = m_rev
-
-            monthly_trend.append({
-                "month": ym,
-                "revenue": m_rev,
-                "revenue_formatted": f"{m_rev:,.0f} đ",
-                "profit": m_prof,
-                "profit_formatted": f"{m_prof:,.0f} đ",
-                "margin_pct": m_margin,
-                "orders_count": m_orders,
-                "mom_growth_pct": mom_growth
-            })
-
-        # Xu hướng theo 4 Quý
         quarterly_map = defaultdict(lambda: {"revenue": 0.0, "profit": 0.0, "orders": 0})
         for r in cleaned_records:
-            q = r.get("Quarter", "Q1-2025")
-            quarterly_map[q]["revenue"] += float(r.get("NetSales", 0))
-            quarterly_map[q]["profit"] += float(r.get("GrossProfit", 0))
+            ym = get_str(r, ["YearMonth", "Tháng", "Thang", "Month"])
+            if not ym or len(ym) < 7:
+                od = get_str(r, ["OrderDate", "Order_Date", "Date", "Ngay"])
+                ym = od[:7] if len(od) >= 7 else "2026-01"
+            if len(ym) >= 7 and ym[:4].isdigit() and ym[5:7].isdigit():
+                ym = ym[:7]
+
+            rev = get_val(r, ["NetRevenue", "NetSales", "NETSALES", "DoanhThuThuan", "Revenue_VND", "Revenue", "Doanh_Thu", "DoanhThu"], 0.0)
+            prof = get_val(r, ["GrossProfit", "GROSSPROFIT", "Gross_Profit", "LoiNhuanGop", "Profit_VND", "Profit"], 0.0)
+            disc = get_val(r, ["DiscountAmount", "DISCOUNT_AMOUNT", "ChietKhau", "Discount"], 0.0)
+            order_id = get_str(r, ["OrderID", "Order_ID", "TransactionID", "MaDong", "MaDonHang"]) or "ORD"
+
+            monthly_map[ym]["revenue"] += rev
+            monthly_map[ym]["profit"] += prof
+            monthly_map[ym]["discounts"] += disc
+            monthly_map[ym]["orders"].add(order_id)
+
+            q_col = get_str(r, ["Quarter", "Quy", "Quý"])
+            if not q_col or not q_col.startswith("Q"):
+                m_num = int(ym[5:7]) if len(ym) >= 7 and ym[5:7].isdigit() else 1
+                q_num = (m_num - 1) // 3 + 1
+                q = f"Q{q_num}"
+            else:
+                q = q_col.split("-")[0] if "-" in q_col else q_col
+            quarterly_map[q]["revenue"] += rev
+            quarterly_map[q]["profit"] += prof
             quarterly_map[q]["orders"] += 1
 
         quarterly_trend = []

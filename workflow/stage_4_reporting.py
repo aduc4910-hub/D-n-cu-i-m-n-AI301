@@ -131,16 +131,18 @@ class ReportingStage:
             reader = csv.DictReader(f)
             for row in reader:
                 try:
-                    qty = int(float(row.get("Quantity") or row.get("QUANTITY") or row.get("SoLuong") or row.get("Qty") or 1))
+                    qty = int(float(row.get("Quantity") or row.get("QUANTITY") or row.get("SoLuong") or row.get("Qty") or row.get("Số đơn") or row.get("So_Don") or row.get("Orders") or 1))
                     unit_p = float(row.get("UnitPrice") or row.get("UNIT_PRICE") or row.get("Unit_Price_VND") or row.get("Unit_Price") or row.get("DonGia") or row.get("Price") or 0)
                     disc_p = float(row.get("DiscountAmount") or row.get("DISCOUNT_AMOUNT") or row.get("Discount_Amount_VND") or row.get("Discount_Amount") or row.get("ChietKhau") or 0)
-                    gross = float(row.get("GrossSales") or row.get("GROSSSALES") or row.get("Gross_Sales_VND") or row.get("Gross_Sales") or row.get("GrossRevenue") or row.get("DoanhThuGop") or (unit_p * qty))
-                    net = float(row.get("NetRevenue") or row.get("NetSales") or row.get("NETSALES") or row.get("Net_Sales_VND") or row.get("Net_Sales") or row.get("DoanhThuThuan") or row.get("Revenue_VND") or row.get("Revenue") or (gross - disc_p))
-                    cogs_p = float(row.get("CostOfGoodsSold") or row.get("TotalCOGS") or row.get("TOTALCOGS") or row.get("Total_Cost_VND") or row.get("Total_Cost") or row.get("COGS") or row.get("Cost_VND") or row.get("GiaVon") or 0)
-                    profit = float(row.get("GrossProfit") or row.get("GROSSPROFIT") or row.get("Profit_VND") or row.get("Profit") or row.get("LoiNhuanGop") or (net - cogs_p))
-                    order_date = row.get("OrderDate") or row.get("Order_Date") or row.get("Date") or ""
-                    month = row.get("YearMonth") or (order_date[:7] if len(order_date) >= 7 else "2025-01")
-                    quarter = row.get("Quarter") or f"Q{(int(month[5:7])-1)//3+1 if len(month)>=7 and month[5:7].isdigit() else 1}-{month[:4] if len(month)>=4 else '2025'}"
+                    gross = float(row.get("GrossSales") or row.get("GROSSSALES") or row.get("Gross_Sales_VND") or row.get("Gross_Sales") or row.get("GrossRevenue") or row.get("DoanhThuGop") or row.get("Doanh thu (VND)") or (unit_p * qty))
+                    net = float(row.get("NetRevenue") or row.get("NetSales") or row.get("NETSALES") or row.get("Net_Sales_VND") or row.get("Net_Sales") or row.get("DoanhThuThuan") or row.get("Revenue_VND") or row.get("Revenue") or row.get("Doanh thu (VND)") or (gross - disc_p))
+                    cogs_p = float(row.get("CostOfGoodsSold") or row.get("TotalCOGS") or row.get("TOTALCOGS") or row.get("Total_Cost_VND") or row.get("Total_Cost") or row.get("COGS") or row.get("Cost_VND") or row.get("GiaVon") or row.get("Chi phí giá vốn (VND)") or 0)
+                    profit = float(row.get("GrossProfit") or row.get("GROSSPROFIT") or row.get("Profit_VND") or row.get("Profit") or row.get("LoiNhuanGop") or row.get("Lợi nhuận gộp (VND)") or (net - cogs_p))
+                    order_date = row.get("OrderDate") or row.get("Order_Date") or row.get("Date") or row.get("Tháng") or row.get("Thang") or ""
+                    month = row.get("YearMonth") or row.get("Tháng") or row.get("Thang") or (order_date[:7] if len(order_date) >= 7 else "2026-01")
+                    if len(month) >= 7 and month[:4].isdigit() and month[5:7].isdigit():
+                        month = month[:7]
+                    quarter = row.get("Quarter") or f"Q{(int(month[5:7])-1)//3+1 if len(month)>=7 and month[5:7].isdigit() else 1}-{month[:4] if len(month)>=4 else '2026'}"
                     pid = (row.get("ProductID") or row.get("Product_ID") or row.get("MaSanPham") or "PRD-101").strip()
                     pname = (row.get("ProductName") or row.get("Product_Name") or row.get("TenSanPham") or row.get("ProductLine") or PROD_NAMES.get(pid, f"Sản phẩm {pid}")).strip()
                     raw_chan = row.get("SalesChannel") or row.get("Sales_Channel") or row.get("Channel") or row.get("KenhBan") or "Khác"
@@ -314,7 +316,7 @@ class ReportingStage:
             m = r["Month"]
             if m not in month_dict:
                 month_dict[m] = {"month": m, "orders": 0, "net": 0.0, "profit": 0.0}
-            month_dict[m]["orders"] += 1
+            month_dict[m]["orders"] += int(r.get("Quantity") or 1)
             month_dict[m]["net"] += r["NetRevenue"]
             month_dict[m]["profit"] += r["GrossProfit"]
 

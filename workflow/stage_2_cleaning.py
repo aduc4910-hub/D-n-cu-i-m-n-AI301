@@ -553,19 +553,19 @@ class CleaningStage:
 
         # Ánh xạ tên cột động theo bộ từ vựng chuẩn kinh doanh & BI
         resolved_pk = primary_key if (primary_key and primary_key in cols) else find_column(cols, [
-            "TransactionID", "OrderID", "Order_ID", "ID", "Code", "MaDonHang", "MaGiaoDich"
+            "TransactionID", "OrderID", "Order_ID", "ID", "Code", "MaDonHang", "MaGiaoDich", "MaDong", "Ma_Dong", "Ma_dong"
         ])
-        qty_col = find_column(cols, ["quantity", "qty", "soluong", "so_luong", "order_quantity", "sl", "sales_volume"])
+        qty_col = find_column(cols, ["quantity", "qty", "soluong", "so_luong", "order_quantity", "sl", "sales_volume", "so_don", "sodon", "orders", "so_luong_don"])
         price_col = find_column(cols, ["unit_price_vnd", "unitprice", "unit_price", "price", "don_gia", "dongia", "gia_ban", "giaban", "selling_price", "gia"])
         unit_cost_col = find_column(cols, ["cost_price", "costprice", "unit_cost", "unitcost", "gia_von", "giavon", "don_gia_von"])
-        total_cost_col = find_column(cols, ["costofgoodssold", "cost_of_goods_sold", "cost_vnd", "cost", "total_cogs", "totalcogs", "cogs", "chi_phi", "chiphi", "tong_chi_phi", "tong_gia_von", "gia_von_hang_ban"])
+        total_cost_col = find_column(cols, ["costofgoodssold", "cost_of_goods_sold", "cost_vnd", "cost", "total_cogs", "totalcogs", "cogs", "chi_phi", "chiphi", "tong_chi_phi", "tong_gia_von", "gia_von_hang_ban", "chi_phi_gia_von", "chiphi_giavon"])
         gross_sales_col = find_column(cols, ["grosssales", "gross_sales", "grossrevenue", "doanh_thu_gop", "tong_tien", "doanhthugop"])
-        net_sales_col = find_column(cols, ["netrevenue", "net_revenue", "netsales", "net_sales", "doanh_thu_thuan", "doanhthuthuan", "revenue_vnd", "revenue", "doanh_thu"])
+        net_sales_col = find_column(cols, ["netrevenue", "net_revenue", "netsales", "net_sales", "doanh_thu_thuan", "doanhthuthuan", "revenue_vnd", "revenue", "doanh_thu", "doanhthu"])
         gross_profit_col = find_column(cols, ["grossprofit", "gross_profit", "loi_nhuan_gop", "loinhuangop", "profit_vnd", "profit", "loi_nhuan"])
         disc_amt_col = find_column(cols, ["discount_amount", "discountamount", "discount_vnd", "giam_gia", "tien_chiet_khau", "chiet_khau"])
         disc_rate_col = find_column(cols, ["discount_rate", "discountrate", "discount_pct", "discount_percent", "ty_le_chiet_khau", "chiet_khau_pct", "phan_tram_giam_gia"])
         shipping_col = find_column(cols, ["shipping_fee", "shippingfee", "shipping", "phi_van_chuyen", "phi_ship"])
-        date_col = find_column(cols, ["order_date", "orderdate", "date", "ngay", "ngay_dat", "created_at", "ngay_don_hang", "registrationdate"])
+        date_col = find_column(cols, ["order_date", "orderdate", "date", "ngay", "ngay_dat", "created_at", "ngay_don_hang", "registrationdate", "thang", "month", "yearmonth", "period", "ky", "thoi_gian"])
         channel_col = find_column(cols, ["sales_channel", "saleschannel", "channel", "kenh_ban_hang", "kenh_ban", "kenh"])
         cust_col = find_column(cols, ["customer_id", "customerid", "ma_khach_hang", "makh", "khach_hang"])
         prod_col = find_column(cols, ["product_id", "productid", "ma_san_pham", "masp", "product_name", "productname", "ten_san_pham", "san_pham"])
@@ -690,7 +690,7 @@ class CleaningStage:
             if "STRAT_DATE" in enabled_strategies and date_col and date_col in clean_row:
                 raw_d = str(clean_row[date_col]).strip()
                 normalized_d = raw_d
-                for fmt in ["%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%Y/%m/%d", "%d-%m-%Y"]:
+                for fmt in ["%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%Y/%m/%d", "%d-%m-%Y", "%Y-%m", "%m/%Y", "%m-%Y", "%Y%m"]:
                     try:
                         dt = datetime.strptime(raw_d, fmt)
                         normalized_d = dt.strftime("%Y-%m-%d")

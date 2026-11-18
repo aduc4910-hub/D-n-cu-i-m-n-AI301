@@ -2181,10 +2181,13 @@ function normalizeChannelName(rawName) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// Bóc tách ngày tháng, năm và quý một cách động từ chuỗi ngày (hỗ trợ YYYY-MM-DD, DD/MM/YYYY, v.v.)
+// Bóc tách ngày tháng, năm và quý một cách động từ chuỗi ngày / tháng (hỗ trợ YYYY-MM-DD, DD/MM/YYYY, YYYY-MM, MM/YYYY, Tháng MM/YYYY, v.v.)
 function parseRowDateInfo(dateStr) {
   if (!dateStr) return null;
   const s = String(dateStr).trim();
+  if (!s || s.toLowerCase() === "null" || s.toLowerCase() === "undefined" || s.toLowerCase() === "nan") return null;
+
+  // 1. Chuỗi ngày đầy đủ YYYY-MM-DD hoặc YYYY/MM/DD
   let match = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
   if (match) {
     const year = parseInt(match[1]);
@@ -2193,6 +2196,8 @@ function parseRowDateInfo(dateStr) {
     const ym = `${year}-${String(month).padStart(2, '0')}`;
     return { year, month, quarter: `Q${qNum}`, ym };
   }
+
+  // 2. Chuỗi ngày DD-MM-YYYY hoặc DD/MM/YYYY
   match = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
   if (match) {
     const year = parseInt(match[3]);
@@ -2201,6 +2206,56 @@ function parseRowDateInfo(dateStr) {
     const ym = `${year}-${String(month).padStart(2, '0')}`;
     return { year, month, quarter: `Q${qNum}`, ym };
   }
+
+  // 3. Chuỗi tháng YYYY-MM hoặc YYYY/MM (vd: "2026-07", "2026/08")
+  match = s.match(/^(\d{4})[-/](\d{1,2})$/);
+  if (match) {
+    const year = parseInt(match[1]);
+    const month = parseInt(match[2]);
+    if (month >= 1 && month <= 12) {
+      const qNum = Math.min(4, Math.max(1, Math.floor((month - 1) / 3) + 1));
+      const ym = `${year}-${String(month).padStart(2, '0')}`;
+      return { year, month, quarter: `Q${qNum}`, ym };
+    }
+  }
+
+  // 4. Chuỗi tháng MM-YYYY hoặc MM/YYYY (vd: "07/2026", "7/2026", "08-2026")
+  match = s.match(/^(\d{1,2})[-/](\d{4})$/);
+  if (match) {
+    const month = parseInt(match[1]);
+    const year = parseInt(match[2]);
+    if (month >= 1 && month <= 12) {
+      const qNum = Math.min(4, Math.max(1, Math.floor((month - 1) / 3) + 1));
+      const ym = `${year}-${String(month).padStart(2, '0')}`;
+      return { year, month, quarter: `Q${qNum}`, ym };
+    }
+  }
+
+  // 5. Định dạng tiếng Việt: "Tháng 07/2026", "Tháng 7-2026", "T07/2026", "T7/26"
+  match = s.match(/(?:th[aá]ng|t)\s*(\d{1,2})\s*[-/]\s*(\d{2,4})/i);
+  if (match) {
+    const month = parseInt(match[1]);
+    let year = parseInt(match[2]);
+    if (year < 100) year += 2000;
+    if (month >= 1 && month <= 12) {
+      const qNum = Math.min(4, Math.max(1, Math.floor((month - 1) / 3) + 1));
+      const ym = `${year}-${String(month).padStart(2, '0')}`;
+      return { year, month, quarter: `Q${qNum}`, ym };
+    }
+  }
+
+  // 6. Định dạng Compact YYYYMM (vd: "202607")
+  match = s.match(/^(\d{4})(\d{2})$/);
+  if (match) {
+    const year = parseInt(match[1]);
+    const month = parseInt(match[2]);
+    if (month >= 1 && month <= 12 && year >= 2000 && year <= 2099) {
+      const qNum = Math.min(4, Math.max(1, Math.floor((month - 1) / 3) + 1));
+      const ym = `${year}-${String(month).padStart(2, '0')}`;
+      return { year, month, quarter: `Q${qNum}`, ym };
+    }
+  }
+
   return null;
 }
 
@@ -2293,20 +2348,32 @@ function computeAnalysisManifestFromRows(rows, businessContext) {
   const yearCounts = {};
   const statusCounts = {};
 
+  let totalOrdersAgg = 0;
+  let hasExplicitOrderCount = false;
+
   rows.forEach((r, idx) => {
+    if (!r) return;
+    const rVals = Object.values(r).filter(v => v !== null && v !== undefined && String(v).trim() !== "");
+    if (rVals.length === 0) return; // Bỏ qua các dòng trống
+
     const orderId = parseStrVal(r, [
-      "Order_ID", "OrderID", "TransactionID", "Transaction_ID", "MaDonHang", "Ma_Don_Hang", "MaGiaoDich", "ID"
+      "Order_ID", "OrderID", "TransactionID", "Transaction_ID", "MaDonHang", "Ma_Don_Hang", "MaGiaoDich", "ID", "MaDong", "Ma_Dong", "Ma_dong"
     ], `ORD-${idx + 1}`);
     uniqueOrdersSet.add(orderId);
 
-    const qty = parseNumVal(r, ["Quantity", "Qty", "SoLuong", "So_Luong", "Units", "SL", "Volume"], 1);
+    const explicitOrders = parseNumVal(r, ["Số đơn", "Số Đơn", "So don", "SoDon", "So_Don", "Orders", "OrderCount", "TotalOrders"], 0);
+    if (explicitOrders > 0) hasExplicitOrderCount = true;
+
+    const qty = parseNumVal(r, ["Quantity", "Qty", "SoLuong", "So_Luong", "Units", "SL", "Volume", "Số đơn", "Số Đơn", "SoDon", "So_Don", "Orders"], 1);
+    const rowOrders = explicitOrders > 0 ? explicitOrders : Math.max(1, qty);
     totalUnits += qty;
+    totalOrdersAgg += rowOrders;
 
     const unitPrice = parseNumVal(r, ["Unit_Price_VND", "Unit_Price", "UnitPrice", "UNIT_PRICE", "DonGia", "Don_Gia", "GiaBan", "Price", "SellingPrice"], 0);
     const unitCost = parseNumVal(r, ["Unit_Cost_VND", "Unit_Cost", "UnitCost", "UNIT_COST", "CostPrice", "Cost_Price", "DonGiaVon", "GiaVonDonVi"], 0);
 
     let gross = parseNumVal(r, [
-      "Gross_Sales_VND", "Gross_Sales", "GrossSales", "GROSSSALES", "GrossRevenue", "Gross_Revenue", "DoanhThuGop", "Doanh_Thu_Gop", "TongTien", "TotalAmount", "Amount"
+      "Gross_Sales_VND", "Gross_Sales", "GrossSales", "GROSSSALES", "GrossRevenue", "Gross_Revenue", "DoanhThuGop", "Doanh_Thu_Gop", "TongTien", "TotalAmount", "Amount", "Doanh thu (VND)", "Doanh thu"
     ], 0);
     if (gross === 0 && unitPrice > 0) gross = unitPrice * qty;
 
@@ -2322,21 +2389,21 @@ function computeAnalysisManifestFromRows(rows, businessContext) {
     }
     
     let net = parseNumVal(r, [
-      "Net_Sales_VND", "Net_Sales", "NetSales", "NETSALES", "NetRevenue", "Net_Revenue", "DoanhThuThuan", "Doanh_Thu_Thuan", "Revenue_VND", "Revenue", "ThucThu", "DoanhThu"
+      "Net_Sales_VND", "Net_Sales", "NetSales", "NETSALES", "NetRevenue", "Net_Revenue", "DoanhThuThuan", "Doanh_Thu_Thuan", "Revenue_VND", "Revenue", "ThucThu", "DoanhThu", "Doanh thu (VND)", "Doanh thu"
     ], 0);
     if (net === 0 && gross > 0) {
       net = Math.max(0, gross - discount);
     }
 
     let cogs = parseNumVal(r, [
-      "Total_Cost_VND", "Total_Cost", "TotalCost", "CostOfGoodsSold", "TotalCOGS", "TOTALCOGS", "Total_COGS", "COGS", "GiaVon", "TongGiaVon", "Cost_VND", "Cost", "ChiPhi"
+      "Total_Cost_VND", "Total_Cost", "TotalCost", "CostOfGoodsSold", "TotalCOGS", "TOTALCOGS", "Total_COGS", "COGS", "GiaVon", "TongGiaVon", "Cost_VND", "Cost", "ChiPhi", "ChiPhiGiaVon", "Chi_Phi_Gia_Von", "Chi phí giá vốn (VND)", "Chi phí giá vốn"
     ], 0);
     if (cogs === 0 && unitCost > 0) {
       cogs = unitCost * qty;
     }
 
     let profit = parseNumVal(r, [
-      "Profit_VND", "Profit", "GrossProfit", "GROSSPROFIT", "Gross_Profit", "LoiNhuanGop", "Loi_Nhuan_Gop", "LoiNhuan", "Margin"
+      "Profit_VND", "Profit", "GrossProfit", "GROSSPROFIT", "Gross_Profit", "LoiNhuanGop", "Loi_Nhuan_Gop", "LoiNhuan", "Margin", "Lợi nhuận gộp (VND)", "Lợi nhuận gộp"
     ], 0);
     if (profit === 0 && net > 0 && cogs > 0) {
       profit = net - cogs;
@@ -2373,40 +2440,53 @@ function computeAnalysisManifestFromRows(rows, businessContext) {
     }
     channelMap[normCh].revenue += net;
     channelMap[normCh].profit += profit;
-    channelMap[normCh].orders += 1;
+    channelMap[normCh].orders += rowOrders;
     channelMap[normCh].discounts += discount;
 
     // Product
     const pName = parseStrVal(r, ["Product_Name", "ProductName", "TenSanPham", "Ten_San_Pham", "ProductLine", "SanPham", "ItemName", "ProductID"], "Sản phẩm khác");
     const pId = parseStrVal(r, ["Product_ID", "ProductID", "MaSanPham", "Ma_San_Pham", "ItemID", "SKU"], `PRD-${idx + 1}`);
-    const pCat = parseStrVal(r, ["Product_Category", "ProductCategory", "Category", "DanhMuc", "Danh_Muc", "NhomHang", "NganhHang"], "Chung");
+    const pCat = parseStrVal(r, ["Product_Category", "ProductCategory", "Category", "DanhMuc", "Danh_Muc", "NhomHang", "NganhHang", "KhuVuc", "Khu_Vuc"], "Chung");
     if (!prodMap[pName]) prodMap[pName] = { id: pId, name: pName, category: pCat, revenue: 0, profit: 0, units: 0, orders: 0 };
     prodMap[pName].revenue += net;
     prodMap[pName].profit += profit;
     prodMap[pName].units += qty;
-    prodMap[pName].orders += 1;
+    prodMap[pName].orders += rowOrders;
 
     // Category
     if (!catMap[pCat]) catMap[pCat] = { category: pCat, net_revenue: 0, gross_profit: 0, orders: 0 };
     catMap[pCat].net_revenue += net;
     catMap[pCat].gross_profit += profit;
-    catMap[pCat].orders += 1;
+    catMap[pCat].orders += rowOrders;
 
     // Date / Quarter / Month
     const dateStr = parseStrVal(r, [
-      "Order_Date", "OrderDate", "Date", "NgayDat", "Ngay_Dat", "NgayGiaoDich", "Ngay", "CreatedAt"
+      "Order_Date", "OrderDate", "Date", "NgayDat", "Ngay_Dat", "NgayGiaoDich", "Ngay", "CreatedAt",
+      "Tháng", "Thang", "Month", "YearMonth", "ThoiGian", "Thoi_Gian", "Time", "Period", "Ky", "Kỳ"
     ], "");
-    const dateInfo = parseRowDateInfo(dateStr);
-    let ym = "2025-01";
+    let dateInfo = parseRowDateInfo(dateStr);
+    if (!dateInfo) {
+      const monthStr = parseStrVal(r, ["Tháng", "Thang", "Month", "YearMonth", "Ky", "Kỳ", "Period"], "");
+      if (monthStr) dateInfo = parseRowDateInfo(monthStr);
+    }
+    let ym = "2026-01";
     let quarterKey = "Q1";
     if (dateInfo) {
       ym = dateInfo.ym;
       quarterKey = dateInfo.quarter;
       yearCounts[dateInfo.year] = (yearCounts[dateInfo.year] || 0) + 1;
     } else {
-      ym = parseStrVal(r, ["YearMonth"], "2025-01");
-      quarterKey = parseStrVal(r, ["Quarter"], "Q1");
-      if (quarterKey.includes("-")) quarterKey = quarterKey.split("-")[0];
+      const rawYm = parseStrVal(r, ["YearMonth", "Tháng", "Thang", "Month"], "");
+      const fbDateInfo = parseRowDateInfo(rawYm);
+      if (fbDateInfo) {
+        ym = fbDateInfo.ym;
+        quarterKey = fbDateInfo.quarter;
+        yearCounts[fbDateInfo.year] = (yearCounts[fbDateInfo.year] || 0) + 1;
+      } else {
+        ym = rawYm || "2026-01";
+        quarterKey = parseStrVal(r, ["Quarter", "Quy", "Quý"], "Q1");
+        if (quarterKey.includes("-")) quarterKey = quarterKey.split("-")[0];
+      }
     }
     if (!["Q1", "Q2", "Q3", "Q4"].includes(quarterKey)) {
       quarterKey = "Q1";
@@ -2417,19 +2497,19 @@ function computeAnalysisManifestFromRows(rows, businessContext) {
     }
     quarterMap[quarterKey].revenue += net;
     quarterMap[quarterKey].profit += profit;
-    quarterMap[quarterKey].orders += 1;
+    quarterMap[quarterKey].orders += rowOrders;
 
     if (!monthMap[ym]) monthMap[ym] = { month: ym, net_revenue: 0, gross_profit: 0, orders: 0 };
     monthMap[ym].net_revenue += net;
     monthMap[ym].gross_profit += profit;
-    monthMap[ym].orders += 1;
+    monthMap[ym].orders += rowOrders;
 
     // Order status
     const st = parseStrVal(r, ["Order_Status", "OrderStatus", "TrangThai", "Trang_Thai", "Status"], "Hoàn thành");
     statusCounts[st] = (statusCounts[st] || 0) + 1;
   });
 
-  const uniqueOrders = uniqueOrdersSet.size || rows.length;
+  const uniqueOrders = (hasExplicitOrderCount && totalOrdersAgg > 0) ? totalOrdersAgg : (uniqueOrdersSet.size || rows.length);
   const grossMargin = totalNet > 0 ? (totalProfit / totalNet) : 0;
   const aov = uniqueOrders > 0 ? Math.round(totalNet / uniqueOrders) : 0;
   const discountRatio = totalGross > 0 ? (totalDiscounts / totalGross) : 0;
