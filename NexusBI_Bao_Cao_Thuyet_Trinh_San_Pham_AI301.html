@@ -1,0 +1,838 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>NexusBI - Báo Cáo & Tài Liệu Thuyết Trình Sản Phẩm (AI301)</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 10mm 12mm 12mm 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #1E293B;
+            background: #F8FAFC;
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 210mm;
+            min-height: 275mm;
+            margin: 0 auto;
+            background: #FFFFFF;
+            padding: 22px 26px;
+            page-break-after: always;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border-radius: 4px;
+        }
+
+        .page:last-child {
+            page-break-after: auto;
+        }
+
+        /* HEADER & FOOTER */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #E2E8F0;
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+        }
+
+        .header-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo-img {
+            height: 32px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .header-brand-title {
+            font-family: "Georgia", "Times New Roman", serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: #0F2C24;
+            letter-spacing: -0.2px;
+        }
+
+        .header-brand-sub {
+            font-size: 8.5px;
+            font-weight: 700;
+            color: #C5A880;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-badge {
+            background: #0F2C24;
+            color: #F8F5EE;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            border: 1px solid #C5A880;
+        }
+
+        .page-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #E2E8F0;
+            padding-top: 8px;
+            margin-top: 14px;
+            font-size: 8.5px;
+            color: #64748B;
+        }
+
+        .footer-highlight {
+            color: #0F2C24;
+            font-weight: 700;
+        }
+
+        /* TYPOGRAPHY */
+        h1.hero-title {
+            font-family: "Georgia", "Times New Roman", serif;
+            font-size: 21px;
+            font-weight: 700;
+            color: #0F2C24;
+            line-height: 1.25;
+            margin-bottom: 6px;
+        }
+
+        h2.section-title {
+            font-family: "Georgia", "Times New Roman", serif;
+            font-size: 14.5px;
+            font-weight: 700;
+            color: #0F2C24;
+            border-left: 4px solid #C5A880;
+            padding-left: 10px;
+            margin-top: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        h3.block-title {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #0F2C24;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        p {
+            margin-bottom: 7px;
+            color: #334155;
+            text-align: justify;
+        }
+
+        .lead-text {
+            font-size: 11.5px;
+            color: #1E293B;
+            font-weight: 500;
+            line-height: 1.45;
+            margin-bottom: 12px;
+        }
+
+        /* CARDS & CONTAINERS */
+        .card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+        }
+
+        .card-luxury {
+            background: linear-gradient(135deg, #0F2C24 0%, #163E32 100%);
+            color: #F8FAFC;
+            border: 1px solid #C5A880;
+            border-radius: 6px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+        }
+
+        .card-luxury h1, .card-luxury h2, .card-luxury h3, .card-luxury p, .card-luxury span {
+            color: #F8FAFC !important;
+        }
+
+        .card-gold {
+            background: #FDFBF7;
+            border: 1px solid #EBDBC8;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+        }
+
+        /* GRID LAYOUTS */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        /* BADGES & PILLS */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 8.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-success { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+        .badge-gold { background: #FDF8E8; color: #B45309; border: 1px solid #FDE68A; }
+        .badge-info { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
+        .badge-dark { background: #0F2C24; color: #C5A880; border: 1px solid #C5A880; }
+
+        /* TALKING POINTS (LỜI THOẠI CHO SINH VIÊN) */
+        .talking-box {
+            background: #F0FDF4;
+            border-left: 4px solid #10B981;
+            padding: 9px 12px;
+            border-radius: 0 6px 6px 0;
+            margin: 8px 0 10px 0;
+        }
+
+        .talking-title {
+            font-size: 10.5px;
+            font-weight: 800;
+            color: #065F46;
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .talking-quote {
+            font-style: italic;
+            color: #047857;
+            font-size: 10.5px;
+            line-height: 1.4;
+        }
+
+        /* TABLES */
+        table.custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            margin-bottom: 10px;
+        }
+
+        table.custom-table th {
+            background: #0F2C24;
+            color: #FFFFFF;
+            padding: 6px 8px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #1E3A32;
+        }
+
+        table.custom-table td {
+            padding: 5px 8px;
+            border: 1px solid #E2E8F0;
+            color: #334155;
+            vertical-align: top;
+        }
+
+        table.custom-table tr:nth-child(even) td {
+            background: #F8FAFC;
+        }
+
+        /* STEP CARDS */
+        .step-container {
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 9px 11px;
+            margin-bottom: 9px;
+            background: #FFFFFF;
+            position: relative;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            border-bottom: 1px dashed #E2E8F0;
+            padding-bottom: 4px;
+        }
+
+        .step-num-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: #0F2C24;
+            color: #C5A880;
+            font-weight: 800;
+            border-radius: 50%;
+            font-size: 10px;
+            margin-right: 6px;
+        }
+
+        .step-name {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #0F2C24;
+        }
+
+        ul.check-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 4px;
+        }
+
+        ul.check-list li {
+            position: relative;
+            padding-left: 14px;
+            margin-bottom: 3px;
+            color: #334155;
+            font-size: 10px;
+        }
+
+        ul.check-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10B981;
+            font-weight: 800;
+        }
+
+        .highlight-box {
+            background: #FEF3C7;
+            border: 1px solid #F59E0B;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            font-size: 10px;
+            color: #92400E;
+        }
+
+        code {
+            background: #F1F5F9;
+            color: #0F2C24;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+            font-size: 9.5px;
+        }
+
+        @media print {
+            body {
+                background: #FFFFFF;
+            }
+            .page {
+                box-shadow: none;
+                padding: 10px 15px;
+                min-height: 280mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- TRANG 1: TỔNG QUAN DỰ ÁN & VẤN ĐỀ BÀI TOÁN -->
+    <!-- ========================================== -->
+    <div class="page">
+        <div>
+            <div class="page-header">
+                <div class="header-logo-group">
+                    <img class="header-logo-img" src="ui/brand_logo_cropped.png" alt="NexusBI Logo" />
+                    <div>
+                        <div class="header-brand-title">NexusBI Platform</div>
+                        <div class="header-brand-sub">Enterprise AI Analytics & Decision Support</div>
+                    </div>
+                </div>
+                <div class="header-badge">ĐỒ ÁN CUỐI MÔN AI301 • HỌC KỲ 2026</div>
+            </div>
+
+            <div class="card-luxury">
+                <div style="font-size: 9px; color: #C5A880; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px;">
+                    EXECUTIVE BRIEFING & DEMO GUIDE
+                </div>
+                <h1 class="hero-title" style="color: #FFFFFF !important; margin-bottom: 6px;">
+                    HỆ THỐNG BI TỰ ĐỘNG HÓA TÍCH HỢP TRỢ LÝ AI PHÂN TÍCH QUẢN TRỊ DOANH NGHIỆP
+                </h1>
+                <p style="color: #E2E8F0; font-size: 11px; line-height: 1.45; margin-bottom: 0;">
+                    Giải pháp chuyển hóa toàn diện dữ liệu bán lẻ đa kênh (Omnichannel) phân mảnh thành Báo cáo Điều hành chuẩn Minto, Dashboard tương tác và Trợ lý AI hỏi đáp dữ liệu thực tế chỉ qua 4 giai đoạn khép kín (End-to-End Data Lineage).
+                </p>
+            </div>
+
+            <div class="grid-3" style="margin-bottom: 10px;">
+                <div class="card" style="border-top: 3px solid #0F2C24;">
+                    <div class="block-title">🎯 Mục tiêu Đồ án</div>
+                    <p style="font-size: 10px; margin: 0;">Giải quyết triệt để sự đứt gãy giữa dữ liệu thô và quyết định điều hành, đảm bảo 100% dữ liệu thực, không phụ thuộc code giả định.</p>
+                </div>
+                <div class="card" style="border-top: 3px solid #C5A880;">
+                    <div class="block-title">⚙️ Công nghệ Cốt lõi</div>
+                    <p style="font-size: 10px; margin: 0;">Kiến trúc Micro-Engine, Verify Gate 6/6 kiểm toán số học, Cây chỉ số MECE, Phân khúc RFM 5 tầng và AI BI Query Engine.</p>
+                </div>
+                <div class="card" style="border-top: 3px solid #10B981;">
+                    <div class="block-title">🚀 Triển khai Thực tế</div>
+                    <p style="font-size: 10px; margin: 0;">Hệ thống đã triển khai trực tiếp trên Vercel Cloud và hỗ trợ đóng gói ứng dụng Desktop chạy Offline bảo mật tối đa.</p>
+                </div>
+            </div>
+
+            <h2 class="section-title">1. BÀI TOÁN DOANH NGHIỆP & GIẢI PHÁP ĐỘT PHÁ CỦA NEXUSBI</h2>
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Khía cạnh</th>
+                        <th style="width: 37%;">Quy trình Truyền thống (Manual Excel / BI rời rạc)</th>
+                        <th style="width: 38%;">Giải pháp Đột phá của NexusBI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Làm sạch Dữ liệu</strong></td>
+                        <td>Tốn 3–5 ngày xử lý thủ công; dễ sót dòng trùng lặp, lỗi khoảng trắng và lệch format.</td>
+                        <td><span class="badge badge-success">Tự động 100%</span> 7 chiến lược làm sạch chuyên sâu, xuất Audit Trail và thẻ DQ Score đạt 100 điểm.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Độ chính xác Số liệu</strong></td>
+                        <td>Dễ lệch công thức (Net Sales ≠ Gross - Chiết khấu); không có chốt chặn kiểm toán toán học.</td>
+                        <td><span class="badge badge-success">Verify Gate 6/6</span> Chốt chặn toán học khóa xuất báo cáo nếu chênh lệch dù chỉ 1 đồng.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Giao tiếp Số liệu</strong></td>
+                        <td>Dashboard tĩnh, biểu đồ khó hiểu; lãnh đạo mất nhiều giờ để tìm ra nguyên nhân cốt lõi.</td>
+                        <td><span class="badge badge-success">Báo cáo Minto</span> Kết luận quản trị tối cao đi đầu, 3 trụ cột luận điểm và bảng lộ trình hành động.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hỏi đáp Dữ liệu</strong></td>
+                        <td>Phải nhờ chuyên viên BI viết query SQL/DAX mất nhiều giờ hoặc AI bịa số (hallucination).</td>
+                        <td><span class="badge badge-success">AI BI Query</span> Hỏi đáp ngôn ngữ tự nhiên tức thì, lấy số liệu sạch 100% từ bảng phân tích.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="talking-box">
+                <div class="talking-title">💡 GỢI Ý MỞ ĐẦU THUYẾT TRÌNH (DÀNH CHO BẠN KHI CHÀO THẦY CÔ):</div>
+                <div class="talking-quote">
+                    "Kính thưa Thầy, trong thực tế doanh nghiệp bán lẻ đa kênh, 80% thời gian của phòng phân tích bị lãng phí vào việc làm sạch dữ liệu và đối soát số liệu lệch nhau giữa các bộ phận. Vì vậy, nhóm chúng em xây dựng NexusBI – một nền tảng BI thông minh tự động hóa khép kín 4 bước từ dữ liệu thô đến Báo cáo Quản trị Minto và Trợ lý AI thực chiến, cam kết bảo toàn 100% dữ liệu thật và loại bỏ hoàn toàn hiện tượng AI bịa số liệu."
+                </div>
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <span>Dự án Cuối Môn AI301 • Nhóm Tác Giả NexusBI</span>
+            <span class="footer-highlight">Trang 1 / 5 • Tổng quan & Bài toán</span>
+            <span>Trạng thái: Hoàn thiện 100% Sẵn sàng Demo</span>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TRANG 2: KIẾN TRÚC VẬN HÀNH 4 BƯỚC KHÉP KÍN -->
+    <!-- ========================================== -->
+    <div class="page">
+        <div>
+            <div class="page-header">
+                <div class="header-logo-group">
+                    <img class="header-logo-img" src="ui/brand_logo_cropped.png" alt="NexusBI Logo" />
+                    <div>
+                        <div class="header-brand-title">NexusBI Architecture</div>
+                        <div class="header-brand-sub">End-to-End Data Lineage Engine</div>
+                    </div>
+                </div>
+                <div class="header-badge">KIẾN TRÚC HỆ THỐNG</div>
+            </div>
+
+            <h2 class="section-title">2. KIẾN TRÚC QUY TRÌNH 4 BƯỚC KHÉP KÍN (END-TO-END DATA LINEAGE)</h2>
+            <p class="lead-text">
+                Hệ thống vận hành theo quy tắc dòng chảy dữ liệu duy nhất: <strong>Tệp nguồn → Dữ liệu gốc bảo toàn → Dữ liệu sạch đã kiểm toán → Phân tích đa chiều → Báo cáo quản trị & Trợ lý AI</strong>. Tuyệt đối không hardcode và không sử dụng dữ liệu mẫu khi đã có file tải lên.
+            </p>
+
+            <div class="step-container" style="border-left: 4px solid #0F2C24;">
+                <div class="step-header">
+                    <div>
+                        <span class="step-num-badge">1</span>
+                        <span class="step-name">BƯỚC 1: TIẾP NHẬN DỮ LIỆU & BỐI CẢNH DOANH NGHIỆP (INGESTION & CONTEXT)</span>
+                    </div>
+                    <span class="badge badge-dark">Data Ingestion</span>
+                </div>
+                <ul class="check-list">
+                    <li><strong>Hỗ trợ đa định dạng:</strong> Tải tệp CSV (UTF-8, UTF-8-BOM) và Excel đa Sheet (.xlsx, .xlsm), tự động lập Metadata Registry.</li>
+                    <li><strong>Universal Column Matching:</strong> Nhận diện thông minh các cột doanh thu, giá vốn, số lượng, kênh bán bất kể tên viết thường, viết hoa, có dấu hoặc không dấu (vd: <code>Gross_Sales_VND</code>, <code>DoanhThuGop</code>, <code>NetRevenue</code>).</li>
+                    <li><strong>Khảo sát bối cảnh thực tế:</strong> Thu nhận loại hình doanh nghiệp, ngành hàng và tối đa <strong>8 câu hỏi quản trị kinh doanh</strong> do người dùng trực tiếp đưa ra.</li>
+                </ul>
+            </div>
+
+            <div class="step-container" style="border-left: 4px solid #C5A880;">
+                <div class="step-header">
+                    <div>
+                        <span class="step-num-badge">2</span>
+                        <span class="step-name">BƯỚC 2: LÀM SẠCH CHUYÊN SÂU & CỔNG KIỂM ĐỊNH (CLEANING & VERIFY GATE)</span>
+                    </div>
+                    <span class="badge badge-gold">Quality Scorecard 100/100</span>
+                </div>
+                <ul class="check-list">
+                    <li><strong>7 Tầng làm sạch chuẩn mực:</strong> Xử lý khuyết thiếu, khoảng trắng, khử trùng lặp, ép kiểu số học, chuẩn hóa ngày tháng, gắn cờ ngoại lai và gom nhóm kênh bán.</li>
+                    <li><strong>Nguyên tắc Bất biến:</strong> Tuyệt đối bảo toàn dữ liệu gốc, lưu phiên bản sạch riêng biệt kèm Nhật ký kiểm toán (Audit Trail) Trước/Sau minh bạch.</li>
+                    <li><strong>Verify Gate 6/6:</strong> Tự động chạy 6 bài kiểm toán số học; chỉ khi toàn bộ đạt <code>PASS</code> mới cấp phép chuyển sang Bước 3.</li>
+                </ul>
+            </div>
+
+            <div class="step-container" style="border-left: 4px solid #10B981;">
+                <div class="step-header">
+                    <div>
+                        <span class="step-num-badge">3</span>
+                        <span class="step-name">BƯỚC 3: PHÂN TÍCH ĐA CHIỀU & HỎI ĐÁP AI THỰC CHIẾN (ANALYSIS & AI QUERY)</span>
+                    </div>
+                    <span class="badge badge-success">Zero Hallucination</span>
+                </div>
+                <ul class="check-list">
+                    <li><strong>5 Phương pháp phân tích BI:</strong> Mô tả KPI, So sánh Kênh & Sản phẩm, Xu hướng 4 Quý (2025), Phân khúc RFM 5 tầng và Chẩn đoán nguyên nhân.</li>
+                    <li><strong>Giải Đáp Tự Động:</strong> Tự động trả lời đầy đủ 100% câu hỏi đã nhập ở Bước 1 bằng số liệu chứng minh thực tế.</li>
+                    <li><strong>Hộp Chat AI Tương tác:</strong> Cho phép người dùng hỏi đáp tự do mọi câu hỏi về doanh số, sản phẩm thấp nhất/cao nhất, kênh chủ lực từ bảng số liệu sạch.</li>
+                </ul>
+            </div>
+
+            <div class="step-container" style="border-left: 4px solid #2563EB;">
+                <div class="step-header">
+                    <div>
+                        <span class="step-num-badge">4</span>
+                        <span class="step-name">BƯỚC 4: BÁO CÁO QUẢN TRỊ MINTO & MÔ PHỎNG WHAT-IF (REPORTING & WHAT-IF)</span>
+                    </div>
+                    <span class="badge badge-info">Executive Decision</span>
+                </div>
+                <ul class="check-list">
+                    <li><strong>Executive Dashboard Sang Trọng:</strong> Thiết kế đẳng cấp (Emerald & Gold), trực quan hóa cây chỉ số tài chính.</li>
+                    <li><strong>Báo cáo Minto Pyramid:</strong> Đúc kết Thông điệp quản trị tối cao ở đầu trang, phân tích 3 trụ cột và bảng lộ trình hành động. Có nút thu gọn/mở rộng trực quan.</li>
+                    <li><strong>Mô phỏng Độ nhạy What-If:</strong> Cho phép lãnh đạo kéo thanh trượt điều chỉnh tỷ lệ chiết khấu, giá vốn để dự báo tức thì biến động lợi nhuận gộp tương lai.</li>
+                </ul>
+            </div>
+
+            <div class="talking-box">
+                <div class="talking-title">💡 LỜI THOẠI KHI GIẢNG GIẢI VỀ KIẾN TRÚC CHO THẦY CÔ:</div>
+                <div class="talking-quote">
+                    "Thưa Thầy, điểm đặc biệt nhất của hệ thống chúng em là tính nhất quán dòng dữ liệu (Data Lineage). Không có bất kỳ khoảng hở nào giữa các bước: File người dùng tải lên ở Bước 1 sẽ được làm sạch ở Bước 2, kết quả sạch đó trực tiếp nuôi dưỡng các chỉ số KPI, biểu đồ 4 Quý tại Bước 3 và kết xuất thành Báo cáo Quản trị tại Bước 4. Nếu dữ liệu có sai lệch, Verify Gate sẽ lập tức cảnh báo."
+                </div>
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <span>Dự án Cuối Môn AI301 • Nhóm Tác Giả NexusBI</span>
+            <span class="footer-highlight">Trang 2 / 5 • Kiến trúc 4 Bước</span>
+            <span>Cam kết: 100% Data Lineage Khép Kín</span>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TRANG 3: CÔNG NGHỆ & TÍNH HỌC THUẬT AI301  -->
+    <!-- ========================================== -->
+    <div class="page">
+        <div>
+            <div class="page-header">
+                <div class="header-logo-group">
+                    <img class="header-logo-img" src="ui/brand_logo_cropped.png" alt="NexusBI Logo" />
+                    <div>
+                        <div class="header-brand-title">NexusBI Academic Merits</div>
+                        <div class="header-brand-sub">Methodology & Mathematical Verification</div>
+                    </div>
+                </div>
+                <div class="header-badge">TÍNH HỌC THUẬT & CÔNG NGHỆ</div>
+            </div>
+
+            <h2 class="section-title">3. TÍNH HỌC THUẬT & ĐỘT PHÁ CÔNG NGHỆ ĐẠT CHUẨN MÔN AI301</h2>
+
+            <div class="card-gold">
+                <h3 class="block-title">🛡️ CƠ CHẾ CỔNG BẢO VỆ TOÁN HỌC: VERIFY GATE (6/6 BÀI KIỂM TOÁN SỐ HỌC)</h3>
+                <p style="font-size: 10px; margin-bottom: 6px;">
+                    Verify Gate là trái tim kiểm soát chất lượng dữ liệu của NexusBI. Trước khi bất kỳ số liệu nào được đưa lên Dashboard hay xuất file báo cáo, hệ thống tự động chạy 6 thuật toán kiểm toán chéo:
+                </p>
+                <div class="grid-2">
+                    <div style="font-size: 9.5px; background: #FFFFFF; padding: 5px 8px; border-radius: 4px; border: 1px solid #E2E8F0;">
+                        <strong>1. Đối chiếu Doanh thu:</strong> <code>|Doanh thu thuần - (Doanh thu gộp - Chiết khấu)| ≤ 1đ</code>
+                    </div>
+                    <div style="font-size: 9.5px; background: #FFFFFF; padding: 5px 8px; border-radius: 4px; border: 1px solid #E2E8F0;">
+                        <strong>2. Đối chiếu Lợi nhuận:</strong> <code>|Lợi nhuận gộp - (Doanh thu thuần - Giá vốn COGS)| ≤ 1đ</code>
+                    </div>
+                    <div style="font-size: 9.5px; background: #FFFFFF; padding: 5px 8px; border-radius: 4px; border: 1px solid #E2E8F0;">
+                        <strong>3. Nhất quán Thời gian:</strong> <code>Tổng doanh thu 4 Quý (Q1+Q2+Q3+Q4) = Doanh thu thuần cả năm</code>
+                    </div>
+                    <div style="font-size: 9.5px; background: #FFFFFF; padding: 5px 8px; border-radius: 4px; border: 1px solid #E2E8F0;">
+                        <strong>4. Toàn vẹn Kênh bán:</strong> <code>Tổng tỷ trọng % của tất cả các kênh bán = 100.0% (±0.1%)</code>
+                    </div>
+                    <div style="font-size: 9.5px; background: #FFFFFF; padding: 5px 8px; border-radius: 4px; border: 1px solid #E2E8F0;">
+                        <strong>5. Kiểm soát Bất thường:</strong> <code>Số bản ghi có số lượng hoặc giá trị âm vô lý = 0 bản ghi</code>
+                    </div>
+                    <div style="font-size: 9.5px; background: #FFFFFF; padding: 5px 8px; border-radius: 4px; border: 1px solid #E2E8F0;">
+                        <strong>6. Bảo toàn Dòng dữ liệu:</strong> <code>Số dòng sau làm sạch + Số dòng trùng lặp = Tổng dòng tệp gốc</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top: 8px;">
+                <div class="card">
+                    <h3 class="block-title">📊 Cây Chỉ Số Tài Chính MECE</h3>
+                    <p style="font-size: 10px;">Phân rã chỉ số tài chính theo nguyên lý MECE (Không trùng lặp, Không bỏ sót):</p>
+                    <ul class="check-list" style="font-size: 9.5px;">
+                        <li><strong>Doanh thu gộp:</strong> Đơn giá × Số lượng thực xuất.</li>
+                        <li><strong>Doanh thu thuần:</strong> Doanh thu gộp trừ toàn bộ Voucher & Giảm giá.</li>
+                        <li><strong>Lợi nhuận gộp:</strong> Doanh thu thuần trừ Tổng giá vốn hàng bán (COGS).</li>
+                        <li><strong>Biên LN gộp:</strong> (Lợi nhuận gộp / Doanh thu thuần) × 100%.</li>
+                        <li><strong>AOV (Giá trị đơn TB):</strong> Doanh thu thuần / Tổng đơn hợp lệ.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3 class="block-title">👥 Mô Hình Phân Khúc Khách Hàng RFM</h3>
+                    <p style="font-size: 10px;">Phân tích 3 chiều Recency (gần đây), Frequency (tần suất), Monetary (giá trị):</p>
+                    <ul class="check-list" style="font-size: 9.5px;">
+                        <li><strong>Champions (VIP):</strong> Mua ≥ 4 đơn trong 90 ngày; đóng góp tỷ trọng doanh thu cao nhất.</li>
+                        <li><strong>Loyal Customers:</strong> Mua đều đặn, trung thành với thương hiệu.</li>
+                        <li><strong>Potential Loyalists:</strong> Khách mới tiềm năng, sức mua tốt.</li>
+                        <li><strong>At Risk:</strong> Khách từng mua nhiều nhưng > 75 ngày chưa quay lại.</li>
+                        <li><strong>Hibernating:</strong> Khách ngủ đông, tần suất thấp cần kích hoạt lại.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 4px; border-left: 4px solid #0F2C24;">
+                <h3 class="block-title">🤖 AI BI Query Engine: Cam Kết Không Ảo Giác (Zero-Hallucination)</h3>
+                <p style="font-size: 10px; margin-bottom: 5px;">
+                    Trong môn học AI301, vấn đề lớn nhất của các ứng dụng tích hợp AI là hiện tượng <em>Ảo giác (Hallucination)</em> khi AI tự bịa ra con số không có thật. NexusBI giải quyết triệt để vấn đề này bằng mô hình <strong>Deterministic Grounding</strong>:
+                </p>
+                <div class="grid-3" style="margin-bottom: 0;">
+                    <div style="background: #F8FAFC; padding: 6px; border-radius: 4px; font-size: 9px; border: 1px solid #E2E8F0;">
+                        <strong>1. Grounding 100%:</strong> AI không tự sinh số. Mọi câu trả lời đều được truy vấn trực tiếp từ bảng số liệu sạch của phiên làm việc.
+                    </div>
+                    <div style="background: #F8FAFC; padding: 6px; border-radius: 4px; font-size: 9px; border: 1px solid #E2E8F0;">
+                        <strong>2. NLU Đa dạng:</strong> Nhận diện từ khóa đời thường (thấp nhất, cao nhất, sụt giảm, kênh nào, sản phẩm nào...).
+                    </div>
+                    <div style="background: #F8FAFC; padding: 6px; border-radius: 4px; font-size: 9px; border: 1px solid #E2E8F0;">
+                        <strong>3. Bằng chứng kiểm chứng:</strong> Kèm theo mỗi câu trả lời là 3 luận điểm chứng minh số liệu cụ thể (Evidence Trail).
+                    </div>
+                </div>
+            </div>
+
+            <div class="talking-box" style="margin-top: 8px;">
+                <div class="talking-title">💡 LỜI THOẠI KHI NÓI VỀ ĐỘT PHÁ CÔNG NGHỆ VỚI THẦY CÔ:</div>
+                <div class="talking-quote">
+                    "Thưa Thầy, điểm tạo nên sự khác biệt học thuật của đồ án là cơ chế Verify Gate 6 bài kiểm toán và kiến trúc AI Zero-Hallucination. Khi người dùng hỏi AI 'kênh nào doanh thu cao nhất' hay 'sản phẩm nào biên lợi nhuận thấp nhất', AI của NexusBI không đoán mò mà trích xuất chính xác từ bộ dữ liệu đã được kiểm toán toán học, đảm bảo tính chuẩn mực cho ban giám đốc ra quyết định."
+                </div>
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <span>Dự án Cuối Môn AI301 • Nhóm Tác Giả NexusBI</span>
+            <span class="footer-highlight">Trang 3 / 5 • Phương pháp & Học thuật</span>
+            <span>Kiểm định: 100% Pass Verify Gate</span>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TRANG 4: HƯỚNG DẪN THỰC CHIẾN DEMO 4 BƯỚC -->
+    <!-- ========================================== -->
+    <div class="page">
+        <div>
+            <div class="page-header">
+                <div class="header-logo-group">
+                    <img class="header-logo-img" src="ui/brand_logo_cropped.png" alt="NexusBI Logo" />
+                    <div>
+                        <div class="header-brand-title">Live Demo Walkthrough</div>
+                        <div class="header-brand-sub">Step-by-Step Presentation Guide</div>
+                    </div>
+                </div>
+                <div class="header-badge">HƯỚNG DẪN DEMO THỰC TẾ</div>
+            </div>
+
+            <h2 class="section-title">4. KỊCH BẢN THỰC CHIẾN DEMO 4 BƯỚC (DÀNH CHO BẠN KHI THAO TÁC TRỰC TIẾP)</h2>
+            <p class="lead-text">
+                Hãy làm theo đúng 4 bước dưới đây trên màn hình máy tính trước mặt Thầy cô để buổi thuyết minh diễn ra hoàn hảo nhất:
+            </p>
+
+            <table class="custom-table" style="font-size: 9.5px;">
+                <thead>
+                    <tr>
+                        <th style="width: 14%;">Giai đoạn</th>
+                        <th style="width: 38%;">Thao tác trực tiếp trên Màn hình</th>
+                        <th style="width: 48%;">Câu nói giảng giải mượt mà nhất</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>BƯỚC 1<br>(30 giây)</strong><br><span class="badge badge-dark">Kết nối</span></td>
+                        <td>
+                            1. Mở trang web, nhấn vào khu vực tải file.<br>
+                            2. Tải tệp <code>AnPhatHome_Business_Test_Dataset.csv</code> lên.<br>
+                            3. Chỉ chuột vào bảng cấu trúc 12 cột tự động nhận diện.<br>
+                            4. Giữ nguyên hoặc bổ sung thêm câu hỏi ở ô câu hỏi kinh doanh.
+                        </td>
+                        <td>
+                            <em>"Dạ thưa Thầy, ở Bước 1 hệ thống tiếp nhận file CSV/Excel của doanh nghiệp. Điểm hay là cơ chế Universal Column Matching tự động nhận diện các cột doanh thu, giá vốn, kênh bán mà người dùng không cần sửa lại file gốc. Đồng thời hệ thống tiếp nhận các bài toán kinh doanh thực tế cần giải quyết."</em>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>BƯỚC 2<br>(45 giây)</strong><br><span class="badge badge-gold">Làm sạch</span></td>
+                        <td>
+                            1. Nhấn nút <strong>"Tiến hành làm sạch dữ liệu"</strong>.<br>
+                            2. Chỉ vào thẻ điểm <strong>DQ Score 100/100</strong>.<br>
+                            3. Cuộn nhanh bảng đối soát Trước/Sau (Before vs After) và 6 bài kiểm toán Verify Gate đều hiện nhãn <code>Đạt chuẩn (PASS)</code>.
+                        </td>
+                        <td>
+                            <em>"Chuyển sang Bước 2, hệ thống kích hoạt 7 thuật toán làm sạch, loại bỏ khoảng trắng, chuẩn hóa tên các kênh bán phân mảnh và chạy 6 bài kiểm toán Verify Gate. Dữ liệu gốc hoàn toàn được bảo toàn, đồng thời tạo ra một bản dữ liệu sạch có nguồn gốc kiểm chứng minh bạch."</em>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>BƯỚC 3<br>(60 giây)</strong><br><span class="badge badge-success">Phân tích</span></td>
+                        <td>
+                            1. Nhấn chuyển sang <strong>Bước 3: Phân tích</strong>.<br>
+                            2. Chỉ vào các chỉ số: <strong>Doanh thu thuần, Lợi nhuận gộp, Biểu đồ 4 Quý (2025) và Tỷ trọng kênh bán</strong>.<br>
+                            3. Cuộn xuống phần <strong>"Giải Đáp Bài Toán Kinh Doanh"</strong>.<br>
+                            4. Gõ vào ô Chat AI: <code>kênh nào có doanh thu cao nhất</code> và nhấn <strong>Hỏi AI</strong>.
+                        </td>
+                        <td>
+                            <em>"Tại Bước 3, toàn bộ KPI tài chính và biểu đồ biến động 4 Quý được tính toán 100% từ file dữ liệu vừa làm sạch. Thầy có thể thấy hệ thống giải đáp tự động các bài toán kinh doanh đặt ra ở Bước 1. Đặc biệt, khi em hỏi AI bất kỳ chỉ số nào trong hộp chat, AI lập tức truy vấn từ dữ liệu thật và đưa ra bằng chứng số liệu mà không bịa đặt."</em>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>BƯỚC 4<br>(45 giây)</strong><br><span class="badge badge-info">Báo cáo</span></td>
+                        <td>
+                            1. Nhấn chuyển sang <strong>Bước 4: Báo cáo</strong>.<br>
+                            2. Chỉ vào Executive Dashboard và phần Báo cáo Minto.<br>
+                            3. Nhấn thử nút <strong>"Thu gọn / Mở rộng"</strong> báo cáo Minto.<br>
+                            4. Thao tác thanh trượt mô phỏng <strong>What-If</strong> (kéo tăng giảm chiết khấu để thấy lợi nhuận biến động).<br>
+                            5. Chỉ vào nút <strong>"Xuất Báo Cáo & Dữ Liệu Sạch"</strong>.
+                        </td>
+                        <td>
+                            <em>"Cuối cùng ở Bước 4, hệ thống tổng hợp Báo cáo Quản trị theo cấu trúc Kim tự tháp Minto giúp Hội đồng Quản trị nắm bắt thông điệp tối cao chỉ trong 30 giây. Lãnh đạo còn có thể sử dụng công cụ mô phỏng What-If để dự báo lợi nhuận khi thay đổi chính sách chiết khấu và tải về tệp báo cáo hoàn chỉnh."</em>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box">
+                <strong>⭐ MẸO GHI ĐIỂM TUYỆT ĐỐI KHI DEMO:</strong> Thầy giáo chấm đồ án thường sẽ kiểm tra xem số liệu có phải thật không. Bạn hãy mở file CSV gốc lên và đối chiếu con số <strong>Tổng số đơn hàng</strong> hoặc <strong>Doanh thu kênh Shopee</strong> trên màn hình với file Excel gốc. Thầy sẽ đánh giá cực kỳ cao tính trung thực và chuẩn mực dữ liệu của bạn!
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <span>Dự án Cuối Môn AI301 • Nhóm Tác Giả NexusBI</span>
+            <span class="footer-highlight">Trang 4 / 5 • Hướng dẫn Demo</span>
+            <span>Tự tin trình bày • Chuẩn bị chu đáo</span>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TRANG 5: KỊCH BẢN THUYẾT MINH & PHẢN BIỆN   -->
+    <!-- ========================================== -->
+    <div class="page">
+        <div>
+            <div class="page-header">
+                <div class="header-logo-group">
+                    <img class="header-logo-img" src="ui/brand_logo_cropped.png" alt="NexusBI Logo" />
+                    <div>
+                        <div class="header-brand-title">Presentation Script & FAQ Defense</div>
+                        <div class="header-brand-sub">Grading Defense & Q&A Strategy</div>
+                    </div>
+                </div>
+                <div class="header-badge">KỊCH BẢN 3 PHÚT & PHẢN BIỆN</div>
+            </div>
+
+            <h2 class="section-title">5. KỊCH BẢN THUYẾT MINH 3 PHÚT & BỘ CÂU HỎI PHẢN BIỆN (FAQ DEFENSE)</h2>
+
+            <div class="card-luxury" style="padding: 9px 12px; margin-bottom: 8px;">
+                <div style="font-size: 9px; color: #C5A880; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">
+                    🎙️ KỊCH BẢN THUYẾT MINH 3 PHÚT LIỀN MẠCH (NÓI TRƯỚC HỘI ĐỒNG):
+                </div>
+                <p style="color: #F8FAFC !important; font-size: 9.5px; line-height: 1.45; margin-bottom: 0;">
+                    <em>"Kính thưa quý Thầy Cô trong Hội đồng chấm đồ án AI301. Hôm nay nhóm chúng em xin trân trọng giới thiệu sản phẩm <strong>NexusBI</strong> – Nền tảng Business Intelligence tự động hóa tích hợp Trợ lý AI phân tích chuyên sâu.<br>
+                    Xuất phát từ thực tế các doanh nghiệp bán lẻ mất hàng tuần làm sạch dữ liệu và đối mặt với rủi ro sai lệch số liệu khi ra quyết định, NexusBI được thiết kế với 3 trụ cột đột phá: <strong>Thứ nhất</strong> là dòng dữ liệu khép kín 100% Data Lineage, bảo toàn tệp gốc và tự động hóa 7 tầng làm sạch. <strong>Thứ hai</strong> là Cổng kiểm định toán học Verify Gate 6 bài test chéo, đảm bảo loại bỏ hoàn toàn lỗi số học. <strong>Thứ ba</strong> là Trợ lý AI thực chiến cam kết không ảo giác, trực tiếp giải đáp các bài toán kinh doanh bằng bằng chứng số liệu và Báo cáo Quản trị Minto hỗ trợ mô phỏng What-If.<br>
+                    Sau đây, em xin phép được demo trực tiếp quy trình 4 bước trên tệp dữ liệu giao dịch thực tế..."</em>
+                </p>
+            </div>
+
+            <h3 class="block-title" style="margin-top: 8px; margin-bottom: 5px;">🎯 BẢNG 5 CÂU HỎI THẦY CÔ HAY HỎI NHẤT & CÂU TRẢ LỜI GHI ĐIỂM TỐI ĐA:</h3>
+
+            <div class="card" style="padding: 7px 9px; margin-bottom: 5px;">
+                <div style="font-weight: 700; color: #0F2C24; font-size: 10px;">
+                    ❓ Câu 1: "AI trong hệ thống này hoạt động như thế nào? Có bịa đặt số liệu (Hallucination) không?"
+                </div>
+                <div style="color: #334155; font-size: 9.5px; margin-top: 2px;">
+                    <strong>Trả lời:</strong> <em>"Dạ thưa Thầy, hệ thống áp dụng cơ chế <strong>Deterministic Grounding</strong>. AI không được phép tự bịa ra bất kỳ số liệu nào mà chỉ đóng vai trò phân tích trên nền tảng Data Manifest đã được Verify Gate kiểm chứng ở Bước 2 và Bước 3. Nhờ đó, hệ thống loại bỏ 100% nguy cơ hallucination trong báo cáo tài chính."</em>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 7px 9px; margin-bottom: 5px;">
+                <div style="font-weight: 700; color: #0F2C24; font-size: 10px;">
+                    ❓ Câu 2: "Nếu người dùng tải lên một file có tên cột khác hoàn toàn thì hệ thống xử lý ra sao?"
+                </div>
+                <div style="color: #334155; font-size: 9.5px; margin-top: 2px;">
+                    <strong>Trả lời:</strong> <em>"Hệ thống đã xây dựng lớp thuật toán <strong>Universal Column Matching</strong> kết hợp chuẩn hóa Unicode, loại bỏ ký tự đặc biệt và đối chiếu theo ma trận từ điển tài chính đa ngôn ngữ (Gross, Net, Doanh thu, Doanh so, Tien, Gia von, COGS, Kenh, Channel...). Do đó, các biến thể tên cột phổ biến trong doanh nghiệp Việt Nam đều được tự động ánh xạ chính xác."</em>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 7px 9px; margin-bottom: 5px;">
+                <div style="font-weight: 700; color: #0F2C24; font-size: 10px;">
+                    ❓ Câu 3: "Verify Gate hoạt động như thế nào và có tác dụng gì?"
+                </div>
+                <div style="color: #334155; font-size: 9.5px; margin-top: 2px;">
+                    <strong>Trả lời:</strong> <em>"Dạ, Verify Gate là cổng kiểm soát toán học bắt buộc gồm 6 bài test: đối chiếu Gross trừ Discount bằng Net, Net trừ COGS bằng Lợi nhuận, tổng 4 Quý bằng cả năm, tổng tỷ trọng kênh bằng 100%, kiểm tra số âm bất thường và bảo toàn dòng dữ liệu. Nếu phát hiện sai số dù chỉ 1 đồng, hệ thống sẽ chặn xuất báo cáo để tránh đưa thông tin sai lệch cho ban lãnh đạo."</em>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 7px 9px; margin-bottom: 5px;">
+                <div style="font-weight: 700; color: #0F2C24; font-size: 10px;">
+                    ❓ Câu 4: "Điểm khác biệt lớn nhất giữa NexusBI và PowerBI / Tableau là gì?"
+                </div>
+                <div style="color: #334155; font-size: 9.5px; margin-top: 2px;">
+                    <strong>Trả lời:</strong> <em>"PowerBI là công cụ trực quan hóa thuần túy đòi hỏi chuyên viên phải tự viết code DAX/PowerQuery và tự thiết kế báo cáo. NexusBI là nền tảng Agentic BI tự động hóa toàn bộ vòng đời: từ làm sạch dữ liệu, tự động dựng cây chỉ số MECE, giải đáp bài toán kinh doanh, viết báo cáo quản trị Minto đến hỗ trợ hội thoại AI và mô phỏng What-If chỉ trong 60 giây."</em>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 7px 9px; margin-bottom: 5px;">
+                <div style="font-weight: 700; color: #0F2C24; font-size: 10px;">
+                    ❓ Câu 5: "Sản phẩm được triển khai và lưu trữ như thế nào?"
+                </div>
+                <div style="color: #334155; font-size: 9.5px; margin-top: 2px;">
+                    <strong>Trả lời:</strong> <em>"Sản phẩm được thiết kế theo kiến trúc Micro-Frontend hiện đại, đã triển khai Production trên hạ tầng Vercel Cloud Serverless để truy cập mọi lúc mọi nơi, đồng thời hỗ trợ tệp đóng gói HTML/JS độc lập để chạy Offline nội bộ trong doanh nghiệp nhằm bảo mật dữ liệu tuyệt đối."</em>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <span>Dự án Cuối Môn AI301 • Nhóm Tác Giả NexusBI</span>
+            <span class="footer-highlight">Trang 5 / 5 • Kịch bản & Phản biện FAQ</span>
+            <span>Chúc Bạn Đạt Điểm A+ Xuất Sắc! 🌟</span>
+        </div>
+    </div>
+
+</body>
+</html>
