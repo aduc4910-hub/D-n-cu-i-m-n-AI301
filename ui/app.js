@@ -224,14 +224,22 @@ function switchToOverview() {
   updateSidebarNav();
   updateTopKPICards();
   renderCurrentWorkspace();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.scrollY > 40) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ================= LUXURY NUMBER COUNTER ANIMATION =================
-function animateNumber(element, endVal, duration = 800, prefix = '', suffix = '', isDecimal = false) {
+function animateNumber(element, endVal, duration = 300, prefix = '', suffix = '', isDecimal = false) {
   if (!element) return;
+  const targetStr = isDecimal ? `${prefix}${endVal.toFixed(1)}${suffix}` : `${prefix}${Math.round(endVal).toLocaleString()}${suffix}`;
+  if (element.textContent === targetStr) return;
+
   const startTime = performance.now();
-  const startVal = 0;
+  const rawCurrent = parseFloat(element.textContent.replace(/[^0-9.-]+/g, ''));
+  const startVal = isNaN(rawCurrent) ? 0 : rawCurrent;
+  if (Math.abs(endVal - startVal) < 0.001) {
+    element.textContent = targetStr;
+    return;
+  }
 
   function update(now) {
     const elapsed = now - startTime;
@@ -239,20 +247,14 @@ function animateNumber(element, endVal, duration = 800, prefix = '', suffix = ''
     const ease = 1 - Math.pow(1 - progress, 3);
     const currentVal = startVal + (endVal - startVal) * ease;
 
-    if (isDecimal) {
-      element.innerHTML = `${prefix}${currentVal.toFixed(1)}${suffix}`;
-    } else {
-      element.innerHTML = `${prefix}${Math.round(currentVal).toLocaleString()}${suffix}`;
-    }
+    element.textContent = isDecimal 
+      ? `${prefix}${currentVal.toFixed(1)}${suffix}`
+      : `${prefix}${Math.round(currentVal).toLocaleString()}${suffix}`;
 
     if (progress < 1) {
       requestAnimationFrame(update);
     } else {
-      if (isDecimal) {
-        element.innerHTML = `${prefix}${endVal.toFixed(1)}${suffix}`;
-      } else {
-        element.innerHTML = `${prefix}${Math.round(endVal).toLocaleString()}${suffix}`;
-      }
+      element.textContent = targetStr;
     }
   }
   requestAnimationFrame(update);
@@ -288,13 +290,18 @@ function getActivePipelineData() {
   const repM = currentReportingManifest;
   const lineage = window.CURRENT_SESSION_LINEAGE;
 
-  // Nếu đã nạp dữ liệu nhưng chưa chạy Bước 3, tự động tính toán phân tích thời gian thực để Overview luôn có số liệu thực
+  // Tối ưu hóa hiệu năng: Cache kết quả tính toán trong bộ nhớ để tránh duyệt lặp lại hàng nghìn dòng
   if (!analysisM && activeRows && activeRows.length > 0) {
-    try {
-      analysisM = computeAnalysisManifestFromRows(activeRows, currentBusinessContext);
-    } catch (e) {
-      console.warn("Lỗi tính toán manifest phân tích cho Overview:", e);
+    const cacheKey = (file || 'dataset') + '_' + activeRows.length;
+    if (!window._CACHED_ANALYSIS_MANIFEST || window._CACHED_ANALYSIS_KEY !== cacheKey) {
+      try {
+        window._CACHED_ANALYSIS_MANIFEST = computeAnalysisManifestFromRows(activeRows, currentBusinessContext);
+        window._CACHED_ANALYSIS_KEY = cacheKey;
+      } catch (e) {
+        console.warn("Lỗi tính toán manifest phân tích cho Overview:", e);
+      }
     }
+    analysisM = window._CACHED_ANALYSIS_MANIFEST;
   }
   
   const rowCount = (cleanM?.cleaned_rows !== undefined && cleanM?.cleaned_rows !== null && cleanM.cleaned_rows > 0)
@@ -1208,7 +1215,7 @@ function goToStep(idx) {
   updateTopKPICards();
   renderHorizontalPipelineBar();
   renderCurrentWorkspace();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.scrollY > 40) window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (idx === 1 && (!currentCleaningManifest || cleaningStateStatus !== "COMPLETED")) {
     loadCleaningProfile();
@@ -1232,7 +1239,7 @@ function advanceStep(fromIdx) {
   updateTopKPICards();
   renderHorizontalPipelineBar();
   renderCurrentWorkspace();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.scrollY > 40) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function prevStep() {
@@ -1240,7 +1247,7 @@ function prevStep() {
     currentStepIdx--;
     renderHorizontalPipelineBar();
     renderCurrentWorkspace();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.scrollY > 40) window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
 
@@ -1306,9 +1313,13 @@ function renderCurrentWorkspace() {
   const ws = document.getElementById('workspace-content');
   if (!ws) return;
 
-  ws.classList.remove('fade-slide-up');
-  void ws.offsetWidth;
-  ws.classList.add('fade-slide-up');
+  // Tối ưu hóa hiệu năng: Chỉ kích hoạt animation khi đổi view hoặc đổi step, loại bỏ void ws.offsetWidth
+  if (window._LAST_ACTIVE_VIEW !== currentActiveView || window._LAST_STEP_IDX !== currentStepIdx) {
+    ws.classList.remove('fade-slide-up');
+    requestAnimationFrame(() => ws.classList.add('fade-slide-up'));
+    window._LAST_ACTIVE_VIEW = currentActiveView;
+    window._LAST_STEP_IDX = currentStepIdx;
+  }
 
   if (currentActiveView === 'OVERVIEW') {
     ws.innerHTML = renderExecutiveOverview();
@@ -4831,7 +4842,7 @@ function startNewSession() {
     loadAvailableFilesOnly();
     renderHorizontalPipelineBar();
     renderCurrentWorkspace();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.scrollY > 40) window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
 
