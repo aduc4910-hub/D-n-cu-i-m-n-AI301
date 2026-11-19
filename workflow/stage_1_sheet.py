@@ -216,7 +216,9 @@ class SheetStage:
                 "validation": {
                     "blocking_errors": blocking_errors,
                     "warnings": warnings,
-                    "can_proceed_to_cleaning": False
+                    "can_proceed_to_cleaning": False,
+                    "rejection_title": "LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+                    "rejection_message": "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên."
                 },
                 "blocking_errors": blocking_errors,
                 "warnings": warnings,
@@ -239,7 +241,9 @@ class SheetStage:
                 "validation": {
                     "blocking_errors": blocking_errors,
                     "warnings": warnings,
-                    "can_proceed_to_cleaning": False
+                    "can_proceed_to_cleaning": False,
+                    "rejection_title": "LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+                    "rejection_message": "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên."
                 },
                 "blocking_errors": blocking_errors,
                 "warnings": warnings,
@@ -270,7 +274,9 @@ class SheetStage:
                 "validation": {
                     "blocking_errors": blocking_errors,
                     "warnings": warnings,
-                    "can_proceed_to_cleaning": False
+                    "can_proceed_to_cleaning": False,
+                    "rejection_title": "LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+                    "rejection_message": "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên."
                 },
                 "blocking_errors": blocking_errors,
                 "warnings": warnings,
@@ -278,7 +284,7 @@ class SheetStage:
             }
 
         if not records:
-            blocking_errors.append(f"Sheet '{chosen_sheet}' không có dòng dữ liệu nào sau tiêu đề.")
+            blocking_errors.append("Tệp dữ liệu không có bản ghi (0 dòng dữ liệu). Hệ thống chỉ phát hiện dòng tiêu đề cột.")
             return {
                 "status": "ERROR",
                 "readable": True,
@@ -294,7 +300,9 @@ class SheetStage:
                 "validation": {
                     "blocking_errors": blocking_errors,
                     "warnings": warnings,
-                    "can_proceed_to_cleaning": False
+                    "can_proceed_to_cleaning": False,
+                    "rejection_title": "LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+                    "rejection_message": "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên."
                 },
                 "blocking_errors": blocking_errors,
                 "warnings": warnings,
@@ -361,7 +369,15 @@ class SheetStage:
         # 4. Phân loại cấu trúc trường: Measures vs Dimensions
         classified = self.categorize_columns(raw_headers, detected_schema)
 
-        # 5. Đánh giá khả năng sử dụng dữ liệu (Data Usability Assessment)
+        # 5. Kiểm tra tính đầy đủ và phù hợp để phân tích
+        empty_ratio = (empty_cells / total_cells) if total_cells > 0 else 0
+        if empty_ratio > 0.75:
+            blocking_errors.append(f"Tỷ lệ dữ liệu trống quá cao ({round(empty_ratio * 100, 1)}% ô dữ liệu bị rỗng). Không đủ cơ sở để AI Agent thực hiện phân tích.")
+
+        if len(classified.get("measures", [])) == 0:
+            blocking_errors.append("Tệp thiếu các trường dữ liệu định lượng cần thiết (không tìm thấy cột số liệu, doanh thu, đơn giá hoặc chỉ số đo lường).")
+
+        # 6. Đánh giá khả năng sử dụng dữ liệu (Data Usability Assessment)
         can_proceed = len(blocking_errors) == 0 and len(records) > 0 and len(raw_headers) > 0
         usability_score = 100 if len(warnings) == 0 else max(70, 100 - (len(warnings) * 5))
         usability_rating = "OPTIMAL_READY" if len(warnings) == 0 and can_proceed else "READY_WITH_WARNINGS" if can_proceed else "BLOCKED"
@@ -383,12 +399,13 @@ class SheetStage:
             "detected_schema": detected_schema,
             "column_profiles": column_profiles,
             "classified_columns": classified,
-            "usability_score": usability_score,
+            "usability_score": usability_score if can_proceed else 0,
             "usability_rating": usability_rating,
             "total_cells": total_cells,
             "filled_cells": filled_cells,
             "empty_cells": empty_cells,
             "blank_rows_count": blank_rows_count,
+            "preview_data": records[:15],
             "preview_rows": records[:15],
             "validation": {
                 "has_headers": True,
@@ -396,9 +413,11 @@ class SheetStage:
                 "is_empty": False,
                 "blocking_errors": blocking_errors,
                 "warnings": warnings,
-                "can_proceed_to_cleaning": can_proceed
+                "can_proceed_to_cleaning": can_proceed,
+                "rejection_title": None if can_proceed else "LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+                "rejection_message": None if can_proceed else "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên."
             },
-            "raw_records": records  # 100% dữ liệu gốc được bảo toàn
+            "raw_records": records if can_proceed else []  # Chỉ lưu trữ khi tệp hợp lệ
         }
         return manifest
 

@@ -452,19 +452,20 @@ function runCounterAnimations() {
 // =========================================================================
 
 function getActivePipelineData() {
-  const file = currentSheetManifest?.file_name || currentSelectedFile || null;
-  const rawRows = window.CURRENT_UPLOADED_ROWS || [];
-  const cleanRows = window.CURRENT_CLEANED_ROWS || [];
+  const sheetM = currentSheetManifest;
+  const isRejected = sheetM && (sheetM.status === "ERROR" || sheetM.status === "REJECTED" || sheetM.validation?.can_proceed_to_cleaning === false);
+  const file = isRejected ? null : (sheetM?.file_name || currentSelectedFile || null);
+  const rawRows = isRejected ? [] : (window.CURRENT_UPLOADED_ROWS || []);
+  const cleanRows = isRejected ? [] : (window.CURRENT_CLEANED_ROWS || []);
   const activeRows = cleanRows.length > 0 ? cleanRows : rawRows;
   
-  const sheetM = currentSheetManifest;
-  const cleanM = currentCleaningManifest;
-  let analysisM = currentAnalysisManifest;
-  const repM = currentReportingManifest;
+  const cleanM = isRejected ? null : currentCleaningManifest;
+  let analysisM = isRejected ? null : currentAnalysisManifest;
+  const repM = isRejected ? null : currentReportingManifest;
   const lineage = window.CURRENT_SESSION_LINEAGE;
 
   // Tối ưu hóa hiệu năng: Cache kết quả tính toán trong bộ nhớ để tránh duyệt lặp lại hàng nghìn dòng
-  if (!analysisM && activeRows && activeRows.length > 0) {
+  if (!isRejected && !analysisM && activeRows && activeRows.length > 0) {
     const cacheKey = (file || 'dataset') + '_' + activeRows.length;
     if (!window._CACHED_ANALYSIS_MANIFEST || window._CACHED_ANALYSIS_KEY !== cacheKey) {
       try {
@@ -477,14 +478,14 @@ function getActivePipelineData() {
     analysisM = window._CACHED_ANALYSIS_MANIFEST;
   }
   
-  const rowCount = (cleanM?.cleaned_rows !== undefined && cleanM?.cleaned_rows !== null && cleanM.cleaned_rows > 0)
+  const rowCount = isRejected ? 0 : ((cleanM?.cleaned_rows !== undefined && cleanM?.cleaned_rows !== null && cleanM.cleaned_rows > 0)
     ? cleanM.cleaned_rows
-    : (activeRows.length || sheetM?.rows_count || 0);
+    : (activeRows.length || sheetM?.rows_count || 0));
 
-  const colCount = sheetM?.columns_count || (activeRows[0] ? Object.keys(activeRows[0]).length : 0);
-  const columns = sheetM?.columns || (activeRows[0] ? Object.keys(activeRows[0]) : []);
+  const colCount = isRejected ? 0 : (sheetM?.columns_count || (activeRows[0] ? Object.keys(activeRows[0]).length : 0));
+  const columns = isRejected ? [] : (sheetM?.columns || (activeRows[0] ? Object.keys(activeRows[0]) : []));
 
-  const hasData = !!(file && rowCount > 0);
+  const hasData = !isRejected && !!(file && rowCount > 0);
 
   const kpis = analysisM?.kpis || repM?.kpis || {
     NetRevenue: 0,
@@ -666,17 +667,30 @@ function updateTopKPICards() {
     </svg>`;
 
   const pipeline = getActivePipelineData();
+  const isRejected = currentSheetManifest && (currentSheetManifest.status === "ERROR" || currentSheetManifest.status === "REJECTED" || currentSheetManifest.validation?.can_proceed_to_cleaning === false);
 
-  // STRICT ZERO METRICS STATE WHEN NO FILE IS LOADED
-  if (!pipeline.hasData) {
-    if (sizeEl) sizeEl.textContent = "0 dòng";
+  // STRICT ZERO METRICS STATE WHEN NO FILE IS LOADED OR DATA IS REJECTED
+  if (!pipeline.hasData || isRejected) {
+    if (sizeEl) sizeEl.textContent = isRejected ? "0 dòng" : "0 dòng";
     if (repEl) repEl.textContent = "0";
     if (timeEl) timeEl.textContent = "0.0s";
-    if (accEl) accEl.textContent = "0% (Chờ tệp)";
-    if (trend1) { trend1.textContent = "Chờ nạp"; trend1.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#4A635A]"; }
-    if (trend2) { trend2.textContent = "0 báo cáo"; trend2.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#4A635A]"; }
-    if (trend3) { trend3.textContent = "Chờ xử lý"; trend3.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#4A635A]"; }
-    if (trend4) { trend4.textContent = "Chờ tệp"; trend4.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#4A635A]"; }
+    if (accEl) accEl.textContent = isRejected ? "0% (Tệp bị từ chối)" : "0% (Chờ tệp)";
+    if (trend1) { 
+      trend1.textContent = isRejected ? "Tệp không hợp lệ" : "Chờ nạp"; 
+      trend1.className = isRejected ? "text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200" : "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#4A635A]"; 
+    }
+    if (trend2) { 
+      trend2.textContent = isRejected ? "Tệp bị từ chối" : "0 báo cáo"; 
+      trend2.className = isRejected ? "text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200" : "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#4A635A]"; 
+    }
+    if (trend3) { 
+      trend3.textContent = isRejected ? "Dừng xử lý" : "Chờ xử lý"; 
+      trend3.className = isRejected ? "text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200" : "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#4A635A]"; 
+    }
+    if (trend4) { 
+      trend4.textContent = isRejected ? "Validation FAIL" : "Chờ tệp"; 
+      trend4.className = isRejected ? "text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200" : "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#4A635A]"; 
+    }
     if (s1) s1.innerHTML = flatSpark;
     if (s2) s2.innerHTML = flatSpark;
     if (s3) s3.innerHTML = flatSpark;
@@ -1312,8 +1326,13 @@ function renderHorizontalPipelineBar() {
   // Cập nhật thẻ tên tệp nguồn ở góc phải thanh tiến trình
   const projEl = document.getElementById('project-dataset-name');
   const dotEl = document.getElementById('project-dataset-dot');
+  const isRejected = currentSheetManifest && (currentSheetManifest.status === "ERROR" || currentSheetManifest.status === "REJECTED" || currentSheetManifest.validation?.can_proceed_to_cleaning === false);
   if (projEl) {
-    if (pipeline.hasData) {
+    if (isRejected) {
+      projEl.textContent = `Tệp bị từ chối: ${currentSheetManifest.file_name} (Lỗi dữ liệu)`;
+      projEl.className = "text-[11px] font-bold text-red-700";
+      if (dotEl) dotEl.className = "w-2 h-2 rounded-full bg-red-600 animate-pulse";
+    } else if (pipeline.hasData) {
       projEl.textContent = `${pipeline.fileName} (${pipeline.rowCount.toLocaleString()} dòng)`;
       projEl.className = "text-[11px] font-bold text-[#0D2B22]";
       if (dotEl) dotEl.className = "w-2 h-2 rounded-full bg-[#10B981] animate-pulse";
@@ -1402,6 +1421,12 @@ function initApp() {
 }
 
 function goToStep(idx) {
+  const m = currentSheetManifest;
+  const isRejected = m && (m.status === "ERROR" || m.status === "REJECTED" || m.validation?.can_proceed_to_cleaning === false);
+  if (idx > 0 && isRejected) {
+    alert("🛑 Không thể chuyển bước!\nTệp dữ liệu hiện tại bị từ chối do không đáp ứng yêu cầu tối thiểu.\nVui lòng tải lại tệp dữ liệu đạt chuẩn.");
+    return;
+  }
   const effectiveMax = isDemoUnlocked ? WORKFLOW_STEPS.length - 1 : maxUnlockedStepIdx;
   if (idx > effectiveMax) {
     alert("🔒 Giai đoạn này đang bị khóa!\nBạn cần hoàn thành bước trước đó để mở khóa tiếp.");
@@ -1658,7 +1683,165 @@ function simulateLocalSheetInspect(fileName, sheetName = null) {
   if (currentStepIdx === 0 && currentActiveView === 'STAGE') renderCurrentWorkspace();
 }
 
+function validateDatasetStructure(fileName, headers, rows, rawFileSize = null, rawText = null) {
+  const errors = [];
+  const warnings = [];
+
+  // 1. Kiểm tra định dạng phần mở rộng
+  const lowerName = (fileName || '').toLowerCase();
+  const validExts = ['.csv', '.xlsx', '.xls'];
+  const hasValidExt = validExts.some(ext => lowerName.endsWith(ext));
+  if (!hasValidExt) {
+    errors.push("Định dạng tệp không được hỗ trợ. NexusBI chỉ tiếp nhận tệp định dạng bảng tính Excel (.xlsx, .xls) hoặc CSV (.csv).");
+    return {
+      isValid: false,
+      rejectionTitle: "TIÊU ĐỀ: LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+      rejectionMessage: "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên.",
+      errors,
+      warnings
+    };
+  }
+
+  // 2. Tệp rỗng (0 bytes hoặc dung lượng trống)
+  if (rawFileSize === 0 || (rawText !== null && rawText.trim().length === 0)) {
+    errors.push("Tệp rỗng: Không có dữ liệu hoặc dung lượng dữ liệu bằng 0 byte.");
+  }
+
+  // 3. Thiếu cấu trúc bảng / Không tìm thấy tên cột
+  if (!headers || headers.length === 0) {
+    errors.push("Thiếu cấu trúc bảng: Không tìm thấy tiêu đề cột hoặc file không phân tách được các trường dữ liệu.");
+  }
+
+  // 4. Không có bản ghi (Header-only / 0 dòng)
+  if (!rows || rows.length === 0) {
+    errors.push("Tệp dữ liệu không có bản ghi: Tệp có tiêu đề cột nhưng không chứa bất kỳ dòng dữ liệu nào.");
+  } else if (rows.length < 3) {
+    errors.push(Số lượng bản ghi không đáp ứng yêu cầu tối thiểu ( + rows.length +  dòng): Cần tối thiểu ít nhất 3 bản ghi dữ liệu để AI tiến hành phân tích.);
+  }
+
+  // Nếu đã phát hiện các lỗi cơ bản ở trên, từ chối ngay lập tức
+  if (errors.length > 0) {
+    return {
+      isValid: false,
+      rejectionTitle: "TIÊU ĐỀ: LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+      rejectionMessage: "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên.",
+      errors,
+      warnings
+    };
+  }
+
+  // 5. Dữ liệu thiếu nghiêm trọng (> 75% giá trị ô trống)
+  let totalCells = rows.length * headers.length;
+  let emptyCells = 0;
+  for (let r = 0; r < rows.length; r++) {
+    for (let h = 0; h < headers.length; h++) {
+      const v = rows[r][headers[h]];
+      if (v === null || v === undefined || v === '' || (typeof v === 'string' && v.trim() === '')) {
+        emptyCells++;
+      }
+    }
+  }
+  const emptyRate = totalCells > 0 ? (emptyCells / totalCells) : 1;
+  if (emptyRate > 0.75) {
+    errors.push(Dữ liệu thiếu nghiêm trọng: Tỷ lệ ô trống chiếm  + (emptyRate * 100).toFixed(1) + % (vượt quá ngưỡng cho phép 75%), hệ thống không đủ cơ sở thực hiện phân tích.);
+  } else if (emptyRate > 0.20) {
+    warnings.push(Dữ liệu có  + (emptyRate * 100).toFixed(1) + % ô trống, AI Agent sẽ tự động xử lý làm sạch và điền khuyết ở Bước 2.);
+  }
+
+  // 6. Dữ liệu không phù hợp: Kiểm tra có trường số định lượng (measures) nào không
+  let numericColsCount = 0;
+  headers.forEach(h => {
+    let numCount = 0;
+    let checkedRows = Math.min(rows.length, 50);
+    for (let i = 0; i < checkedRows; i++) {
+      const val = rows[i][h];
+      if (typeof val === 'number' && !isNaN(val)) numCount++;
+      else if (typeof val === 'string' && val.trim() !== '' && !isNaN(val)) numCount++;
+    }
+    if (numCount / checkedRows >= 0.5) {
+      numericColsCount++;
+    }
+  });
+
+  if (numericColsCount === 0) {
+    errors.push("Dữ liệu không phù hợp: Không tìm thấy bất kỳ trường số định lượng nào (doanh số, số lượng, giá tiền, chi phí...) để tính toán KPI và biểu đồ phân tích.");
+  }
+
+  const isValid = errors.length === 0;
+  return {
+    isValid,
+    rejectionTitle: isValid ? null : "TIÊU ĐỀ: LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+    rejectionMessage: isValid ? null : "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên.",
+    errors,
+    warnings,
+    numericColsCount,
+    emptyRate
+  };
+}
+
+function rejectUploadedFile(fileName, format, validationResult, rawBytes = 0) {
+  currentSelectedFile = fileName;
+  currentSelectedSheet = null;
+  sheetStateStatus = "ERROR";
+  maxUnlockedStepIdx = 0;
+  currentStepIdx = 0;
+
+  const errList = validationResult.errors && validationResult.errors.length > 0
+    ? validationResult.errors
+    : ["Tệp dữ liệu tải lên không đáp ứng yêu cầu xử lý của hệ thống."];
+
+  currentSheetManifest = {
+    file_name: fileName,
+    file_format: format || 'CSV',
+    selected_sheet: null,
+    rows_count: 0,
+    columns_count: 0,
+    columns: [],
+    preview_data: [],
+    status: "ERROR",
+    rejection_title: validationResult.rejectionTitle || "TIÊU ĐỀ: LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+    rejection_message: validationResult.rejectionMessage || "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên.",
+    validation: {
+      blocking_errors: errList,
+      warnings: validationResult.warnings || [],
+      can_proceed_to_cleaning: false
+    }
+  };
+
+  // CÔ LẬP TRIỆT ĐỂ: Xóa toàn bộ dữ liệu ở các giai đoạn sau
+  window.CURRENT_UPLOADED_ROWS = [];
+  window.CURRENT_CLEANED_ROWS = [];
+  currentCleaningManifest = null;
+  currentAnalysisManifest = null;
+  currentReportingManifest = null;
+  currentDashboardFilteredData = null;
+  currentGeneratedReportMarkdown = "";
+  isStage4Confirmed = false;
+  cleaningStateStatus = "IDLE";
+  analysisStateStatus = "IDLE";
+  reportingStateStatus = "IDLE";
+
+  updateTopSystemInfo(currentSheetManifest);
+  updateTopKPICards();
+  renderHorizontalPipelineBar();
+  renderCurrentWorkspace();
+  console.warn([Upload:REJECTED] Tệp ' + fileName + ' đã bị từ chối:, errList);
+}
+
 function parseCsvClientSide(text) {
+  if (!text || !text.trim()) {
+    return { headers: [], rows: [], totalLines: 0, isEmpty: true };
+  }
+
+  // Tự động nhận diện dấu phân tách: phẩy, chấm phẩy, tab
+  const sample = text.slice(0, 4000);
+  const commaCount = (sample.match(/,/g) || []).length;
+  const semiCount = (sample.match(/;/g) || []).length;
+  const tabCount = (sample.match(/\t/g) || []).length;
+  let delimiter = ',';
+  if (semiCount > commaCount && semiCount > tabCount) delimiter = ';';
+  else if (tabCount > commaCount && tabCount > semiCount) delimiter = '\t';
+
   const lines = [];
   let row = [];
   let inQuotes = false;
@@ -1675,7 +1858,7 @@ function parseCsvClientSide(text) {
       } else {
         inQuotes = !inQuotes;
       }
-    } else if (char === ',' && !inQuotes) {
+    } else if (char === delimiter && !inQuotes) {
       row.push(curVal.trim());
       curVal = '';
     } else if ((char === '\r' || char === '\n') && !inQuotes) {
@@ -1695,71 +1878,142 @@ function parseCsvClientSide(text) {
     if (row.some(cell => cell.length > 0)) lines.push(row);
   }
   
-  if (lines.length < 2) return { headers: [], rows: [] };
-  const headers = lines[0].map(h => h.replace(/^["']|["']$/g, '').trim());
+  if (lines.length === 0) {
+    return { headers: [], rows: [], totalLines: 0, isEmpty: true };
+  }
+
+  const headers = lines[0].map(h => h.replace(/^["']|["']$/g, '').trim()).filter(h => h.length > 0);
+  if (lines.length === 1) {
+    return { headers, rows: [], totalLines: 1, isEmpty: false };
+  }
+
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
     const item = {};
     for (let c = 0; c < headers.length; c++) {
       let val = lines[i][c] !== undefined ? lines[i][c] : '';
-      if (val !== '' && !isNaN(val)) val = Number(val);
+      if (val !== '' && !isNaN(val) && !/^\s*$/.test(val)) {
+        const numVal = Number(val);
+        if (!isNaN(numVal)) val = numVal;
+      }
       item[headers[c]] = val;
     }
     rows.push(item);
   }
-  return { headers, rows };
+  return { headers, rows, totalLines: lines.length, isEmpty: false };
 }
 
 function processUploadedFileClientSide(file) {
+  if (!file) return;
+
+  // 1. Kiểm tra ngay file 0 byte
+  if (file.size === 0) {
+    rejectUploadedFile(file.name, file.name.endsWith('.xlsx') ? 'XLSX' : 'CSV', {
+      rejectionTitle: "TIÊU ĐỀ: LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+      rejectionMessage: "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên.",
+      errors: ["Tệp rỗng: Dung lượng dữ liệu bằng 0 byte, không có nội dung."]
+    }, 0);
+    return;
+  }
+
   const isXlsx = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+  const isCsv = file.name.endsWith('.csv');
+
+  if (!isXlsx && !isCsv) {
+    rejectUploadedFile(file.name, 'UNKNOWN', {
+      rejectionTitle: "TIÊU ĐỀ: LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+      rejectionMessage: "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên.",
+      errors: ["Định dạng tệp không được hỗ trợ. NexusBI chỉ tiếp nhận tệp Excel (.xlsx, .xls) hoặc CSV (.csv)."]
+    }, file.size);
+    return;
+  }
   
   if (isXlsx) {
     const reader = new FileReader();
     reader.onload = function(e) {
       try {
-        if (window.XLSX) {
-          const data = new Uint8Array(e.target.result);
-          const workbook = window.XLSX.read(data, { type: 'array' });
-          const firstSheet = workbook.SheetNames[0];
-          const rawRows = window.XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
-          const headers = rawRows.length > 0 ? Object.keys(rawRows[0]) : [];
-          finishClientSideUpload(file.name, headers, rawRows, 'XLSX', firstSheet);
-        } else {
-          simulateLocalSheetInspect(file.name);
+        if (!window.XLSX) {
+          rejectUploadedFile(file.name, 'XLSX', {
+            errors: ["Thư viện đọc bảng tính Excel chưa sẵn sàng trên trình duyệt."]
+          }, file.size);
+          return;
         }
+        const data = new Uint8Array(e.target.result);
+        const workbook = window.XLSX.read(data, { type: 'array' });
+        if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+          rejectUploadedFile(file.name, 'XLSX', {
+            errors: ["Tệp Excel bị hỏng hoặc không chứa bất kỳ trang tính nào."]
+          }, file.size);
+          return;
+        }
+        const firstSheet = workbook.SheetNames[0];
+        const rawRows = window.XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { defval: '' });
+        const headers = rawRows.length > 0 ? Object.keys(rawRows[0]) : [];
+
+        const valRes = validateDatasetStructure(file.name, headers, rawRows, file.size, null);
+        if (!valRes.isValid) {
+          rejectUploadedFile(file.name, 'XLSX', valRes, file.size);
+          return;
+        }
+
+        finishClientSideUpload(file.name, headers, rawRows, 'XLSX', firstSheet);
       } catch (err) {
         console.warn("Lỗi đọc Excel client-side:", err);
-        simulateLocalSheetInspect(file.name);
+        rejectUploadedFile(file.name, 'XLSX', {
+          errors: ["Tệp Excel bị lỗi cấu trúc, hỏng dữ liệu hoặc mã hóa không hợp lệ: " + (err.message || "Không thể phân tích")]
+        }, file.size);
       }
     };
     reader.onerror = function() {
-      simulateLocalSheetInspect(file.name);
+      rejectUploadedFile(file.name, 'XLSX', {
+        errors: ["Trình duyệt không thể đọc nội dung tệp tin do lỗi quyền truy cập hoặc file bị khóa."]
+      }, file.size);
     };
     reader.readAsArrayBuffer(file);
   } else {
+    // CSV
     const reader = new FileReader();
     reader.onload = function(e) {
       try {
         const text = e.target.result;
-        const parsed = parseCsvClientSide(text);
-        if (parsed.headers.length > 0 && parsed.rows.length > 0) {
-          finishClientSideUpload(file.name, parsed.headers, parsed.rows, 'CSV');
-        } else {
-          simulateLocalSheetInspect(file.name);
+        if (!text || !text.trim()) {
+          rejectUploadedFile(file.name, 'CSV', {
+            errors: ["Tệp CSV rỗng, không chứa dữ liệu."]
+          }, file.size);
+          return;
         }
+        const parsed = parseCsvClientSide(text);
+        const valRes = validateDatasetStructure(file.name, parsed.headers, parsed.rows, file.size, text);
+        if (!valRes.isValid) {
+          rejectUploadedFile(file.name, 'CSV', valRes, file.size);
+          return;
+        }
+
+        finishClientSideUpload(file.name, parsed.headers, parsed.rows, 'CSV');
       } catch (err) {
         console.warn("Lỗi đọc CSV client-side:", err);
-        simulateLocalSheetInspect(file.name);
+        rejectUploadedFile(file.name, 'CSV', {
+          errors: ["Tệp CSV bị hỏng hoặc không đúng chuẩn định dạng: " + (err.message || "Không thể phân tích")]
+        }, file.size);
       }
     };
     reader.onerror = function() {
-      simulateLocalSheetInspect(file.name);
+      rejectUploadedFile(file.name, 'CSV', {
+        errors: ["Trình duyệt không thể đọc nội dung tệp tin do lỗi quyền truy cập hoặc file bị khóa."]
+      }, file.size);
     };
     reader.readAsText(file, 'utf-8');
   }
 }
 
 function finishClientSideUpload(fileName, headers, rows, format, sheetName = null) {
+  // Thẩm định kiểm tra lần cuối
+  const valRes = validateDatasetStructure(fileName, headers, rows, null, null);
+  if (!valRes.isValid) {
+    rejectUploadedFile(fileName, format, valRes, 0);
+    return;
+  }
+
   currentSheetManifest = {
     file_name: fileName,
     file_format: format,
@@ -1771,7 +2025,7 @@ function finishClientSideUpload(fileName, headers, rows, format, sheetName = nul
     status: "COMPLETED",
     validation: {
       blocking_errors: [],
-      warnings: [],
+      warnings: valRes.warnings || [],
       can_proceed_to_cleaning: true
     }
   };
@@ -1817,7 +2071,7 @@ function finishClientSideUpload(fileName, headers, rows, format, sheetName = nul
   updateTopKPICards();
   renderHorizontalPipelineBar();
   renderCurrentWorkspace();
-  console.log(`[Upload:ClientSide] Đã tải và phân tích thành công: '${fileName}' (${rows.length} dòng, ${headers.length} cột). Data Lineage đã cập nhật.`);
+  console.log([Upload:ClientSide] Đã tải và phân tích thành công: ' + fileName + ' ( + rows.length +  dòng,  + headers.length +  cột). Data Lineage đã cập nhật.);
 }
 
 function handleCustomFileUpload(event) {
@@ -1828,11 +2082,16 @@ function handleCustomFileUpload(event) {
   }
 
   const sizeKb = (file.size / 1024).toFixed(1);
-  console.log(`[Upload:Frontend] Tệp đã chọn: tên='${file.name}', dung lượng=${file.size} bytes (${sizeKb} KB), loại='${file.type || "n/a"}'`);
+  console.log([Upload:Frontend] Tệp đã chọn: tên=' + file.name + ', dung lượng= + file.size +  bytes ( + sizeKb +  KB), loại=' + (file.type || "n/a") + ');
 
+  // Kiểm tra rỗng ngay tại cổng tiếp nhận
   if (file.size === 0) {
-    console.error(`[Upload:Frontend] LỖI: Tệp '${file.name}' hoàn toàn rỗng (0 bytes).`);
-    alert("Lỗi tải tệp: Tệp tin hoàn toàn rỗng (0 bytes). Vui lòng chọn tệp có dữ liệu.");
+    console.error([Upload:Frontend] LỖI: Tệp ' + file.name + ' hoàn toàn rỗng (0 bytes).);
+    rejectUploadedFile(file.name, file.name.endsWith('.xlsx') ? 'XLSX' : 'CSV', {
+      rejectionTitle: "TIÊU ĐỀ: LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ",
+      rejectionMessage: "NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên.",
+      errors: ["Tệp rỗng: Dung lượng dữ liệu bằng 0 byte, không có nội dung."]
+    }, 0);
     if (event.target) event.target.value = '';
     return;
   }
@@ -1842,25 +2101,24 @@ function handleCustomFileUpload(event) {
 
   const formData = new FormData();
   formData.append('file', file, file.name);
-  console.log(`[Upload:Request] FormData đã đóng gói trường 'file' ('${file.name}', ${file.size} bytes). Đang gửi POST /api/sheet/upload...`);
 
   fetch('/api/sheet/upload', {
     method: 'POST',
     body: formData
   })
   .then(async res => {
-    const data = await res.json().catch(() => ({ status: "ERROR", error: `HTTP ${res.status}: Không thể phân tích phản hồi máy chủ` }));
+    const data = await res.json().catch(() => ({ status: "ERROR", error: HTTP  + res.status + : Không thể phân tích phản hồi máy chủ }));
     return { ok: res.ok, status: res.status, data };
   })
   .then(({ ok, data }) => {
     if (data.status === "SUCCESS" || (ok && data.status === "COMPLETED")) {
       const rows = data.rows_count || data.manifest?.rows_count || 0;
       const cols = data.columns_count || data.manifest?.columns_count || 0;
-      console.log(`[Upload:Result] Tải lên và thẩm định thành công: tệp='${data.file_name}', số dòng=${rows}, số cột=${cols}`);
+      console.log([Upload:Result] Tải lên và thẩm định thành công: tệp=' + data.file_name + ', số dòng= + rows + , số cột= + cols);
       loadAvailableFilesOnly();
       inspectSheetFile(data.file_name);
     } else {
-      console.warn("[Upload:Fallback] Server không khả dụng hoặc trả về 404 (môi trường Vercel/Static). Chuyển sang xử lý Client-side...");
+      console.warn("[Upload:Fallback] Chuyển sang xử lý và kiểm tra Client-side...");
       processUploadedFileClientSide(file);
     }
   })
@@ -1897,6 +2155,12 @@ function loadQuickQuestionTemplate(type) {
 }
 
 function confirmConnectionAndAdvance() {
+  const m = currentSheetManifest;
+  const isRejected = m && (m.status === "ERROR" || m.status === "REJECTED" || m.validation?.can_proceed_to_cleaning === false);
+  if (!currentSheetManifest || sheetStateStatus !== "COMPLETED" || isRejected) {
+    alert("🛑 Dữ liệu bị từ chối hoặc chưa sẵn sàng!\nNexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào.\nVui lòng kiểm tra lại nội dung và tải lên tệp hợp lệ.");
+    return;
+  }
   if (!currentSheetManifest || sheetStateStatus !== "COMPLETED") {
     alert("⚠️ Chưa có tệp dữ liệu nào được tiếp nhận hoặc tệp đang bị lỗi!\nVui lòng chọn một tệp dữ liệu.");
     return;
@@ -1947,14 +2211,47 @@ function confirmConnectionAndAdvance() {
 
 function renderStage1_Connection() {
   const m = currentSheetManifest || {};
-  const isLoaded = !!currentSheetManifest;
-  const rows = m.preview_data || [];
-  const cols = m.columns || (rows[0] ? Object.keys(rows[0]) : []);
+  const isRejected = (m.status === "ERROR" || m.status === "REJECTED" || m.validation?.can_proceed_to_cleaning === false);
+  const isLoaded = !!currentSheetManifest && !isRejected;
+  const rows = isRejected ? [] : (m.preview_data || []);
+  const cols = isRejected ? [] : (m.columns || (rows[0] ? Object.keys(rows[0]) : []));
 
-  // Giao diện chọn tệp tinh gọn (Loại bỏ 8 nút phân tán, thay bằng dropdown và active banner)
+  // Giao diện chọn tệp: Đổi trạng thái nếu tệp bị từ chối
   let fileControlHtml = "";
-  if (isLoaded) {
-    fileControlHtml = `
+  if (isRejected) {
+    fileControlHtml = 
+      <div class="p-3.5 rounded-2xl bg-red-50 border border-red-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-sm">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm border border-red-400">
+            ✕
+          </div>
+          <div>
+            <div class="font-bold text-red-900 flex items-center gap-2">
+              <span class="text-xs md:text-sm"> + currentSelectedFile + </span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-red-600 text-white uppercase tracking-wider">Tệp bị từ chối</span>
+            </div>
+            <div class="text-[11px] text-red-700 mt-0.5">
+              Không đáp ứng yêu cầu đầu vào của hệ thống
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 self-end sm:self-auto">
+          <select onchange="if(this.value) inspectSheetFile(this.value)" class="px-3 py-1.5 text-xs rounded-xl glass-input text-[#0A261D] cursor-pointer font-medium">
+            <option value="">Đổi tệp mẫu khác...</option>
+             + (availableSystemFiles || []).map(f => 
+              <option value=" + f.file_name + ">📄  + f.file_name + </option>
+            ).join('') + 
+          </select>
+          <label class="cursor-pointer px-3.5 py-1.5 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs shadow-md transition inline-flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            <span>Tải lại tệp dữ liệu</span>
+            <input type="file" accept=".xlsx,.xls,.csv" onchange="handleCustomFileUpload(event)" class="hidden">
+          </label>
+        </div>
+      </div>
+    ;
+  } else if (isLoaded) {
+    fileControlHtml = 
       <div class="p-3.5 rounded-2xl bg-[#E8F2EE] border border-[#10B981]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-sm">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-xl bg-[#0A261D] text-[#D4B07B] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm border border-[#D4B07B]/30">
@@ -1962,23 +2259,21 @@ function renderStage1_Connection() {
           </div>
           <div>
             <div class="font-bold text-[#0A261D] flex items-center gap-2">
-              <span class="text-xs md:text-sm">${currentSelectedFile}</span>
+              <span class="text-xs md:text-sm"> + currentSelectedFile + </span>
               <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#10B981] text-white">Đang sử dụng</span>
             </div>
             <div class="text-[11px] text-[#4A635A] mt-0.5">
-              ${m.file_format || 'Tệp'} · ${(m.rows_count || rows.length).toLocaleString()} dòng · ${m.columns_count || cols.length} cột
+               + (m.file_format || 'Tệp') +  ·  + (m.rows_count || rows.length).toLocaleString() +  dòng ·  + (m.columns_count || cols.length) +  cột
             </div>
           </div>
         </div>
         <div class="flex items-center gap-2 self-end sm:self-auto">
-          <!-- Dropdown đổi tệp mẫu -->
           <select onchange="if(this.value) inspectSheetFile(this.value)" class="px-3 py-1.5 text-xs rounded-xl glass-input text-[#0A261D] cursor-pointer font-medium">
             <option value="">Đổi tệp mẫu khác...</option>
-            ${(availableSystemFiles || []).map(f => `
-              <option value="${f.file_name}" ${currentSelectedFile === f.file_name ? 'selected' : ''}>📄 ${f.file_name}</option>
-            `).join('')}
+             + (availableSystemFiles || []).map(f => 
+              <option value=" + f.file_name + "  + (currentSelectedFile === f.file_name ? 'selected' : '') + >📄  + f.file_name + </option>
+            ).join('') + 
           </select>
-          <!-- Nút tải tệp mới -->
           <label class="cursor-pointer px-3.5 py-1.5 rounded-xl bg-[#0A261D] hover:bg-[#133A2D] text-white font-bold text-xs shadow-md shadow-[#0A261D]/20 transition inline-flex items-center gap-1.5">
             <svg class="w-3.5 h-3.5 text-[#D4B07B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
             <span>Tải tệp mới</span>
@@ -1986,17 +2281,16 @@ function renderStage1_Connection() {
           </label>
         </div>
       </div>
-    `;
+    ;
   } else {
-    fileControlHtml = `
+    fileControlHtml = 
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-        <!-- Dropdown chọn nhanh tệp mẫu -->
         <div class="relative flex-1">
           <select id="sample-file-select" onchange="if(this.value) inspectSheetFile(this.value)" class="w-full pl-9 pr-8 py-2.5 text-xs rounded-xl glass-input text-[#0A261D] cursor-pointer font-medium appearance-none">
-            <option value="">-- Chọn tệp dữ liệu mẫu trong hệ thống (${(availableSystemFiles || []).length} tệp) --</option>
-            ${(availableSystemFiles || []).map(f => `
-              <option value="${f.file_name}" ${currentSelectedFile === f.file_name ? 'selected' : ''}>📄 ${f.file_name}</option>
-            `).join('')}
+            <option value="">-- Chọn tệp dữ liệu mẫu trong hệ thống ( + (availableSystemFiles || []).length +  tệp) --</option>
+             + (availableSystemFiles || []).map(f => 
+              <option value=" + f.file_name + "  + (currentSelectedFile === f.file_name ? 'selected' : '') + >📄  + f.file_name + </option>
+            ).join('') + 
           </select>
           <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#C8A870]">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
@@ -2006,63 +2300,104 @@ function renderStage1_Connection() {
           </div>
         </div>
 
-        <!-- Nút tải tệp mới -->
         <label class="cursor-pointer px-4 py-2.5 rounded-xl bg-[#0A261D] hover:bg-[#133A2D] text-white font-bold text-xs shadow-md shadow-[#0A261D]/20 transition inline-flex items-center justify-center gap-1.5 shrink-0">
           <svg class="w-3.5 h-3.5 text-[#D4B07B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
           <span>Tải tệp mới (.xlsx, .csv)</span>
           <input type="file" accept=".xlsx,.xls,.csv" onchange="handleCustomFileUpload(event)" class="hidden">
         </label>
       </div>
-    `;
+    ;
   }
 
   let sheetChipsHtml = "";
-  if (m.available_sheets && m.available_sheets.length > 1) {
-    sheetChipsHtml = `
+  if (m.available_sheets && m.available_sheets.length > 1 && !isRejected) {
+    sheetChipsHtml = 
       <div class="flex items-center gap-2 mt-2 pt-2 border-t border-[#ECE4D8]">
         <span class="text-xs text-[#4A635A] font-medium">Chọn Sheet:</span>
         <div class="flex flex-wrap gap-1.5">
-          ${m.available_sheets.map(s => {
+           + m.available_sheets.map(s => {
             const isSel = (currentSelectedSheet === s);
-            return `
-              <button onclick="inspectSheetFile('${currentSelectedFile}', '${s}')" class="px-3 py-1 rounded-xl text-xs transition ${isSel ? 'bg-[#0A261D] text-white border border-[#D4B07B] shadow-sm font-semibold' : 'glass-pill hover:bg-[#F5EFE6] text-[#0A261D]'}">
-                ${s}
+            return 
+              <button onclick="inspectSheetFile(' + currentSelectedFile + ', ' + s + ')" class="px-3 py-1 rounded-xl text-xs transition  + (isSel ? 'bg-[#0A261D] text-white border border-[#D4B07B] shadow-sm font-semibold' : 'glass-pill hover:bg-[#F5EFE6] text-[#0A261D]') + ">
+                 + s + 
               </button>
-            `;
-          }).join('')}
+            ;
+          }).join('') + 
         </div>
       </div>
-    `;
+    ;
   }
 
+  // Bảng dữ liệu hoặc Khung Lỗi Từ Chối
   let tableHtml = "";
-  if (rows && rows.length > 0) {
-    tableHtml = `
+  if (isRejected) {
+    tableHtml = 
+      <div class="rounded-2xl border-2 border-red-300 bg-red-50/90 p-5 shadow-sm space-y-4 mt-3">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-lg shrink-0 shadow-sm">
+            ✕
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-sm font-bold text-red-900 tracking-wide uppercase">
+              TIÊU ĐỀ: LỖI – DỮ LIỆU KHÔNG ĐẦY ĐỦ
+            </h3>
+            <p class="text-xs text-red-800 leading-relaxed font-medium">
+              NexusBI không thể tiếp tục xử lý vì tệp dữ liệu tải lên không đáp ứng đầy đủ yêu cầu đầu vào. Vui lòng kiểm tra lại nội dung, cấu trúc và tính hợp lệ của dữ liệu trước khi tải lên.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white/90 rounded-xl p-3.5 border border-red-200 space-y-2">
+          <div class="text-[11px] font-bold text-red-900 uppercase font-mono tracking-wider flex items-center gap-1.5">
+            <span>Nguyên nhân phát hiện cụ thể:</span>
+          </div>
+          <ul class="text-xs text-red-700 space-y-1.5 pl-1">
+             + (m.validation?.blocking_errors || ["Tệp dữ liệu không đáp ứng yêu cầu tối thiểu."]).map(err => 
+              <li class="flex items-start gap-2">
+                <span class="text-red-500 font-bold shrink-0 mt-0.5">✕</span>
+                <span class="leading-tight"> + err + </span>
+              </li>
+            ).join('') + 
+          </ul>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-red-200">
+          <span class="text-[11px] text-red-600 italic">Vui lòng cung cấp tệp có đủ tiêu đề cột, tối thiểu 3 bản ghi và ít nhất 1 trường số định lượng.</span>
+          <label class="cursor-pointer px-4 py-2 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs shadow-md transition inline-flex items-center gap-2">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            <span>Tải lại tệp dữ liệu</span>
+            <input type="file" accept=".xlsx,.xls,.csv" onchange="handleCustomFileUpload(event)" class="hidden">
+          </label>
+        </div>
+      </div>
+    ;
+  } else if (rows && rows.length > 0) {
+    tableHtml = 
       <div class="border border-[#ECE4D8] rounded-2xl overflow-hidden mt-3 shadow-sm bg-white">
         <div class="overflow-x-auto max-h-72">
           <table class="w-full text-xs text-left text-[#0A261D]">
             <thead class="text-[10px] text-[#4A635A] uppercase bg-[#F5EFE6] border-b border-[#ECE4D8] sticky top-0 font-mono">
               <tr>
-                ${cols.map(c => `<th class="px-3.5 py-2.5 font-bold whitespace-nowrap">${c}</th>`).join('')}
+                 + cols.map(c => <th class="px-3.5 py-2.5 font-bold whitespace-nowrap"> + c + </th>).join('') + 
               </tr>
             </thead>
             <tbody class="divide-y divide-[#ECE4D8] font-mono text-[11px]">
-              ${rows.slice(0, 6).map(r => `
+               + rows.slice(0, 6).map(r => 
                 <tr class="hover:bg-[#F5EFE6]/70 transition">
-                  ${cols.map(c => {
+                   + cols.map(c => {
                     const val = r[c];
                     const isNum = typeof val === 'number';
-                    return `<td class="px-3.5 py-2.5 whitespace-nowrap ${isNum ? 'text-right font-medium' : ''}">${isNum ? val.toLocaleString() : (val !== null && val !== undefined ? val : '')}</td>`;
-                  }).join('')}
+                    return <td class="px-3.5 py-2.5 whitespace-nowrap  + (isNum ? 'text-right font-medium' : '') + "> + (isNum ? val.toLocaleString() : (val !== null && val !== undefined ? val : '')) + </td>;
+                  }).join('') + 
                 </tr>
-              `).join('')}
+              ).join('') + 
             </tbody>
           </table>
         </div>
       </div>
-    `;
+    ;
   } else {
-    tableHtml = `
+    tableHtml = 
       <label ondragover="event.preventDefault()" ondrop="event.preventDefault(); if(event.dataTransfer?.files?.[0]) handleCustomFileUpload({ target: { files: event.dataTransfer.files } })" class="cursor-pointer border-2 border-dashed border-[#E2D9C8] hover:border-[#D4B07B] rounded-2xl p-8 flex flex-col items-center justify-center text-center transition bg-[#FAF7F2]/40 hover:bg-[#FAF7F2]/80 mt-3 group">
         <input type="file" accept=".xlsx,.xls,.csv" onchange="handleCustomFileUpload(event)" class="hidden">
         <div class="w-12 h-12 rounded-2xl bg-[#E8F2EE] group-hover:bg-[#0A261D] group-hover:text-white text-[#0D2B22] flex items-center justify-center mb-3 transition shadow-sm border border-[#D4B07B]/40">
@@ -2071,10 +2406,10 @@ function renderStage1_Connection() {
         <p class="text-xs font-bold text-[#0A261D] group-hover:text-[#0A261D]">Nhấp để tải lên tệp (.xlsx, .csv) hoặc kéo thả vào đây</p>
         <p class="text-[11px] text-[#4A635A] mt-1 max-w-sm">Hỗ trợ định dạng bảng tính Excel và CSV. Toàn bộ chỉ số sẽ tự động cập nhật khi tệp được nạp.</p>
       </label>
-    `;
+    ;
   }
 
-  return `
+  return 
     <div class="space-y-5">
       
       <!-- DUAL-PANE GRID: LEFT FORM (5 COLS) + RIGHT DATA CENTER (7 COLS) -->
@@ -2101,7 +2436,7 @@ function renderStage1_Connection() {
                 <label class="text-xs font-semibold text-[#0A261D]">Loại hình doanh nghiệp <span class="text-[#0A261D]">*</span></label>
                 <span class="text-[9px] font-bold text-[#0A261D] bg-[#F5EFE6] px-2.5 py-0.5 rounded-full border border-[#D4B07B]/40">BẮT BUỘC</span>
               </div>
-              <input type="text" id="ctx-company-type" value="${currentBusinessContext.company_type || ''}" placeholder="Ví dụ: Bán lẻ thời trang, SaaS B2B, dịch vụ logistics" class="w-full px-4 py-2.5 text-xs rounded-xl glass-input text-[#0A261D] transition">
+              <input type="text" id="ctx-company-type" value=" + (currentBusinessContext.company_type || '') + " placeholder="Ví dụ: Bán lẻ thời trang, SaaS B2B, dịch vụ logistics" class="w-full px-4 py-2.5 text-xs rounded-xl glass-input text-[#0A261D] transition">
             </div>
 
             <!-- FIELD 2: THÔNG TIN BỔ SUNG -->
@@ -2110,7 +2445,7 @@ function renderStage1_Connection() {
                 <label class="text-xs font-semibold text-[#0A261D]">Phạm vi & Thông tin bổ sung</label>
                 <span class="text-[9px] text-[#4A635A] font-medium">TÙY CHỌN</span>
               </div>
-              <input type="text" id="ctx-notes-input" value="${currentBusinessContext.additional_notes || ''}" placeholder="Ví dụ: Đánh giá hiệu quả 5 kênh bán và danh mục sản phẩm chính 4 quý năm 2025" class="w-full px-4 py-2.5 text-xs rounded-xl glass-input text-[#0A261D] transition">
+              <input type="text" id="ctx-notes-input" value=" + (currentBusinessContext.additional_notes || '') + " placeholder="Ví dụ: Đánh giá hiệu quả 5 kênh bán và danh mục sản phẩm chính 4 quý năm 2025" class="w-full px-4 py-2.5 text-xs rounded-xl glass-input text-[#0A261D] transition">
             </div>
 
             <!-- FIELD 3: CÂU HỎI KINH DOANH -->
@@ -2119,7 +2454,7 @@ function renderStage1_Connection() {
                 <label class="text-xs font-semibold text-[#0A261D]">Bài toán kinh doanh cần phân tích <span class="text-[#0A261D]">*</span></label>
                 <button onclick="loadQuickQuestionTemplate('retail')" class="text-[11px] text-[#0A261D] hover:text-[#0A261D] font-bold transition">Nạp mẫu câu hỏi</button>
               </div>
-              <textarea id="ctx-questions-input" rows="4" placeholder="Doanh thu theo kênh nào cao nhất?\nSản phẩm nào mang lại lợi nhuận cao nhất?\nChi phí chiết khấu ảnh hưởng thế nào đến biên lợi nhuận?" class="w-full px-4 py-2.5 text-xs rounded-xl glass-input text-[#0A261D] resize-none font-sans leading-relaxed transition">${(currentBusinessContext.questions || []).join('\n')}</textarea>
+              <textarea id="ctx-questions-input" rows="4" placeholder="Doanh thu theo kênh nào cao nhất?\nSản phẩm nào mang lại lợi nhuận cao nhất?\nChi phí chiết khấu ảnh hưởng thế nào đến biên lợi nhuận?" class="w-full px-4 py-2.5 text-xs rounded-xl glass-input text-[#0A261D] resize-none font-sans leading-relaxed transition"> + (currentBusinessContext.questions || []).join('\n') + </textarea>
               <div class="text-[10px] text-[#4A635A] mt-1.5 flex items-center justify-between">
                 <span>Nhập tối đa 8 câu hỏi (mỗi câu 1 dòng).</span>
                 <span class="text-[#D4B07B] font-semibold">Tự động trả lời ở Bước 3</span>
@@ -2148,49 +2483,55 @@ function renderStage1_Connection() {
             </div>
 
             <!-- STREAMLINED FILE SELECTION CONTROL -->
-            ${fileControlHtml}
+             + fileControlHtml + 
 
-            ${sheetChipsHtml}
+             + sheetChipsHtml + 
 
-            <!-- 4 SCHEMA METRIC BADGES (TẤT CẢ VỀ 0 KHI CHƯA CHỌN TỆP) -->
+            <!-- 4 SCHEMA METRIC BADGES -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-              <div class="p-3 rounded-2xl bg-[#F5EFE6]/70 border border-[#E2D9C8] text-xs">
-                <span class="text-[#4A635A] block text-[9px] uppercase font-mono font-semibold">Định dạng</span>
-                <span class="font-bold text-[#0A261D]">${isLoaded ? (m.file_format || 'CSV / Excel') : '--'}</span>
+              <div class="p-3 rounded-2xl  + (isRejected ? 'bg-red-50 border border-red-200' : 'bg-[#F5EFE6]/70 border border-[#E2D9C8]') +  text-xs">
+                <span class=" + (isRejected ? 'text-red-600' : 'text-[#4A635A]') +  block text-[9px] uppercase font-mono font-semibold">Định dạng</span>
+                <span class="font-bold  + (isRejected ? 'text-red-700' : 'text-[#0A261D]') + "> + (isRejected ? 'Tệp không hợp lệ' : (isLoaded ? (m.file_format || 'CSV / Excel') : '--')) + </span>
               </div>
-              <div class="p-3 rounded-2xl bg-[#F5EFE6]/70 border border-[#E2D9C8] text-xs">
-                <span class="text-[#4A635A] block text-[9px] uppercase font-mono font-semibold">Quy mô</span>
-                <span class="font-bold ${isLoaded ? 'text-[#0A261D]' : 'text-[#4A635A]'} font-mono">${isLoaded ? (m.rows_count || rows.length).toLocaleString() + ' dòng' : '0 dòng'}</span>
+              <div class="p-3 rounded-2xl  + (isRejected ? 'bg-red-50 border border-red-200' : 'bg-[#F5EFE6]/70 border border-[#E2D9C8]') +  text-xs">
+                <span class=" + (isRejected ? 'text-red-600' : 'text-[#4A635A]') +  block text-[9px] uppercase font-mono font-semibold">Quy mô</span>
+                <span class="font-bold  + (isRejected ? 'text-red-700' : (isLoaded ? 'text-[#0A261D]' : 'text-[#4A635A]')) +  font-mono"> + (isRejected ? '0 dòng' : (isLoaded ? (m.rows_count || rows.length).toLocaleString() + ' dòng' : '0 dòng')) + </span>
               </div>
-              <div class="p-3 rounded-2xl bg-[#F5EFE6]/70 border border-[#E2D9C8] text-xs">
-                <span class="text-[#4A635A] block text-[9px] uppercase font-mono font-semibold">Số trường</span>
-                <span class="font-bold ${isLoaded ? 'text-[#0A261D]' : 'text-[#4A635A]'} font-mono">${isLoaded ? (m.columns_count || cols.length) + ' cột' : '0 cột'}</span>
+              <div class="p-3 rounded-2xl  + (isRejected ? 'bg-red-50 border border-red-200' : 'bg-[#F5EFE6]/70 border border-[#E2D9C8]') +  text-xs">
+                <span class=" + (isRejected ? 'text-red-600' : 'text-[#4A635A]') +  block text-[9px] uppercase font-mono font-semibold">Số trường</span>
+                <span class="font-bold  + (isRejected ? 'text-red-700' : (isLoaded ? 'text-[#0A261D]' : 'text-[#4A635A]')) +  font-mono"> + (isRejected ? '0 cột' : (isLoaded ? (m.columns_count || cols.length) + ' cột' : '0 cột')) + </span>
               </div>
-              <div class="p-3 rounded-2xl bg-[#F5EFE6]/70 border border-[#E2D9C8] text-xs ${isLoaded ? 'bg-[#E8F2EE] border-[#10B981]/40' : ''}">
-                <span class="${isLoaded ? 'text-[#10B981]' : 'text-[#4A635A]'} block text-[9px] uppercase font-mono font-semibold">Tính sẵn sàng</span>
-                <span class="font-bold ${isLoaded ? 'text-[#0A261D]' : 'text-[#4A635A]'}">${isLoaded ? '100% Hợp lệ' : '0% (Chờ tệp)'}</span>
+              <div class="p-3 rounded-2xl  + (isRejected ? 'bg-red-100 border border-red-300' : (isLoaded ? 'bg-[#E8F2EE] border-[#10B981]/40' : 'bg-[#F5EFE6]/70 border border-[#E2D9C8]')) +  text-xs">
+                <span class=" + (isRejected ? 'text-red-700 font-bold' : (isLoaded ? 'text-[#10B981]' : 'text-[#4A635A]')) +  block text-[9px] uppercase font-mono font-semibold">Tính sẵn sàng</span>
+                <span class="font-bold  + (isRejected ? 'text-red-700' : (isLoaded ? 'text-[#0A261D]' : 'text-[#4A635A]')) + "> + (isRejected ? '0% TỪ CHỐI (REJECTED)' : (isLoaded ? '100% Hợp lệ' : '0% (Chờ tệp)')) + </span>
               </div>
             </div>
 
-            <!-- TABLE PREVIEW HOẶC DROPZONE -->
-            ${tableHtml}
+            <!-- TABLE PREVIEW HOẶC DROPZONE HOẶC REJECTION ERROR -->
+             + tableHtml + 
 
           </div>
 
           <!-- PRIMARY ACTION CTA -->
           <div class="pt-3 border-t border-[#ECE4D8] flex items-center justify-between">
-            <span class="text-xs text-[#4A635A] font-mono">${isLoaded ? 'Giai đoạn 01/04 hoàn tất khi xác nhận' : 'Chờ nạp nguồn dữ liệu (Số liệu: 0)'}</span>
-            <button onclick="confirmConnectionAndAdvance()" class="px-6 py-2.5 rounded-xl font-bold text-xs md:text-sm shadow-lg transition flex items-center gap-2 ${isLoaded ? 'bg-[#0A261D] hover:bg-[#133A2D] text-white shadow-[#0A261D]/20 cursor-pointer' : 'bg-[#F5EFE6] text-[#4A635A]/40 opacity-50 cursor-not-allowed border border-[#E2D9C8]'}" ${!isLoaded ? 'disabled' : ''}>
-              <span>${isLoaded ? 'Xác Nhận & Mở Khóa Giai Đoạn 2: Làm Sạch Dữ Liệu' : 'Chờ Chọn Tệp Dữ Liệu Để Tiếp Tục'}</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-            </button>
+            <span class="text-xs  + (isRejected ? 'text-red-600 font-bold' : 'text-[#4A635A]') +  font-mono"> + (isRejected ? '🛑 Tệp bị từ chối - Không thể tiếp tục' : (isLoaded ? 'Giai đoạn 01/04 hoàn tất khi xác nhận' : 'Chờ nạp nguồn dữ liệu (Số liệu: 0)')) + </span>
+             + (isRejected ? 
+              <button disabled class="px-6 py-2.5 rounded-xl font-bold text-xs md:text-sm shadow-none transition flex items-center gap-2 bg-red-100 text-red-500 border border-red-200 cursor-not-allowed">
+                <span>🛑 Dữ Liệu Bị Từ Chối - Không Thể Tiếp Tục</span>
+              </button>
+             : 
+              <button onclick="confirmConnectionAndAdvance()" class="px-6 py-2.5 rounded-xl font-bold text-xs md:text-sm shadow-lg transition flex items-center gap-2  + (isLoaded ? 'bg-[#0A261D] hover:bg-[#133A2D] text-white shadow-[#0A261D]/20 cursor-pointer' : 'bg-[#F5EFE6] text-[#4A635A]/40 opacity-50 cursor-not-allowed border border-[#E2D9C8]') + "  + (!isLoaded ? 'disabled' : '') + >
+                <span> + (isLoaded ? 'Xác Nhận & Mở Khóa Giai Đoạn 2: Làm Sạch Dữ Liệu' : 'Chờ Chọn Tệp Dữ Liệu Để Tiếp Tục') + </span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </button>
+            ) + 
           </div>
         </div>
 
       </div>
 
     </div>
-  `;
+  ;
 }
 
 // ================= CHI TIẾT BƯỚC 2: DUAL-PANE QUALITY (FROSTED GLASS) =================
