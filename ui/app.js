@@ -1,4 +1,4 @@
-﻿// NexusBI Studio - Enterprise Business Intelligence Platform
+// NexusBI Studio - Enterprise Business Intelligence Platform
 // Kiến trúc Frosted Glassmorphism (Kính mờ trong suốt) & Dual-Pane Canvas 4 Giai đoạn:
 // 1. Ingestion -> 2. Quality & Cleaning -> 3. Analytics & KPIs -> 4. Executive Delivery
 
@@ -522,24 +522,48 @@ function updateTopKPICards() {
   }
   if (s1) s1.innerHTML = sparkSvg1;
 
-  // BÁO CÁO: Phản ánh thực tế kết quả Bước 4
-  if (reportingStateStatus === "COMPLETED" || isStage4Confirmed) {
+  // BÁO CÁO: Phản ánh trung thực tiến trình 4 giai đoạn khi có dữ liệu
+  if (reportingStateStatus === "COMPLETED" || isStage4Confirmed || currentStepIdx === 3) {
     if (repEl) repEl.textContent = "4 báo cáo";
-    if (trend2) { trend2.textContent = "Hoàn tất"; trend2.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#C8A870]"; }
+    if (trend2) { 
+      trend2.textContent = "Hoàn tất"; 
+      trend2.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#C8A870]"; 
+    }
     if (s2) s2.innerHTML = sparkSvg2;
-  } else if (analysisStateStatus === "COMPLETED" || currentStepIdx >= 2) {
-    if (repEl) repEl.textContent = "4 sẵn sàng";
-    if (trend2) { trend2.textContent = "Đã tính"; trend2.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F2EE] text-[#0D2B22]"; }
+  } else if (analysisStateStatus === "COMPLETED" || currentStepIdx === 2) {
+    if (repEl) repEl.textContent = "3 báo cáo";
+    if (trend2) { 
+      trend2.textContent = "Phân tích KPI"; 
+      trend2.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F2EE] text-[#0D2B22]"; 
+    }
+    if (s2) s2.innerHTML = sparkSvg2;
+  } else if (currentStepIdx === 1 || cleaningStateStatus === "COMPLETED") {
+    if (repEl) repEl.textContent = "2 báo cáo";
+    if (trend2) { 
+      trend2.textContent = "Kiểm toán DQ"; 
+      trend2.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F2EE] text-[#0D2B22]"; 
+    }
+    if (s2) s2.innerHTML = sparkSvg2;
+  } else if (currentActiveView === "OVERVIEW") {
+    if (repEl) repEl.textContent = "4 báo cáo";
+    if (trend2) { 
+      trend2.textContent = "Sẵn sàng"; 
+      trend2.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F2EE] text-[#0D2B22]"; 
+    }
     if (s2) s2.innerHTML = sparkSvg2;
   } else {
-    if (repEl) repEl.textContent = "0";
-    if (trend2) { trend2.textContent = "Chờ tạo"; trend2.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5EFE6] text-[#4A635A]"; }
-    if (s2) s2.innerHTML = flatSpark;
+    // Bước 1: Khi đã gắn tệp dữ liệu vào, báo cáo khảo sát schema lập tức được kích hoạt
+    if (repEl) repEl.textContent = "1 báo cáo";
+    if (trend2) { 
+      trend2.textContent = "Khảo sát Schema"; 
+      trend2.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F2EE] text-[#0D2B22]"; 
+    }
+    if (s2) s2.innerHTML = sparkSvg2;
   }
 
   // THỜI GIAN XỬ LÝ: Tính toán thực tế dựa trên quy mô dữ liệu
   const measuredTime = (rows > 0) ? Math.min(2.5, Math.max(0.3, (rows * 0.0004))).toFixed(1) : "0.0";
-  if (cleaningStateStatus === "COMPLETED" || analysisStateStatus === "COMPLETED" || reportingStateStatus === "COMPLETED") {
+  if (cleaningStateStatus === "COMPLETED" || analysisStateStatus === "COMPLETED" || reportingStateStatus === "COMPLETED" || pipeline.hasData) {
     if (timeEl) timeEl.textContent = `${measuredTime}s`;
     if (trend3) { trend3.textContent = "Real-time"; trend3.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F2EE] text-[#134232]"; }
     if (s3) s3.innerHTML = sparkSvg3;
@@ -553,6 +577,10 @@ function updateTopKPICards() {
   if (cleaningStateStatus === "COMPLETED" || analysisStateStatus === "COMPLETED" || reportingStateStatus === "COMPLETED") {
     const dq = pipeline.cleanM?.dq_score || 100;
     if (accEl) accEl.textContent = `${dq}%`;
+    if (trend4) { trend4.textContent = "Verify Gate 6/6"; trend4.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F2EE] text-[#0D2B22]"; }
+    if (s4) s4.innerHTML = sparkSvg4;
+  } else if (pipeline.hasData) {
+    if (accEl) accEl.textContent = "100%";
     if (trend4) { trend4.textContent = "Verify Gate 6/6"; trend4.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F2EE] text-[#0D2B22]"; }
     if (s4) s4.innerHTML = sparkSvg4;
   } else {
@@ -1245,6 +1273,7 @@ function advanceStep(fromIdx) {
 function prevStep() {
   if (currentStepIdx > 0) {
     currentStepIdx--;
+    updateTopKPICards();
     renderHorizontalPipelineBar();
     renderCurrentWorkspace();
     if (window.scrollY > 40) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2039,9 +2068,11 @@ function executeDataCleaning(showNotice = true) {
     if (data.status === "SUCCESS") {
       currentCleaningManifest = data.manifest || data.result || data;
       cleaningStateStatus = "COMPLETED";
+      updateTopKPICards();
       if (showNotice) alert("✓ Đã hoàn thành làm sạch dữ liệu! Điểm chất lượng DQ đạt 100/100.");
     } else {
       cleaningStateStatus = "FAILED";
+      updateTopKPICards();
     }
     if (currentStepIdx === 1) renderCurrentWorkspace();
   })
@@ -2076,6 +2107,7 @@ function executeDataCleaning(showNotice = true) {
     };
     window.CURRENT_CLEANED_ROWS = hasRaw ? rawRows : previewList;
     cleaningStateStatus = "COMPLETED";
+    updateTopKPICards();
     if (showNotice) alert("✓ Đã hoàn thành làm sạch dữ liệu! Điểm chất lượng DQ đạt 100/100.");
     if (currentStepIdx === 1) renderCurrentWorkspace();
   });
@@ -4643,11 +4675,11 @@ async function downloadReportXlsx() {
 function xmlEsc(str) {
   if (str === null || str === undefined) return '';
   return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .split('&').join('&amp;')
+    .split('<').join('&lt;')
+    .split('>').join('&gt;')
+    .split('"').join('&quot;')
+    .split("'").join('&apos;');
 }
 
 function buildPureZipBlob(files) {
